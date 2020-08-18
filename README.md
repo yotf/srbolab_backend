@@ -1,3 +1,7 @@
+prerequists:
+
+- python3.6 or higher
+
 if first time using the project:
 
 1. add ssh ==> key https://gitlab.com/profile/keys

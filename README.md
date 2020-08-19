@@ -10,7 +10,7 @@ if first time using the project:
 4. `cd flask_app`
 5. `virtualenv venv`
 6. `source venv/bin/activate` #to leave virtual env run `deactivate`
-7. `pip install requirements.txt`
+7. `pip install -r requirements.txt`
 8. `python code/app.py`
 
 Otherwise:

@@ -1,7 +1,6 @@
 from flask import Flask
 from flask_restful import Api
-from flask_jwt import JWT
-
+from flask_jwt_extended import JWTManager, create_access_token
 from security import authenticate, identity
 from resources.user import UserRegister
 from resources.item import Item, ItemList
@@ -18,7 +17,27 @@ def create_tables():
     db.create_all()
 
 
-jwt = JWT(app, authenticate, identity)
+jwt = JWTManager(app)
+
+@app.route('/login', methods=['POST'])
+def login():
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+    if not username:
+        return jsonify({"msg": "Missing username parameter"}), 400
+    if not password:
+        return jsonify({"msg": "Missing password parameter"}), 400
+
+    if username != 'test' or password != 'test':
+        return jsonify({"msg": "Bad username or password"}), 401
+
+    # Identity can be any data that is json serializable
+    access_token = create_access_token(identity=username)
+    return jsonify(access_token=access_token), 200
+
 
 api.add_resource(Item, "/item/<string:name>")
 api.add_resource(ItemList, "/items")

@@ -2,19 +2,20 @@ from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager, create_access_token
 from security import authenticate, identity
-from resources.user import UserRegister
-from resources.item import Item, ItemList
+from resources.user import UserRegister, Users
+# from resources.item import Item, ItemList
+
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres+psycopg2://postgres:pg123@localhost:5432/srbolab'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = "asdfqwer"
 api = Api(app)
 
 
-@app.before_first_request
-def create_tables():
-    db.create_all()
+# @app.before_first_request
+# def create_tables():
+#     db.create_all()
 
 
 jwt = JWTManager(app)
@@ -39,9 +40,10 @@ def login():
     return jsonify(access_token=access_token), 200
 
 
-api.add_resource(Item, "/item/<string:name>")
-api.add_resource(ItemList, "/items")
+# api.add_resource(Item, "/item/<string:name>")
+# api.add_resource(ItemList, "/items")
 api.add_resource(UserRegister, "/register")
+api.add_resource(Users, "/users")
 
 if __name__ == '__main__':
     from db import db

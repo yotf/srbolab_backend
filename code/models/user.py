@@ -35,8 +35,8 @@ class UserModel(db.Model):
 
     @classmethod
     def find_by_username(cls, username):
-        return cls.query.filter_by(
-            kr_username=username).first()  #querry is method on db.Model class
+        return cls.query.filter_by(  #querry is method on db.Model class
+            kr_username=username).first()
 
     @classmethod
     def find_by_id(cls, _id):

@@ -1,14 +1,14 @@
 from db import db
 
 
-class LocationModel(db.Model):
-    __tablename__ = "lokacija"
+class LocationModel: #( db.Model ):
+    # __tablename__ = "lokacija"
 
-    lk_id = db.Column(db.Integer, primary_key=True)
-    lk_naziv = db.Column(db.String(300))
-    lk_naziv_l = db.Column(db.String(30))
-    lk_ip = db.Column(db.String(20))
-    lk_aktivna = db.Column(db.String(1))
+    # lk_id = db.Column(db.Integer, primary_key=True)
+    # lk_naziv = db.Column(db.String(300))
+    # lk_naziv_l = db.Column(db.String(30))
+    # lk_ip = db.Column(db.String(20))
+    # lk_aktivna = db.Column(db.String(1))
 
     def __init__(self, naziv, naziv_l, ip, aktivna="D"):
         self.lk_naziv = naziv
@@ -21,7 +21,8 @@ class LocationModel(db.Model):
             "naziv": self.lk_naziv,
             "naziv_lokativ": self.lk_naziv_l,
             "ip": self.lk_ip,
-            "id": self.lk_id
+            "id": self.lk_id,
+            "aktivna": self.aktivna
         }
 
     def save_to_db(self):

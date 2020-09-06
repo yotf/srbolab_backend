@@ -8,9 +8,6 @@ from resources.location import LocationList
 # from resources.item import Item, ItemList
 
 app = Flask(__name__)
-app.config[
-    'SQLALCHEMY_DATABASE_URI'] = 'postgres+psycopg2://postgres:pg123@localhost:5432/srbolab'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = "asdfqwer"
 api = Api(app)
 cors = CORS(app)  #TODO add fixed origin for production

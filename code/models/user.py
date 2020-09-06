@@ -1,17 +1,7 @@
 from db import db
 
 
-class UserModel(db.Model):
-    __tablename__ = "korisnik"
-
-    kr_id = db.Column(db.Integer, primary_key=True)
-    kr_username = db.Column(db.String(80))
-    kr_password = db.Column(db.String(80))
-    kr_prezime = db.Column(db.String(80))
-    kr_ime = db.Column(db.String(80))
-    kr_aktivan = db.Column(db.String(1))
-    arl_id = db.Column(
-        db.Integer)  #TODO change to foreign key when tabels are ready
+class UserModel:
 
     def __init__(self, ime, prezime, username, password, aktivan="D", arl_id=1):
         self.kr_username = username

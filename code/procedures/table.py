@@ -1,0 +1,153 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# -*- Mode: Python; py-indent-offset: 2 -*-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#  imports
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+import json as js
+import psycopg2
+from box import SBox as dd
+from pgdb import pgdb
+
+#---------------------------------------
+# global variables
+#---------------------------------------
+db = pgdb('pg123')
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#  classes & functions
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#= CLASS ===============================
+# table
+#=======================================
+class table:
+
+  #= METHOD ==============================
+  # __init__
+  #=======================================
+  def __init__(self, pc_schema, pc_table):
+
+    self.schema = pc_schema
+    self.name = pc_table
+    self.col_names, self.col_types = db.tbl_cols_arr(self.schema, self.name)
+    self.fnc = dd({})
+    for vcl_act in 'giud':
+      self.fnc[vcl_act] = {
+                           'n': 'f_{}_{}'.format(self.name, vcl_act),
+                           'sn': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
+                          }
+
+  #= METHOD ==============================
+  # tbl_g
+  #=======================================
+  def tbl_g(self, *px_prms):
+
+    """  Get data; Returns json object"""
+
+    conn = db.connget()
+    crsr = conn.cursor()
+    vjl_res = None
+    try:
+      crsr.callproc(self.fnc.g.sn, list(px_prms))
+      vjl_res = js.dumps([dict(r) for r in crsr])
+    except:
+      raise
+    finally:
+      conn.commit()
+      crsr.close()
+      db.connret(conn)
+
+    return vjl_res
+
+  #= METHOD ==============================
+  # tbl_i
+  #=======================================
+  def tbl_i(self, *px_rec):
+
+    """  Insert data; Returns new tbl_id & message"""
+
+    conn = db.connget()
+    crsr = conn.cursor()
+    vnl_res = -1
+    vcl_res = None
+    try:
+      crsr.callproc(self.fnc.i.sn, list(px_rec))
+      vnl_res = crsr.fetchone()[self.fnc.i.n]
+      if vnl_res:
+        vcl_res = db.connntc(conn)
+        conn.commit()
+    except (psycopg2.errors.UniqueViolation, psycopg2.errors.CheckViolation) as err:
+      vcl_res = err.pgerror.splitlines()[0].split(':', 1)[1].strip()
+    except:
+      raise
+    finally:
+      crsr.close()
+      db.connret(conn)
+
+    return (vnl_res, vcl_res)
+
+  #= METHOD ==============================
+  # tbl_u
+  #=======================================
+  def tbl_u(self, *px_rec):
+
+    """  Update data; Returns number of records updated & message"""
+
+    conn = db.connget()
+    crsr = conn.cursor()
+    vnl_res = -1
+    vcl_res = None
+    try:
+      crsr.callproc(self.fnc.u.sn, list(px_rec))
+      vnl_res = crsr.fetchone()[self.fnc.u.n]
+      if vnl_res:
+        vcl_res = db.connntc(conn)
+        conn.commit()
+    except (psycopg2.errors.UniqueViolation, psycopg2.errors.CheckViolation) as err:
+      vcl_res = err.pgerror.splitlines()[0].split(':', 1)[1].strip()
+    except:
+      raise
+    finally:
+      crsr.close()
+      db.connret(conn)
+
+    return (vnl_res, vcl_res)
+
+  #= METHOD ==============================
+  # tbl_d
+  #=======================================
+  def tbl_d(self, *pl_prms):
+
+    """  Delete data; Returns number of records deleted & message"""
+
+    conn = db.connget()
+    crsr = conn.cursor()
+    vnl_res = -1
+    vcl_res = None
+    try:
+      crsr.callproc(self.fnc.d.sn, list(pl_prms))
+      vnl_res = crsr.fetchone()[self.fnc.d.n.format(self.name)]
+      if vnl_res:
+        vcl_res = db.connntc(conn)
+        conn.commit()
+    except Exception as err:
+      vcl_res = '{}'.format(err)
+    finally:
+      crsr.close()
+      db.connret(conn)
+
+    return (vnl_res, vcl_res)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# main code
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if __name__=='__main__':
+
+  pass
+
+#---------------------------------------
+# global variables
+#---------------------------------------
+#---------------------------------------
+# code
+#---------------------------------------

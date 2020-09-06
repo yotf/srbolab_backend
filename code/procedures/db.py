@@ -11,13 +11,9 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  imports
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-import re
-import sys
 import json as js
 import psycopg2
 import psycopg2.extras
-from psycopg2 import pool
-from box import SBox as dd
 
 
 #---------------------------------------
@@ -36,7 +32,7 @@ class pgdb:
     #=======================================
     def __init__(self):
 
-        self.dsn = 'user=postgres password=geometar host=127.0.0.1 port=5432 dbname=srbolab'
+        self.dsn = 'user=postgres password=pg123 host=127.0.0.1 port=5432 dbname=srbolab'
         self.ccpool()
 
     #= METHOD ==============================
@@ -49,7 +45,7 @@ class pgdb:
             self.cpool.closeall()
 
     #= METHOD ==============================
-    # ccpool
+    # create_connection_pool
     #=======================================
     def ccpool(self):
         """  Create connection pool"""

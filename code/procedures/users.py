@@ -1,9 +1,9 @@
 from db import db
 
 #= CLASS ===============================
-# lokacija
+# korisnik
 #=======================================
-class lokacija:
+class korisnik:
 
     #= METHOD ==============================
     # __init__
@@ -11,18 +11,20 @@ class lokacija:
     def __init__(self):
 
         self.schema = 'sys'
-        self.name = 'lokacija'
+        self.name = 'korisnik'
         self.col_names, self.col_types = db.tbl_cols_arr(self.schema, self.name)
 
     #= METHOD ==============================
-    # lk_get
+    # kr_get
     #=======================================
-    def lk_get(self,
-             pn_lk_insertd=None,
-             pc_lk_naziv=None,
-             pc_lk_naziv_l=None,
-             pc_lk_insertp=None,
-             pc_lk_aktivna=None):
+    def kr_get(self,
+             pn_kr_insertd=None,
+             pc_kr_ime=None,
+             pc_kr_prezime=None,
+               pc_kr_username=None,
+               pc_kr_password=None,
+             pc_kr_insertp=None,
+             pc_kr_aktivan=None):
         """  Get data; Returns json object"""
 
         conn = db.get_connection()
@@ -30,8 +32,8 @@ class lokacija:
         vx_res = None
         try:
             crsr.callproc(
-                'sys.f_lokacija_g',
-                [pn_lk_insertd, pc_lk_naziv, pc_lk_naziv_l, pc_lk_insertp, pc_lk_aktivna])
+                'sys.f_korisnik_g',
+                [pn_kr_insertd, pc_kr_naziv, pc_kr_naziv_l, pc_kr_insertp, pc_kr_aktivna])
             vx_res = js.dumps([dict(r) for r in crsr])
         except:
             raise
@@ -42,17 +44,17 @@ class lokacija:
         return vx_res
 
     #= METHOD ==============================
-    # lk_insert
+    # kr_insert
     #=======================================
-    def lk_insert(self, pc_rec):
-        """  Insert data; Returns new lk_insertd"""
+    def kr_insert(self, pc_rec):
+        """  Insert data; Returns new kr_insertd"""
 
         conn = db.get_connection()
         crsr = conn.cursor()
         vn_res = -1
         try:
-            crsr.callproc('sys.f_lokacija_i', [pc_rec])
-            vn_res = crsr.fetchone()['f_lokacija_i']
+            crsr.callproc('sys.f_korisnik_i', [pc_rec])
+            vn_res = crsr.fetchone()['f_korisnik_i']
             if vn_res:
                 conn.commit()
         except:
@@ -64,17 +66,17 @@ class lokacija:
         return vn_res
 
     #= METHOD ==============================
-    # lk_update
+    # kr_update
     #=======================================
-    def lk_update(self, pc_rec):
+    def kr_update(self, pc_rec):
         """  Update data; Returns number of records updated"""
 
         conn = db.get_connection()
         crsr = conn.cursor()
         vn_res = -1
         try:
-            crsr.callproc('sys.f_lokacija_u', [pc_rec])
-            vn_res = crsr.fetchone()['f_lokacija_u']
+            crsr.callproc('sys.f_korisnik_u', [pc_rec])
+            vn_res = crsr.fetchone()['f_korisnik_u']
             if vn_res:
                 conn.commit()
         except:
@@ -86,17 +88,17 @@ class lokacija:
         return vn_res
 
     #= METHOD ==============================
-    # lk_delete
+    # kr_delete
     #=======================================
-    def lk_delete(self, pn_lk_insertd):
+    def kr_delete(self, pn_kr_insertd):
         """  Delete data; Returns number of records deleted"""
 
         conn = db.get_connection()
         crsr = conn.cursor()
         vn_res = -1
         try:
-            crsr.callproc('sys.f_lokacija_d', [pn_lk_insertd])
-            vn_res = crsr.fetchone()['f_lokacija_d']
+            crsr.callproc('sys.f_korisnik_d', [pn_kr_insertd])
+            vn_res = crsr.fetchone()['f_korisnik_d']
             if vn_res:
                 conn.commit()
         except:

@@ -12,7 +12,7 @@ from pgdb import pgdb
 #---------------------------------------
 # global variables
 #---------------------------------------
-db = pgdb('pg123')
+db = pgdb('geometar')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
@@ -84,7 +84,7 @@ class table:
       crsr.close()
       db.connret(conn)
 
-    return (vnl_res, vcl_res)
+    return js.dumps({'rcod': vnl_res, 'rmsg': vcl_res})
 
   #= METHOD ==============================
   # tbl_u
@@ -111,7 +111,7 @@ class table:
       crsr.close()
       db.connret(conn)
 
-    return (vnl_res, vcl_res)
+    return js.dumps({'rcod': vnl_res, 'rmsg': vcl_res})
 
   #= METHOD ==============================
   # tbl_d
@@ -136,7 +136,7 @@ class table:
       crsr.close()
       db.connret(conn)
 
-    return (vnl_res, vcl_res)
+    return js.dumps({'rcod': vnl_res, 'rmsg': vcl_res})
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code

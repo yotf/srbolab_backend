@@ -1,11 +1,9 @@
 from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager, create_access_token
-from security import authenticate, identity
+from flask_jwt_extended import JWTManager
 from resources.user import UserRegister, Users, UserLogin
-from resources.location import LocationList
-# from resources.item import Item, ItemList
+from resources.location import LocationList, Location
 
 app = Flask(__name__)
 app.secret_key = "asdfqwer"
@@ -43,8 +41,7 @@ api.add_resource(UserRegister, "/register")
 api.add_resource(Users, "/users")
 api.add_resource(UserLogin, "/login")
 api.add_resource(LocationList, "/locations")
+api.add_resource(Location, "/location")
 
 if __name__ == '__main__':
-    from db import db
-    db.init_app(app)
-    app.run(port=5000, debug=True)
+  app.run(port=5000, debug=True)

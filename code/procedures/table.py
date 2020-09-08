@@ -7,12 +7,12 @@
 import json as js
 import psycopg2
 from box import SBox as dd
-from pgdb import pgdb
+from procedures.pgdb import pgdb
 
 #---------------------------------------
 # global variables
 #---------------------------------------
-db = pgdb('geometar')
+db = pgdb('pg123')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
@@ -49,7 +49,9 @@ class table:
     vjl_res = None
     try:
       crsr.callproc(self.fnc.g.sn, list(px_prms))
-      vjl_res = js.dumps([dict(r) for r in crsr])
+      print(crsr)
+      # vjl_res = js.dumps([dict(r) for r in crsr])
+      vjl_res = [dict(r) for r in crsr]
     except:
       raise
     finally:

@@ -7,13 +7,12 @@
 import json as js
 import psycopg2
 from box import SBox as dd
-from procedures.pgdb import pgdb
+from pgdb import pgdb
 
 #---------------------------------------
 # global variables
 #---------------------------------------
-db = pgdb('pg123')
-
+db = pgdb()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
@@ -34,24 +33,37 @@ class table:
     self.fnc = dd({})
     for vcl_act in 'giud':
       self.fnc[vcl_act] = {
-          'n': 'f_{}_{}'.format(self.name, vcl_act),
-          'sn': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
-      }
+                           'n': 'f_{}_{}'.format(self.name, vcl_act),
+                           'sn': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
+                          }
+
+  #= METHOD ==============================
+  # res2dct
+  #=======================================
+  def res2dct(self, pn_res, pc_res):
+
+    return {'rcod': pn_res, 'rmsg': pc_res}
+
+  #= METHOD ==============================
+  # res2dct
+  #=======================================
+  def res2dct(self, pd_row):
+
+    return js.dumps(pd_row)
 
   #= METHOD ==============================
   # tbl_g
   #=======================================
   def tbl_g(self, *px_prms):
+
     """  Get data; Returns json object"""
 
     conn = db.connget()
     crsr = conn.cursor()
-    vjl_res = None
+    vxl_res = None
     try:
       crsr.callproc(self.fnc.g.sn, list(px_prms))
-      print(crsr)
-      # vjl_res = js.dumps([dict(r) for r in crsr])
-      vjl_res = [dict(r) for r in crsr]
+      vxl_res = crsr.fetchall()
     except:
       raise
     finally:
@@ -59,12 +71,13 @@ class table:
       crsr.close()
       db.connret(conn)
 
-    return vjl_res
+    return vxl_res
 
   #= METHOD ==============================
   # tbl_i
   #=======================================
   def tbl_i(self, *px_rec):
+
     """  Insert data; Returns new tbl_id & message"""
 
     conn = db.connget()
@@ -72,13 +85,12 @@ class table:
     vnl_res = -1
     vcl_res = None
     try:
-      crsr.callproc(self.fnc.i.sn, list(px_rec))
+      crsr.callproc(self.fnc.i.sn, list(self.res2dct(px_rec)))
       vnl_res = crsr.fetchone()[self.fnc.i.n]
       if vnl_res:
         vcl_res = db.connntc(conn)
         conn.commit()
-    except (psycopg2.errors.UniqueViolation,
-            psycopg2.errors.CheckViolation) as err:
+    except (psycopg2.errors.UniqueViolation, psycopg2.errors.CheckViolation) as err:
       vcl_res = err.pgerror.splitlines()[0].split(':', 1)[1].strip()
     except:
       raise
@@ -86,12 +98,13 @@ class table:
       crsr.close()
       db.connret(conn)
 
-    return js.dumps({ 'rcod': vnl_res, 'rmsg': vcl_res })
+    return self.res2dct(vnl_res, vcl_res)
 
   #= METHOD ==============================
   # tbl_u
   #=======================================
   def tbl_u(self, *px_rec):
+
     """  Update data; Returns number of records updated & message"""
 
     conn = db.connget()
@@ -99,13 +112,12 @@ class table:
     vnl_res = -1
     vcl_res = None
     try:
-      crsr.callproc(self.fnc.u.sn, list(px_rec))
+      crsr.callproc(self.fnc.u.sn, list(self.res2dct(px_rec)))
       vnl_res = crsr.fetchone()[self.fnc.u.n]
       if vnl_res:
         vcl_res = db.connntc(conn)
         conn.commit()
-    except (psycopg2.errors.UniqueViolation,
-            psycopg2.errors.CheckViolation) as err:
+    except (psycopg2.errors.UniqueViolation, psycopg2.errors.CheckViolation) as err:
       vcl_res = err.pgerror.splitlines()[0].split(':', 1)[1].strip()
     except:
       raise
@@ -113,12 +125,13 @@ class table:
       crsr.close()
       db.connret(conn)
 
-    return js.dumps({ 'rcod': vnl_res, 'rmsg': vcl_res })
+    return self.res2dct(vnl_res, vcl_res)
 
   #= METHOD ==============================
   # tbl_d
   #=======================================
   def tbl_d(self, *pl_prms):
+
     """  Delete data; Returns number of records deleted & message"""
 
     conn = db.connget()
@@ -137,13 +150,12 @@ class table:
       crsr.close()
       db.connret(conn)
 
-    return js.dumps({ 'rcod': vnl_res, 'rmsg': vcl_res })
-
+    return self.res2dct(vnl_res, vcl_res)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if __name__ == '__main__':
+if __name__=='__main__':
 
   pass
 

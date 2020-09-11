@@ -22,9 +22,13 @@ class pgdb:
   #= METHOD ==============================
   # __init__
   #=======================================
-  def __init__(self, pc_password, pc_user='postgres', pc_host='localhost', pn_port=5432, pc_dbname='srbolab'):
+  def __init__(self, pc_password=None, pc_user='postgres', pc_host='localhost', pn_port=5432, pc_dbname='srbolab'):
 
-    self.dsn = 'user={} password={} host={} port={} dbname={}'.format(pc_user, pc_password, pc_host, pn_port, pc_dbname)
+    if pc_password:
+      vcl_pwd = pc_password
+    else:
+      vcl_pwd = self.getpwd()
+    self.dsn = 'user={} password={} host={} port={} dbname={}'.format(pc_user, vcl_pwd, pc_host, pn_port, pc_dbname)
     self.ccpool()
 
   #= METHOD ==============================
@@ -36,6 +40,22 @@ class pgdb:
 
     if self.cpool:
       self.cpool.closeall()
+
+  #= METHOD ==============================
+  # getpwd
+  #=======================================
+  def getpwd(self):
+
+    """  Get password from file"""
+
+    vcl_pwd = None
+    try:
+      with open('.pwd', 'r') as f:
+        vcl_pwd = f.read().strip()
+    except:
+      print('Nema fajla sa lozinkom!')
+
+    return vcl_pwd
 
   #= METHOD ==============================
   # ccpool

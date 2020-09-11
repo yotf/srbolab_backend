@@ -49,6 +49,8 @@ class Location(Resource):
     try:
       new_location = locations_service.tbl_i(
           json.dumps(locations_service.add_prefix(location)))
+      print(new_location)
+      location["id"] = new_location["rcod"]
       return { 'message': "location added", 'location': location }, 200
     except:
       return { 'message': "failed to create location"}, 500

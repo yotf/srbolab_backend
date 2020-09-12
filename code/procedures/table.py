@@ -45,9 +45,9 @@ class table:
     return {'rcod': pn_res, 'rmsg': pc_res}
 
   #= METHOD ==============================
-  # res2dct
+  # prm2json
   #=======================================
-  def res2dct(self, pd_row):
+  def prm2json(self, pd_row):
 
     return js.dumps(pd_row)
 
@@ -76,7 +76,7 @@ class table:
   #= METHOD ==============================
   # tbl_i
   #=======================================
-  def tbl_i(self, *px_rec):
+  def tbl_i(self, px_rec):
 
     """  Insert data; Returns new tbl_id & message"""
 
@@ -85,7 +85,7 @@ class table:
     vnl_res = -1
     vcl_res = None
     try:
-      crsr.callproc(self.fnc.i.sn, list(self.res2dct(px_rec)))
+      crsr.callproc(self.fnc.i.sn, [self.prm2json(px_rec)])
       vnl_res = crsr.fetchone()[self.fnc.i.n]
       if vnl_res:
         vcl_res = db.connntc(conn)
@@ -103,7 +103,7 @@ class table:
   #= METHOD ==============================
   # tbl_u
   #=======================================
-  def tbl_u(self, *px_rec):
+  def tbl_u(self, px_rec):
 
     """  Update data; Returns number of records updated & message"""
 
@@ -112,7 +112,7 @@ class table:
     vnl_res = -1
     vcl_res = None
     try:
-      crsr.callproc(self.fnc.u.sn, list(self.res2dct(px_rec)))
+      crsr.callproc(self.fnc.u.sn, [self.prm2json(px_rec)])
       vnl_res = crsr.fetchone()[self.fnc.u.n]
       if vnl_res:
         vcl_res = db.connntc(conn)

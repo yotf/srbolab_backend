@@ -4,6 +4,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  imports
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+import os.path as osp
 import psycopg2
 import psycopg2.extras
 from psycopg2 import pool
@@ -11,6 +12,8 @@ from psycopg2 import pool
 #---------------------------------------
 # global variables
 #---------------------------------------
+mdir = osp.dirname(str(__import__(__name__)).split(' ')[-1].strip("'<>"))
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -50,10 +53,11 @@ class pgdb:
 
     vcl_pwd = None
     try:
-      with open('.pwd', 'r') as f:
+      with open(osp.join(mdir, '.pwd'), 'r') as f:
         vcl_pwd = f.read().strip()
     except:
       print('Nema fajla sa lozinkom!')
+      raise
 
     return vcl_pwd
 

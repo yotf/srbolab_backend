@@ -4,6 +4,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  imports
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+import os.path as osp
 import psycopg2
 import psycopg2.extras
 from psycopg2 import pool
@@ -11,6 +12,8 @@ from psycopg2 import pool
 #---------------------------------------
 # global variables
 #---------------------------------------
+mdir = osp.dirname(str(__import__(__name__)).split(' ')[-1].strip("'<>"))
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -50,10 +53,11 @@ class pgdb:
 
     vcl_pwd = None
     try:
-      with open('.pwd', 'r') as f:
+      with open(osp.join(mdir, '.pwd'), 'r') as f:
         vcl_pwd = f.read().strip()
     except:
       print('Nema fajla sa lozinkom!')
+      raise
 
     return vcl_pwd
 
@@ -126,6 +130,85 @@ class pgdb:
       self.connret(conn)
 
     return lcl_col_nt
+
+  #= METHOD ==============================
+  # c_def
+  #=======================================
+  def c_def(self, pc_c_def, pc_c_typ):
+
+    vxl_c_def = None
+    if pc_c_def:
+      if pc_c_typ=='c':
+        vxl_c_def = pc_c_def
+      elif pc_c_typ=='i':
+        vxl_c_def = int(pc_c_def)
+      elif pc_c_typ=='n':
+        vxl_c_def = float(pc_c_def)
+      elif pc_c_typ=='d':
+        pass
+      elif pc_c_typ=='t':
+        pass
+      else:
+        pass
+
+    return vxl_c_def
+
+  #= METHOD ==============================
+  # c_cc
+  #=======================================
+  def c_cc(self, pc_c_cc, pc_c_typ):
+
+    vxl_c_cc = None
+    if pc_c_cc:
+      if pc_c_typ=='c':
+        vxl_c_cc = pc_c_cc.split(',')
+      elif pc_c_typ=='i':
+        vxl_c_cc = [int(n) for n in pc_c_cc.split(',')]
+      elif pc_c_typ=='n':
+        vxl_c_cc = [float(n) for n in pc_c_cc.split(',')]
+      elif pc_c_typ=='d':
+        pass
+      elif pc_c_typ=='t':
+        pass
+      else:
+        pass
+
+    return vxl_c_cc
+
+  #= METHOD ==============================
+  # tbl_cols
+  #=======================================
+  def tbl_cols(self, pc_schema, pc_table):
+
+    """  Get columns for table in schema"""
+
+    conn = self.connget()
+    crsr = conn.cursor()
+
+    lcl_cols = []
+    ddl_cols = {}
+    try:
+      crsr.callproc('public.f_tbl_cols', [pc_schema, pc_table])
+      for r in crsr:
+        ddl_cols[r['col_name']] = {
+                                   'ord': r['col_ord'],
+                                   'typ': r['col_type'][0],
+                                   'len': r['col_length'],
+                                   'dec': r['col_dec'],
+                                   'nn': (r['col_is_nn']=='Y'),
+                                   'def': self.c_def(r['col_default'], r['col_type'][0]),
+                                   'cc': self.c_cc(r['col_check'], r['col_type'][0]),
+                                   'pk': (r['col_is_pk']=='Y'),
+                                   'fk': (r['col_is_fk']=='Y'),
+                                  }
+      lcl_cols = [c for c, d in sorted(ddl_cols.items(), key=lambda tcd: tcd[1]['ord'])]
+    except:
+      raise
+    finally:
+      crsr.close()
+      self.connret(conn)
+
+    return (lcl_cols, ddl_cols)
 
   #= METHOD ==============================
   # tbls

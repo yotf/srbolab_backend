@@ -151,7 +151,7 @@ def t00(pc_tbl):
 
 # table
   print('## {}'.format('Table info'))
-  print('  Schema: {}\n  Name: {}\n  Column names: {}\n  Column types: {}'.format(t.schema, t.name, t.col_names, t.col_types))
+  print('  Schema: {}\n  Name: {}\n  Column names: {}\n  Column types: {}'.format(t.schema, t.name, t.colsl, [t.colsd[c]['typ'] for c in t.colsl]))
 # get all
   tbl_g('get all')
 # insert ...

@@ -29,7 +29,7 @@ class table:
 
     self.schema = pc_schema
     self.name = pc_table
-    self.col_names, self.col_types = db.tbl_cols_arr(self.schema, self.name)
+    self.colsl, self.colsd = db.tbl_cols(self.schema, self.name)
     self.fnc = dd({})
     for vcl_act in 'giud':
       self.fnc[vcl_act] = {

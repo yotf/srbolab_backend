@@ -62,6 +62,18 @@ tbls['vozilo_vrsta'] = {
                         'ru': {'vzv_id': None, 'vzv_oznaka': 'A', 'vzv_naziv': 'Ромобили'},
                         'pk': 'vzv_id',
                        }
+tbls['ag_proizvodjac'] = {
+                          'sch': 'sif',
+                          'rn': {'agp_id': 0, 'agp_naziv': 'NS AUTOGAS', 'agp_napomena': None},
+                          'ru': {'agp_id': None, 'agp_naziv': 'NS AUTOGAS', 'agp_napomena': 'Napomena'},
+                          'pk': 'agp_id',
+                         }
+tbls['ag_homologacija'] = {
+                           'sch': 'sif',
+                           'rn': {'agh_id': 0, 'agh_oznaka': '123 456 789', 'agh_uredjaj': 'MV'},
+                           'ru': {'agh_id': None, 'agh_oznaka': '123 456 789', 'agh_uredjaj': 'RD'},
+                           'pk': 'agh_id',
+                          }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
@@ -182,6 +194,8 @@ if __name__=='__main__':
               'vozilo_karoserija',
               'vozilo_klasa',
               'vozilo_vrsta',
+              'ag_proizvodjac',
+              'ag_homologacija',
              ]
 
 #---------------------------------------
@@ -189,7 +203,7 @@ if __name__=='__main__':
 #---------------------------------------
 
   try:
-    for vcg_tbl in lcg_tbls:
+    for vcg_tbl in lcg_tbls[-2:]:
 #    t00(lcg_tbls[7])
       t00(vcg_tbl)
       print()

@@ -23,131 +23,59 @@ from table import db, table
 #---------------------------------------
 tbls = dd({})
 tbls['emisija'] = {
-    'sch': 'sif',
-    'rn': {
-        'em_id': 0,
-        'em_naziv': '7 (Седам)'
-    },
-    'ru': {
-        'em_id': None,
-        'em_naziv': '8 (Осам)'
-    },
-    'pk': 'em_id',
-}
+                   'schema': 'sif',
+                   'recordnew': {'em_id': 0, 'em_naziv': '7 (Седам)'},
+                   'recorupdate': {'em_id': None, 'em_naziv': '8 (Осам)'},
+                   'primarykey': 'em_id',
+                  }
 tbls['gorivo'] = {
-    'sch': 'sif',
-    'rn': {
-        'gr_id': 0,
-        'gr_naziv': 'Угаљ'
-    },
-    'ru': {
-        'gr_id': None,
-        'gr_naziv': 'Шљака'
-    },
-    'pk': 'gr_id',
-}
+                  'schema': 'sif',
+                  'recordnew': {'gr_id': 0, 'gr_naziv': 'Угаљ'},
+                  'recorupdate': {'gr_id': None, 'gr_naziv': 'Шљака'},
+                  'primarykey': 'gr_id',
+                 }
 tbls['lokacija'] = {
-    'sch': 'sys',
-    'rn': {
-        'lk_id': 0,
-        'lk_naziv': 'Нови Сад',
-        'lk_naziv_l': 'Новом Саду',
-        'lk_ip': '192.168.1.55',
-        'lk_aktivna': 'D'
-    },
-    'ru': {
-        'lk_id': None,
-        'lk_naziv': 'Нови Сад',
-        'lk_naziv_l': 'Новом Саду',
-        'lk_ip': '192.168.1.66',
-        'lk_aktivna': 'N'
-    },
-    'pk': 'lk_id',
-}
+                   'schema': 'sys',
+                   'recordnew': {'lk_id': 0, 'lk_naziv': 'Нови Сад', 'lk_naziv_l': 'Новом Саду', 'lk_ip': '192.168.1.55', 'lk_aktivna': 'D'},
+                   'recorupdate': {'lk_id': None, 'lk_naziv': 'Нови Сад', 'lk_naziv_l': 'Новом Саду', 'lk_ip': '192.168.1.66', 'lk_aktivna': 'N'},
+                   'primarykey': 'lk_id',
+                   }
 tbls['organizacija'] = {
-    'sch': 'sif',
-    'rn': {
-        'org_id': 0,
-        'org_naziv': 'ЈКПИ',
-        'org_napomena': 'Бла, бла, ...'
-    },
-    'ru': {
-        'org_id': None,
-        'org_naziv': 'ЈКПИ',
-        'org_napomena': 'Трт мрт'
-    },
-    'pk': 'org_id',
-}
+                        'schema': 'sif',
+                        'recordnew': {'org_id': 0, 'org_naziv': 'ЈКПИ', 'org_napomena': 'Бла, бла, ...'},
+                        'recorupdate': {'org_id': None, 'org_naziv': 'ЈКПИ', 'org_napomena': 'Трт мрт'},
+                        'primarykey': 'org_id',
+                       }
 tbls['vozilo_karoserija'] = {
-    'sch': 'sif',
-    'rn': {
-        'vzk_id': 0,
-        'vzk_oznaka': 'XX',
-        'vzk_naziv': 'Баги'
-    },
-    'ru': {
-        'vzk_id': None,
-        'vzk_oznaka': 'XX',
-        'vzk_naziv': 'Кросовер'
-    },
-    'pk': 'vzk_id',
-}
+                             'schema': 'sif',
+                             'recordnew': {'vzk_id': 0, 'vzk_oznaka': 'XX', 'vzk_naziv': 'Баги'},
+                             'recorupdate': {'vzk_id': None, 'vzk_oznaka': 'XX', 'vzk_naziv': 'Кросовер'},
+                             'primarykey': 'vzk_id',
+                            }
 tbls['vozilo_klasa'] = {
-    'sch': 'sif',
-    'rn': {
-        'vzkl_id': 0,
-        'vzkl_oznaka': 'M',
-        'vzkl_naziv': 'Klasa M'
-    },
-    'ru': {
-        'vzkl_id': None,
-        'vzkl_oznaka': 'M',
-        'vzkl_naziv': 'Klasa X'
-    },
-    'pk': 'vzkl_id',
-}
+                        'schema': 'sif',
+                        'recordnew': {'vzkl_id': 0, 'vzkl_oznaka': 'M', 'vzkl_naziv': 'Klasa M'},
+                        'recorupdate': {'vzkl_id': None, 'vzkl_oznaka': 'M', 'vzkl_naziv': 'Klasa X'},
+                        'primarykey': 'vzkl_id',
+                       }
 tbls['vozilo_vrsta'] = {
-    'sch': 'sif',
-    'rn': {
-        'vzv_id': 0,
-        'vzv_oznaka': 'A',
-        'vzv_naziv': 'Тротинети'
-    },
-    'ru': {
-        'vzv_id': None,
-        'vzv_oznaka': 'A',
-        'vzv_naziv': 'Ромобили'
-    },
-    'pk': 'vzv_id',
-}
+                        'schema': 'sif',
+                        'recordnew': {'vzv_id': 0, 'vzv_oznaka': 'A', 'vzv_naziv': 'Тротинети'},
+                        'recorupdate': {'vzv_id': None, 'vzv_oznaka': 'A', 'vzv_naziv': 'Ромобили'},
+                        'primarykey': 'vzv_id',
+                       }
 tbls['ag_proizvodjac'] = {
-    'sch': 'sif',
-    'rn': {
-        'agp_id': 0,
-        'agp_naziv': 'NS AUTOGAS',
-        'agp_napomena': None
-    },
-    'ru': {
-        'agp_id': None,
-        'agp_naziv': 'NS AUTOGAS',
-        'agp_napomena': 'Napomena'
-    },
-    'pk': 'agp_id',
-}
+                          'schema': 'sif',
+                          'recordnew': {'agp_id': 0, 'agp_naziv': 'NS AUTOGAS', 'agp_napomena': None},
+                          'recorupdate': {'agp_id': None, 'agp_naziv': 'NS AUTOGAS', 'agp_napomena': 'Napomena'},
+                          'primarykey': 'agp_id',
+                         }
 tbls['ag_homologacija'] = {
-    'sch': 'sif',
-    'rn': {
-        'agh_id': 0,
-        'agh_oznaka': '123 456 789',
-        'agh_uredjaj': 'MV'
-    },
-    'ru': {
-        'agh_id': None,
-        'agh_oznaka': '123 456 789',
-        'agh_uredjaj': 'RD'
-    },
-    'pk': 'agh_id',
-}
+                           'schema': 'sif',
+                           'recordnew': {'agh_id': 0, 'agh_oznaka': '123 456 789', 'agh_uredjaj': 'MV'},
+                           'recorupdate': {'agh_id': None, 'agh_oznaka': '123 456 789', 'agh_uredjaj': 'RD'},
+                           'primarykey': 'agh_id',
+                          }
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -160,7 +88,6 @@ def res2obj(pd_res):
 
   return dd(pd_res)
 
-
 #= FUNCTION ============================
 # t00
 #=======================================
@@ -171,89 +98,87 @@ def t00(pc_tbl):
     return
 
   td = tbls[vcl_tbl]
-  t = table(td.sch, vcl_tbl)
+  tbl = table(td.schema, vcl_tbl)
 
   #= FUNCTION ============================
-  # tbl_g
+  # tbl_get
   #=======================================
-  def tbl_g(pc_msg, pn_t_id=None):
+  def tbl_get(pc_msg, pi_tbl_id=None):
 
-    print("#####################", pn_t_id)
+    print("#####################", pi_tbl_id)
     print('\n# {}'.format(pc_msg))
-    res = t.tbl_g(pn_t_id)
+    res = tbl.tbl_get(pi_tbl_id)
     if res:
       for r in res:
         print('  {}'.format(dict(r)))
     else:
-      print('  Nema sloga sa ID-om {}.'.format(vnl_t_id))
+      print('  Nema sloga sa ID-om {}.'.format(vil_tbl_id))
 
   #= FUNCTION ============================
-  # tbl_i
+  # tbl_insert
   #=======================================
-  def tbl_i():
+  def tbl_insert():
 
     print('\n# {}'.format('insert new record'))
-    dxl_row = td.rn
+    dxl_row = td.recordnew
     print('  {}'.format(dxl_row))
-    res = res2obj(t.tbl_i(dxl_row))
-    vnl_t_id = res.rcod
-    if vnl_t_id < 0:
+    res = res2obj(tbl.tbl_insert(dxl_row))
+    vil_tbl_id = res.rcod
+    if vil_tbl_id < 0:
       print('  Greška: {}'.format(res.rmsg))
     else:
       print('  New id: {rcod}; {rmsg}'.format(**res))
       # get tbl_id=new tbl_id
-      tbl_g('get new record', vnl_t_id)
+      tbl_get('get new record', vil_tbl_id)
 
-    return vnl_t_id
+    return vil_tbl_id
 
   #= FUNCTION ============================
-  # tbl_u
+  # tbl_update
   #=======================================
-  def tbl_u(pn_t_id):
+  def tbl_update(pi_tbl_id):
 
     # update tbl_id=new tbl_id
     print('\n# {}'.format('update new record'))
-    td.ru[td.pk] = pn_t_id
-    dxl_row = td.ru
+    td.recorupdate[td.primarykey] = pi_tbl_id
+    dxl_row = td.recorupdate
     print('  {}'.format(dxl_row))
-    res = res2obj(t.tbl_u(dxl_row))
+    res = res2obj(tbl.tbl_update(dxl_row))
     if res.rcod < 0:
       print('  Greška: {}'.format(res.rmsg))
     else:
       print('  Updated records: {rcod}; {rmsg}'.format(**res))
       # get tbl_id=new tbl_id
-      tbl_g('get updated new record', pn_t_id)
+      tbl_get('get updated new record', pi_tbl_id)
 
     return res
 
   #= FUNCTION ============================
-  # tbl_d
+  # tbl_delete
   #=======================================
-  def tbl_d(pn_t_id):
+  def tbl_delete(pi_tbl_id):
 
     # delete tbl_id=new tbl_id
     print('\n# {}'.format('delete new record'))
-    res = res2obj(t.tbl_d(pn_t_id))
+    res = res2obj(tbl.tbl_delete(pi_tbl_id))
     print('  Deleted records: {rcod}; {rmsg}'.format(**res))
     # get tbl_id=new tbl_id
-    tbl_g('get new record', pn_t_id)
+    tbl_get('get new record', pi_tbl_id)
 
 # table
 
   print('## {}'.format('Table info'))
-  print(
-      '  Schema: {}\n  Name: {}\n  Column names: {}\n  Column types: {}'.format(
-          t.schema, t.name, t.colsl, [t.colsd[c]['typ'] for c in t.colsl]))
+  print('  Schema: {}\n  Name: {}\n  Column names: {}\n  Column types: {}\n  Comments: {}'.format(tbl.schema, tbl.name, [cd['name'] for cd in tbl.cols], [cd['type'] for cd in tbl.cols], [cd['comment'] for cd in tbl.cols]))
   # get all
-  tbl_g('get all')
+  tbl_get('get all')
   # insert ...
-  vnl_t_id = tbl_i()
-  if vnl_t_id > 0:
+  vil_tbl_id = tbl_insert()
+  if vil_tbl_id > 0:
     #   update tbl_id=new tbl_id
-    res = tbl_u(vnl_t_id)
+    res = tbl_update(vil_tbl_id)
     if res.rcod > 0:
       #     delete tbl_id=new tbl_id
-      tbl_d(vnl_t_id)
+      tbl_delete(vil_tbl_id)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

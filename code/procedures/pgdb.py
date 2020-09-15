@@ -32,7 +32,7 @@ class pgdb:
     else:
       vcl_pwd = self.getpwd()
     self.dsn = 'user={} password={} host={} port={} dbname={}'.format(pc_user, vcl_pwd, pc_host, pn_port, pc_dbname)
-    self.ccpool()
+    self.createconnpool()
 
   #= METHOD ==============================
   # __del__
@@ -41,8 +41,8 @@ class pgdb:
 
     """  Close connection pool"""
 
-    if self.cpool:
-      self.cpool.closeall()
+    if self.connpool:
+      self.connpool.closeall()
 
   #= METHOD ==============================
   # getpwd
@@ -62,14 +62,14 @@ class pgdb:
     return vcl_pwd
 
   #= METHOD ==============================
-  # ccpool
+  # createconnpool
   #=======================================
-  def ccpool(self):
+  def createconnpool(self):
 
     """  Create connection pool"""
 
     try:
-      self.cpool = psycopg2.pool.SimpleConnectionPool(1, 20, self.dsn, cursor_factory=psycopg2.extras.RealDictCursor)
+      self.connpool = psycopg2.pool.SimpleConnectionPool(1, 20, self.dsn, cursor_factory=psycopg2.extras.RealDictCursor)
     except (Exception, psycopg2.DatabaseError) as error:
       print('Error while connecting to PostgreSQL', error)
 
@@ -80,7 +80,7 @@ class pgdb:
 
     """  Get connection from connection pool"""
 
-    return self.cpool.getconn()
+    return self.connpool.getconn()
 
   #= METHOD ==============================
   # connret
@@ -89,94 +89,65 @@ class pgdb:
 
     """  Return connection to connection pool"""
 
-    self.cpool.putconn(po_conn)
+    self.connpool.putconn(po_conn)
 
   #= METHOD ==============================
-  # connntc
+  # connnotices
   #=======================================
-  def connntc(self, po_conn):
+  def connnotices(self, po_conn):
 
     """  Return connection notice"""
 
-    vcl_notice = po_conn.notices[-1].split(':', 1)[1].strip()
+    vcl_notice = ''
+    if po_conn.notices:
+      vcl_notice = po_conn.notices[-1].split(':', 1)[1].strip()
     po_conn.notices = []
 
     return vcl_notice
 
   #= METHOD ==============================
-  # connntcs
+  # col_default
   #=======================================
-  def connntcs(self, po_conn):
+  def col_default(self, pc_col_default, pc_col_type):
 
-    """  Return connection notices"""
-
-    return (po_conn.notices[-1].strip() if po_conn.notices else '')
-
-  #= METHOD ==============================
-  # tbl_cols_arr
-  #=======================================
-  def tbl_cols_arr(self, pc_schema, pc_table):
-
-    """  Get column names/types for table in schema"""
-
-    conn = self.connget()
-    crsr = conn.cursor()
-    lcl_col_nt = []
-    try:
-      crsr.callproc('f_tbl_cols_nt_arr', [pc_schema, pc_table])
-      vcl_res = crsr.fetchone()['f_tbl_cols_nt_arr']
-      lcl_col_nt = [s.split(',') for s in  vcl_res.split('#')]
-    except:
-      raise
-    finally:
-      crsr.close()
-      self.connret(conn)
-
-    return lcl_col_nt
-
-  #= METHOD ==============================
-  # c_def
-  #=======================================
-  def c_def(self, pc_c_def, pc_c_typ):
-
-    vxl_c_def = None
-    if pc_c_def:
-      if pc_c_typ=='c':
-        vxl_c_def = pc_c_def
-      elif pc_c_typ=='i':
-        vxl_c_def = int(pc_c_def)
-      elif pc_c_typ=='n':
-        vxl_c_def = float(pc_c_def)
-      elif pc_c_typ=='d':
+    vxl_col_default = None
+    if pc_col_default:
+      if pc_col_type=='c':
+        vxl_col_default = pc_col_default
+      elif pc_col_type=='i':
+        vxl_col_default = int(pc_col_default)
+      elif pc_col_type=='n':
+        vxl_col_default = float(pc_col_default)
+      elif pc_col_type=='d':
         pass
-      elif pc_c_typ=='t':
+      elif pc_col_type=='t':
         pass
       else:
         pass
 
-    return vxl_c_def
+    return vxl_col_default
 
   #= METHOD ==============================
-  # c_cc
+  # col_checkconst
   #=======================================
-  def c_cc(self, pc_c_cc, pc_c_typ):
+  def col_checkconst(self, pc_col_checkconst, pc_col_type):
 
-    vxl_c_cc = None
-    if pc_c_cc:
-      if pc_c_typ=='c':
-        vxl_c_cc = pc_c_cc.split(',')
-      elif pc_c_typ=='i':
-        vxl_c_cc = [int(n) for n in pc_c_cc.split(',')]
-      elif pc_c_typ=='n':
-        vxl_c_cc = [float(n) for n in pc_c_cc.split(',')]
-      elif pc_c_typ=='d':
+    vxl_col_checkconst = None
+    if pc_col_checkconst:
+      if pc_col_type=='c':
+        vxl_col_checkconst = pc_col_checkconst.split(',')
+      elif pc_col_type=='i':
+        vxl_col_checkconst = [int(n) for n in pc_col_checkconst.split(',')]
+      elif pc_col_type=='n':
+        vxl_col_checkconst = [float(n) for n in pc_col_checkconst.split(',')]
+      elif pc_col_type=='d':
         pass
-      elif pc_c_typ=='t':
+      elif pc_col_type=='t':
         pass
       else:
         pass
 
-    return vxl_c_cc
+    return vxl_col_checkconst
 
   #= METHOD ==============================
   # tbl_cols
@@ -191,19 +162,20 @@ class pgdb:
     lcl_cols = []
     try:
       crsr.callproc('public.f_tbl_cols', [pc_schema, pc_table])
-      for r in crsr:
+      for rec in crsr:
         lcl_cols.append(
                         {
-                         'order': r['col_ord'],
-                         'name': r['col_name'],
-                         'type': r['col_type'][0],
-                         'length': r['col_length'],
-                         'decimal': r['col_dec'],
-                         'isnotnull': (r['col_is_nn']=='Y'),
-                         'default': self.c_def(r['col_default'], r['col_type'][0]),
-                         'checkconst': self.c_cc(r['col_check'], r['col_type'][0]),
-                         'isprimarykey': (r['col_is_pk']=='Y'),
-                         'isforeignkey': (r['col_is_fk']=='Y'),
+                         'order': rec['col_ord'],
+                         'name': rec['col_name'],
+                         'type': rec['col_type'][0],
+                         'length': rec['col_length'],
+                         'decimal': rec['col_dec'],
+                         'isnotnull': (rec['col_is_nn']=='Y'),
+                         'default': self.col_default(rec['col_default'], rec['col_type'][0]),
+                         'checkconst': self.col_checkconst(rec['col_check'], rec['col_type'][0]),
+                         'isprimarykey': (rec['col_is_pk']=='Y'),
+                         'isforeignkey': (rec['col_is_fk']=='Y'),
+                         'comment': rec['col_comment'],
                         }
                        )
     except:
@@ -246,19 +218,19 @@ class pgdb:
 
     conn = self.connget()
     crsr = conn.cursor()
-    vnl_rc = 0
+    vil_reccount = 0
     vcl_sql = """SELECT COUNT(*) AS rc
   FROM {}.{};""".format(pc_schema, pc_table)
     try:
       crsr.execute(vcl_sql, [pc_schema])
-      vnl_rc = crsr.fetchone()['rc']
+      vil_reccount = crsr.fetchone()['rc']
     except:
       raise
     finally:
       crsr.close()
       self.connret(conn)
 
-    return vnl_rc
+    return vil_reccount
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code

@@ -1,7 +1,8 @@
-from flask_restful import Resource, reqparse
-from flask import request
-from procedures.locations import locations_service
 import json
+
+from flask import request
+from flask_restful import Resource, reqparse
+from procedures.locations import locations_service
 
 # class LocationList(Resource):
 #   def get(self):
@@ -23,10 +24,16 @@ import json
 class Location(Resource):
   def get(self):
     lk_id = request.args.get('id')
-    print(lk_id)
-    print("fetching locations")
     try:
-      locations = locations_service.lk_g()
+      if lk_id is not None:
+        lk_id = int(lk_id)
+        locations = locations_service.tbl_g(lk_id)
+        if not len(locations):
+          return {'message': f'location with id "{lk_id}" does not exist'}, 404
+        else:
+          return locations[0], 200
+
+      locations = locations_service.tbl_g()
       return {
           "locations":
           [locations_service.remove_prefix(location) for location in locations]
@@ -38,7 +45,7 @@ class Location(Resource):
 
   def post(self):
     request_args = [
-        col_name.split("_", 1)[1] for col_name in locations_service.col_names
+        col_name.split("_", 1)[1] for col_name in locations_service.colsl
         if col_name != "lk_id"
     ]
     parser = reqparse.RequestParser()
@@ -48,7 +55,7 @@ class Location(Resource):
       location['aktivna'] = "D"
     try:
       new_location = locations_service.tbl_i(
-          json.dumps(locations_service.add_prefix(location)))
+          (locations_service.add_prefix(location)))
       print(new_location)
       location["id"] = new_location["rcod"]
       return { 'message': "location added", 'location': location }, 200
@@ -57,7 +64,7 @@ class Location(Resource):
 
   def put(self):
     request_args = [
-        col_name.split("_", 1)[1] for col_name in locations_service.col_names
+        col_name.split("_", 1)[1] for col_name in locations_service.colsl
     ]
     parser = reqparse.RequestParser()
     [parser.add_argument(arg) for arg in request_args]

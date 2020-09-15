@@ -31,5 +31,9 @@ class Location(table):
       location_db["lk_" + key] = value
     return location_db
 
+  def columns(self):
+    return [{ 'name': col, **self.colsd[col] } for col in self.colsl]
+
 
 locations_service = Location()
+print(locations_service.columns())

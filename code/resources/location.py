@@ -85,3 +85,11 @@ class Location(Resource):
     except:
       print('failed to delete location')
       return { 'message': 'failed to delete location'}, 500
+
+
+class LocationDescription(Resource):
+  def get(self):
+    try:
+      return locations_service.columns(), 200
+    except:
+      return {'message': "failed to fetch column descriptions " }

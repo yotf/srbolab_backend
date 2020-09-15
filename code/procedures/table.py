@@ -28,7 +28,7 @@ class table:
     self.name = pc_table
     self.colsl, self.colsd = db.tbl_cols(self.schema, self.name)
     self.fnc = dd({})
-    for vcl_act in 'giud':
+    for vcl_act in ('d', 'g', 'iu'):
       self.fnc[vcl_act] = {
           'n': 'f_{}_{}'.format(self.name, vcl_act),
           'sn': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
@@ -70,18 +70,18 @@ class table:
     return vxl_res
 
   #= METHOD ==============================
-  # tbl_i
+  # tbl_iu
   #=======================================
-  def tbl_i(self, px_rec):
-    """  Insert data; Returns new tbl_id & message"""
+  def tbl_iu(self, pi_iu, px_rec):
+    """  Insert/Update data; Returns new tbl_id/number of records updated & message"""
 
     conn = db.connget()
     crsr = conn.cursor()
     vnl_res = -1
     vcl_res = None
     try:
-      crsr.callproc(self.fnc.i.sn, [self.prm2json(px_rec)])
-      vnl_res = crsr.fetchone()[self.fnc.i.n]
+      crsr.callproc(self.fnc.iu.sn, [pi_iu, self.prm2json(px_rec)])
+      vnl_res = crsr.fetchone()[self.fnc.iu.n]
       if vnl_res:
         vcl_res = db.connntc(conn)
         conn.commit()
@@ -97,31 +97,20 @@ class table:
     return self.res2dct(vnl_res, vcl_res)
 
   #= METHOD ==============================
+  # tbl_i
+  #=======================================
+  def tbl_i(self, px_rec):
+    """  Insert data; Returns new tbl_id & message"""
+
+    return self.tbl_iu(0, px_rec)
+
+  #= METHOD ==============================
   # tbl_u
   #=======================================
   def tbl_u(self, px_rec):
     """  Update data; Returns number of records updated & message"""
 
-    conn = db.connget()
-    crsr = conn.cursor()
-    vnl_res = -1
-    vcl_res = None
-    try:
-      crsr.callproc(self.fnc.u.sn, [self.prm2json(px_rec)])
-      vnl_res = crsr.fetchone()[self.fnc.u.n]
-      if vnl_res:
-        vcl_res = db.connntc(conn)
-        conn.commit()
-    except (psycopg2.errors.UniqueViolation,
-            psycopg2.errors.CheckViolation) as err:
-      vcl_res = err.pgerror.splitlines()[0].split(':', 1)[1].strip()
-    except:
-      raise
-    finally:
-      crsr.close()
-      db.connret(conn)
-
-    return self.res2dct(vnl_res, vcl_res)
+    return self.tbl_iu(1, px_rec)
 
   #= METHOD ==============================
   # tbl_d

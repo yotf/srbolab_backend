@@ -12,7 +12,7 @@ from psycopg2 import pool
 #---------------------------------------
 # global variables
 #---------------------------------------
-mdir = osp.dirname(str(__import__(__name__)).split(' ')[-1].strip("'<>"))
+mdir = osp.abspath(osp.dirname(str(__import__(__name__)).split(' ')[-1].strip("'<>")))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions

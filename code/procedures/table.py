@@ -27,7 +27,7 @@ class table:
 
     self.schema = pc_schema
     self.name = pc_table
-    self.colsl, self.colsd = db.tbl_cols(self.schema, self.name)
+    self.cols = db.tbl_cols(self.schema, self.name)
     self.fnc = dd({})
     for vcl_act in ('d', 'g', 'iu'):
       self.fnc[vcl_act] = {

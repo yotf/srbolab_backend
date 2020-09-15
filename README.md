@@ -13,6 +13,7 @@ if first time using the project:
 7. `pip install -r requirements.txt`
 8. `python code/app.py`
 
+
 Otherwise:
 
 1. cd to project folder(flask_app)

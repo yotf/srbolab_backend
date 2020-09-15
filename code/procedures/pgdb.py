@@ -98,7 +98,10 @@ class pgdb:
 
     """  Return connection notice"""
 
-    return po_conn.notices[-1].split(':', 1)[1].strip()
+    vcl_notice = po_conn.notices[-1].split(':', 1)[1].strip()
+    po_conn.notices = []
+
+    return vcl_notice
 
   #= METHOD ==============================
   # connntcs
@@ -107,7 +110,7 @@ class pgdb:
 
     """  Return connection notices"""
 
-    return po_conn.notices
+    return (po_conn.notices[-1].strip() if po_conn.notices else '')
 
   #= METHOD ==============================
   # tbl_cols_arr
@@ -186,29 +189,30 @@ class pgdb:
     crsr = conn.cursor()
 
     lcl_cols = []
-    ddl_cols = {}
     try:
       crsr.callproc('public.f_tbl_cols', [pc_schema, pc_table])
       for r in crsr:
-        ddl_cols[r['col_name']] = {
-                                   'ord': r['col_ord'],
-                                   'typ': r['col_type'][0],
-                                   'len': r['col_length'],
-                                   'dec': r['col_dec'],
-                                   'nn': (r['col_is_nn']=='Y'),
-                                   'def': self.c_def(r['col_default'], r['col_type'][0]),
-                                   'cc': self.c_cc(r['col_check'], r['col_type'][0]),
-                                   'pk': (r['col_is_pk']=='Y'),
-                                   'fk': (r['col_is_fk']=='Y'),
-                                  }
-      lcl_cols = [c for c, d in sorted(ddl_cols.items(), key=lambda tcd: tcd[1]['ord'])]
+        lcl_cols.append(
+                        {
+                         'order': r['col_ord'],
+                         'name': r['col_name'],
+                         'type': r['col_type'][0],
+                         'length': r['col_length'],
+                         'decimal': r['col_dec'],
+                         'isnotnull': (r['col_is_nn']=='Y'),
+                         'default': self.c_def(r['col_default'], r['col_type'][0]),
+                         'checkconst': self.c_cc(r['col_check'], r['col_type'][0]),
+                         'isprimarykey': (r['col_is_pk']=='Y'),
+                         'isforeignkey': (r['col_is_fk']=='Y'),
+                        }
+                       )
     except:
       raise
     finally:
       crsr.close()
       self.connret(conn)
 
-    return (lcl_cols, ddl_cols)
+    return lcl_cols
 
   #= METHOD ==============================
   # tbls

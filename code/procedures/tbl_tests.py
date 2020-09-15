@@ -13,67 +13,142 @@
 #  imports
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import json as js
-from table import db, table
+
 from box import SBox as dd
+
+from table import db, table
 
 #---------------------------------------
 # global variables
 #---------------------------------------
 tbls = dd({})
 tbls['emisija'] = {
-                   'sch': 'sif',
-                   'rn': {'em_id': 0, 'em_naziv': '7 (Седам)'},
-                   'ru': {'em_id': None, 'em_naziv': '8 (Осам)'},
-                   'pk': 'em_id',
-                  }
+    'sch': 'sif',
+    'rn': {
+        'em_id': 0,
+        'em_naziv': '7 (Седам)'
+    },
+    'ru': {
+        'em_id': None,
+        'em_naziv': '8 (Осам)'
+    },
+    'pk': 'em_id',
+}
 tbls['gorivo'] = {
-                  'sch': 'sif',
-                  'rn': {'gr_id': 0, 'gr_naziv': 'Угаљ'},
-                  'ru': {'gr_id': None, 'gr_naziv': 'Шљака'},
-                  'pk': 'gr_id',
-                 }
+    'sch': 'sif',
+    'rn': {
+        'gr_id': 0,
+        'gr_naziv': 'Угаљ'
+    },
+    'ru': {
+        'gr_id': None,
+        'gr_naziv': 'Шљака'
+    },
+    'pk': 'gr_id',
+}
 tbls['lokacija'] = {
-                    'sch': 'sys',
-                    'rn': {'lk_id': 0, 'lk_naziv': 'Нови Сад', 'lk_naziv_l': 'Новом Саду', 'lk_ip': '192.168.1.55', 'lk_aktivna': 'D'},
-                    'ru': {'lk_id': None, 'lk_naziv': 'Нови Сад', 'lk_naziv_l': 'Новом Саду', 'lk_ip': '192.168.1.66', 'lk_aktivna': 'N'},
-                    'pk': 'lk_id',
-                   }
+    'sch': 'sys',
+    'rn': {
+        'lk_id': 0,
+        'lk_naziv': 'Нови Сад',
+        'lk_naziv_l': 'Новом Саду',
+        'lk_ip': '192.168.1.55',
+        'lk_aktivna': 'D'
+    },
+    'ru': {
+        'lk_id': None,
+        'lk_naziv': 'Нови Сад',
+        'lk_naziv_l': 'Новом Саду',
+        'lk_ip': '192.168.1.66',
+        'lk_aktivna': 'N'
+    },
+    'pk': 'lk_id',
+}
 tbls['organizacija'] = {
-                        'sch': 'sif',
-                        'rn': {'org_id': 0, 'org_naziv': 'ЈКПИ', 'org_napomena': 'Бла, бла, ...'},
-                        'ru': {'org_id': None, 'org_naziv': 'ЈКПИ', 'org_napomena': 'Трт мрт'},
-                        'pk': 'org_id',
-                       }
+    'sch': 'sif',
+    'rn': {
+        'org_id': 0,
+        'org_naziv': 'ЈКПИ',
+        'org_napomena': 'Бла, бла, ...'
+    },
+    'ru': {
+        'org_id': None,
+        'org_naziv': 'ЈКПИ',
+        'org_napomena': 'Трт мрт'
+    },
+    'pk': 'org_id',
+}
 tbls['vozilo_karoserija'] = {
-                             'sch': 'sif',
-                             'rn': {'vzk_id': 0, 'vzk_oznaka': 'XX', 'vzk_naziv': 'Баги'},
-                             'ru': {'vzk_id': None, 'vzk_oznaka': 'XX', 'vzk_naziv': 'Кросовер'},
-                             'pk': 'vzk_id',
-                            }
+    'sch': 'sif',
+    'rn': {
+        'vzk_id': 0,
+        'vzk_oznaka': 'XX',
+        'vzk_naziv': 'Баги'
+    },
+    'ru': {
+        'vzk_id': None,
+        'vzk_oznaka': 'XX',
+        'vzk_naziv': 'Кросовер'
+    },
+    'pk': 'vzk_id',
+}
 tbls['vozilo_klasa'] = {
-                        'sch': 'sif',
-                        'rn': {'vzkl_id': 0, 'vzkl_oznaka': 'M', 'vzkl_naziv': 'Klasa M'},
-                        'ru': {'vzkl_id': None, 'vzkl_oznaka': 'M', 'vzkl_naziv': 'Klasa X'},
-                        'pk': 'vzkl_id',
-                       }
+    'sch': 'sif',
+    'rn': {
+        'vzkl_id': 0,
+        'vzkl_oznaka': 'M',
+        'vzkl_naziv': 'Klasa M'
+    },
+    'ru': {
+        'vzkl_id': None,
+        'vzkl_oznaka': 'M',
+        'vzkl_naziv': 'Klasa X'
+    },
+    'pk': 'vzkl_id',
+}
 tbls['vozilo_vrsta'] = {
-                        'sch': 'sif',
-                        'rn': {'vzv_id': 0, 'vzv_oznaka': 'A', 'vzv_naziv': 'Тротинети'},
-                        'ru': {'vzv_id': None, 'vzv_oznaka': 'A', 'vzv_naziv': 'Ромобили'},
-                        'pk': 'vzv_id',
-                       }
+    'sch': 'sif',
+    'rn': {
+        'vzv_id': 0,
+        'vzv_oznaka': 'A',
+        'vzv_naziv': 'Тротинети'
+    },
+    'ru': {
+        'vzv_id': None,
+        'vzv_oznaka': 'A',
+        'vzv_naziv': 'Ромобили'
+    },
+    'pk': 'vzv_id',
+}
 tbls['ag_proizvodjac'] = {
-                          'sch': 'sif',
-                          'rn': {'agp_id': 0, 'agp_naziv': 'NS AUTOGAS', 'agp_napomena': None},
-                          'ru': {'agp_id': None, 'agp_naziv': 'NS AUTOGAS', 'agp_napomena': 'Napomena'},
-                          'pk': 'agp_id',
-                         }
+    'sch': 'sif',
+    'rn': {
+        'agp_id': 0,
+        'agp_naziv': 'NS AUTOGAS',
+        'agp_napomena': None
+    },
+    'ru': {
+        'agp_id': None,
+        'agp_naziv': 'NS AUTOGAS',
+        'agp_napomena': 'Napomena'
+    },
+    'pk': 'agp_id',
+}
 tbls['ag_homologacija'] = {
-                           'sch': 'sif',
-                           'rn': {'agh_id': 0, 'agh_oznaka': '123 456 789', 'agh_uredjaj': 'MV'},
-                           'ru': {'agh_id': None, 'agh_oznaka': '123 456 789', 'agh_uredjaj': 'RD'},
-                           'pk': 'agh_id',
-                          }
+    'sch': 'sif',
+    'rn': {
+        'agh_id': 0,
+        'agh_oznaka': '123 456 789',
+        'agh_uredjaj': 'MV'
+    },
+    'ru': {
+        'agh_id': None,
+        'agh_oznaka': '123 456 789',
+        'agh_uredjaj': 'RD'
+    },
+    'pk': 'agh_id',
+}
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
@@ -84,6 +159,7 @@ tbls['ag_homologacija'] = {
 def res2obj(pd_res):
 
   return dd(pd_res)
+
 
 #= FUNCTION ============================
 # t00
@@ -102,6 +178,7 @@ def t00(pc_tbl):
   #=======================================
   def tbl_g(pc_msg, pn_t_id=None):
 
+    print("#####################", pn_t_id)
     print('\n# {}'.format(pc_msg))
     res = t.tbl_g(pn_t_id)
     if res:
@@ -120,7 +197,7 @@ def t00(pc_tbl):
     print('  {}'.format(dxl_row))
     res = res2obj(t.tbl_i(dxl_row))
     vnl_t_id = res.rcod
-    if vnl_t_id<0:
+    if vnl_t_id < 0:
       print('  Greška: {}'.format(res.rmsg))
     else:
       print('  New id: {rcod}; {rmsg}'.format(**res))
@@ -140,7 +217,7 @@ def t00(pc_tbl):
     dxl_row = td.ru
     print('  {}'.format(dxl_row))
     res = res2obj(t.tbl_u(dxl_row))
-    if res.rcod<0:
+    if res.rcod < 0:
       print('  Greška: {}'.format(res.rmsg))
     else:
       print('  Updated records: {rcod}; {rmsg}'.format(**res))
@@ -162,49 +239,53 @@ def t00(pc_tbl):
     tbl_g('get new record', pn_t_id)
 
 # table
+
   print('## {}'.format('Table info'))
-  print('  Schema: {}\n  Name: {}\n  Column names: {}\n  Column types: {}'.format(t.schema, t.name, t.colsl, [t.colsd[c]['typ'] for c in t.colsl]))
-# get all
+  print(
+      '  Schema: {}\n  Name: {}\n  Column names: {}\n  Column types: {}'.format(
+          t.schema, t.name, t.colsl, [t.colsd[c]['typ'] for c in t.colsl]))
+  # get all
   tbl_g('get all')
-# insert ...
+  # insert ...
   vnl_t_id = tbl_i()
-  if vnl_t_id>0:
-#   update tbl_id=new tbl_id
+  if vnl_t_id > 0:
+    #   update tbl_id=new tbl_id
     res = tbl_u(vnl_t_id)
-    if res.rcod>0:
-#     delete tbl_id=new tbl_id
+    if res.rcod > 0:
+      #     delete tbl_id=new tbl_id
       tbl_d(vnl_t_id)
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if __name__=='__main__':
+if __name__ == '__main__':
 
   pass
 
-#---------------------------------------
-# global variables
-#---------------------------------------
+  #---------------------------------------
+  # global variables
+  #---------------------------------------
 
   lcg_tbls = [
-              'emisija',
-              'gorivo',
-              'lokacija',
-              'organizacija',
-              'vozilo_karoserija',
-              'vozilo_klasa',
-              'vozilo_vrsta',
-              'ag_proizvodjac',
-              'ag_homologacija',
-             ]
+      'emisija',
+      'gorivo',
+      'lokacija',
+      'organizacija',
+      'vozilo_karoserija',
+      'vozilo_klasa',
+      'vozilo_vrsta',
+      'ag_proizvodjac',
+      'ag_homologacija',
+  ]
 
-#---------------------------------------
-# code
-#---------------------------------------
+  #---------------------------------------
+  # code
+  #---------------------------------------
 
   try:
     for vcg_tbl in lcg_tbls[-2:]:
-#    t00(lcg_tbls[7])
+      #    t00(lcg_tbls[7])
       t00(vcg_tbl)
       print()
   except IndexError:

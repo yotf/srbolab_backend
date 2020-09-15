@@ -1,9 +1,10 @@
 from flask import Flask
-from flask_restful import Api
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from resources.user import UserRegister, Users, UserLogin
+from flask_restful import Api
+
 from resources.location import Location
+from resources.user import UserLogin, UserRegister, Users
 
 app = Flask(__name__)
 app.secret_key = "asdfqwer"

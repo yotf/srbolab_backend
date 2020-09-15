@@ -1,18 +1,15 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# -*- Mode: Python; py-indent-offset: 2 -*-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#  imports
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import json as js
+
 import psycopg2
 from box import SBox as dd
-from pgdb import pgdb
+
+from procedures.pgdb import pgdb
 
 #---------------------------------------
 # global variables
 #---------------------------------------
 db = pgdb()
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
@@ -33,16 +30,16 @@ class table:
     self.fnc = dd({})
     for vcl_act in ('d', 'g', 'iu'):
       self.fnc[vcl_act] = {
-                           'n': 'f_{}_{}'.format(self.name, vcl_act),
-                           'sn': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
-                          }
+          'n': 'f_{}_{}'.format(self.name, vcl_act),
+          'sn': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
+      }
 
   #= METHOD ==============================
   # res2dct
   #=======================================
   def res2dct(self, pn_res, pc_res):
 
-    return {'rcod': pn_res, 'rmsg': pc_res}
+    return { 'rcod': pn_res, 'rmsg': pc_res }
 
   #= METHOD ==============================
   # prm2json
@@ -55,7 +52,6 @@ class table:
   # tbl_g
   #=======================================
   def tbl_g(self, *px_prms):
-
     """  Get data; Returns json object"""
 
     conn = db.connget()
@@ -77,7 +73,6 @@ class table:
   # tbl_iu
   #=======================================
   def tbl_iu(self, pi_iu, px_rec):
-
     """  Insert/Update data; Returns new tbl_id/number of records updated & message"""
 
     conn = db.connget()
@@ -90,7 +85,8 @@ class table:
       if vnl_res:
         vcl_res = db.connntc(conn)
         conn.commit()
-    except (psycopg2.errors.UniqueViolation, psycopg2.errors.CheckViolation) as err:
+    except (psycopg2.errors.UniqueViolation,
+            psycopg2.errors.CheckViolation) as err:
       vcl_res = err.pgerror.splitlines()[0].split(':', 1)[1].strip()
     except:
       raise
@@ -104,7 +100,6 @@ class table:
   # tbl_i
   #=======================================
   def tbl_i(self, px_rec):
-
     """  Insert data; Returns new tbl_id & message"""
 
     return self.tbl_iu(0, px_rec)
@@ -113,7 +108,6 @@ class table:
   # tbl_u
   #=======================================
   def tbl_u(self, px_rec):
-
     """  Update data; Returns number of records updated & message"""
 
     return self.tbl_iu(1, px_rec)
@@ -122,7 +116,6 @@ class table:
   # tbl_d
   #=======================================
   def tbl_d(self, *pl_prms):
-
     """  Delete data; Returns number of records deleted & message"""
 
     conn = db.connget()
@@ -143,10 +136,11 @@ class table:
 
     return self.res2dct(vnl_res, vcl_res)
 
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if __name__=='__main__':
+if __name__ == '__main__':
 
   pass
 

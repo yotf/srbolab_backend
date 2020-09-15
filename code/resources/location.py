@@ -4,22 +4,6 @@ from flask import request
 from flask_restful import Resource, reqparse
 from procedures.locations import locations_service
 
-# class LocationList(Resource):
-#   def get(self):
-#     lk_id = request.args.get('id')
-#     print(lk_id)
-#     print("fetching locations")
-#     try:
-#       locations = locations_service.lk_g()
-#       return {
-#           "locations":
-#           [locations_service.remove_prefix(location) for location in locations]
-#       }, 200
-#     except Exception:
-#       print(Exception.__class__)
-#       print("failed to fetch locations")
-#       return { 'message': "failed to fetch locations"}, 500
-
 
 class Location(Resource):
   def get(self):
@@ -45,7 +29,7 @@ class Location(Resource):
 
   def post(self):
     request_args = [
-        col_name.split("_", 1)[1] for col_name in locations_service.colsl
+        col_name.split("_", 1)[1] for col_name in [col['name'] for col in locations_service.cols]
         if col_name != "lk_id"
     ]
     parser = reqparse.RequestParser()
@@ -53,6 +37,7 @@ class Location(Resource):
     location = parser.parse_args()
     if location["aktivna"] is None:
       location['aktivna'] = "D"
+
     try:
       new_location = locations_service.tbl_i(
           (locations_service.add_prefix(location)))
@@ -64,7 +49,7 @@ class Location(Resource):
 
   def put(self):
     request_args = [
-        col_name.split("_", 1)[1] for col_name in locations_service.colsl
+        col_name.split("_", 1)[1] for col_name in [col['name'] for col in locations_service.cols]
     ]
     parser = reqparse.RequestParser()
     [parser.add_argument(arg) for arg in request_args]
@@ -90,6 +75,6 @@ class Location(Resource):
 class LocationDescription(Resource):
   def get(self):
     try:
-      return locations_service.columns(), 200
+      return locations_service.cols, 200
     except:
       return {'message': "failed to fetch column descriptions " }

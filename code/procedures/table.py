@@ -9,6 +9,7 @@ from pgdb import pgdb
 # global variables
 #---------------------------------------
 db = pgdb()
+print([js.dumps(dict(tbl)) for tbl in db.tbls()])
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions

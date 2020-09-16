@@ -16,6 +16,7 @@ class Location(table):
   #=======================================
   def __init__(self):
     super().__init__("sys", "lokacija")
+    self.prefix = 'lk'
 
   def remove_prefix(self, location):
     location_rest = {}
@@ -28,8 +29,9 @@ class Location(table):
   def add_prefix(self, location):
     location_db = {}
     for key, value in location.items():
-      location_db["lk_" + key] = value
+      location_db[self.prefix + "_" + key] = value
     return location_db
 
 
 locations_service = Location()
+print(locations_service.cols)

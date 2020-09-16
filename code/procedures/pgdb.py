@@ -9,10 +9,12 @@ import psycopg2
 import psycopg2.extras
 from psycopg2 import pool
 
+from config import globalv
+
 #---------------------------------------
 # global variables
 #---------------------------------------
-mdir = osp.abspath(osp.dirname(str(__import__(__name__)).split(' ')[-1].strip("'<>")))
+#mdir = osp.abspath(osp.dirname(str(__import__(__name__)).split(' ')[-1].strip("'<>")))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
@@ -51,15 +53,16 @@ class pgdb:
 
     """  Get password from file"""
 
-    vcl_pwd = None
-    try:
-      with open(osp.join(mdir, '.pwd'), 'r') as f:
-        vcl_pwd = f.read().strip()
-    except:
-      print('Nema fajla sa lozinkom!')
-      raise
+#    vcl_pwd = None
+#    try:
+#      with open(osp.join(mdir, '.pwd'), 'r') as f:
+#        vcl_pwd = f.read().strip()
+#    except:
+#      print('Nema fajla sa lozinkom!')
+#      raise
 
-    return vcl_pwd
+#    return vcl_pwd
+    return globalv.pgpwd
 
   #= METHOD ==============================
   # createconnpool
@@ -176,6 +179,8 @@ class pgdb:
                          'isprimarykey': (rec['col_is_pk']=='Y'),
                          'isforeignkey': (rec['col_is_fk']=='Y'),
                          'comment': rec['col_comment'],
+                         'header': globalv.colsx.get(pc_table, {}).get('columns', {}).get(rec['col_name'], {}).get('header', rec['col_name'].split('_', 1)[1]),
+                         'show': globalv.colsx.get(pc_table, {}).get('columns', {}).get(rec['col_name'], {}).get('show', not rec['col_name'].startswith('id_')),
                         }
                        )
     except:

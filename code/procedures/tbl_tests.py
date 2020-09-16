@@ -77,7 +77,6 @@ tbls['ag_homologacija'] = {
                            'primarykey': 'agh_id',
                           }
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

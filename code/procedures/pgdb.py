@@ -189,17 +189,14 @@ class pgdb:
   #= METHOD ==============================
   # tbls
   #=======================================
-  def tbls(self, pc_schema=None):
+  def tbls(self, pc_table=None, pc_schema=None):
 
     """  Get tables"""
 
     conn = self.connget()
     crsr = conn.cursor()
-    vcl_sql = """SELECT t.tbl_name,
-       t.sch_name
-  FROM public.f_tbls(%s) t;"""
     try:
-      crsr.execute(vcl_sql, [pc_schema])
+      crsr.callproc('public.f_tbls', [pc_table, pc_schema])
       dcl_tbls = crsr.fetchall()
     except:
       raise

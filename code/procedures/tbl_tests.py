@@ -168,7 +168,7 @@ def t00(pc_tbl):
 # table
 
   print('## {}'.format('Table info'))
-  print('  Schema: {}\n  Name: {}\n  Column names: {}\n  Column types: {}\n  Comments: {}'.format(tbl.schema, tbl.name, [cd['name'] for cd in tbl.cols], [cd['type'] for cd in tbl.cols], [cd['comment'] for cd in tbl.cols]))
+  print('  Schema: {}\n  Name: {}\n  Comment: {}\n  Column names: {}\n  Column types: {}\n  Column comments: {}'.format(tbl.schema, tbl.name, tbl.comment, [cd['name'] for cd in tbl.cols], [cd['type'] for cd in tbl.cols], [cd['comment'] for cd in tbl.cols]))
   # get all
   tbl_get('get all')
   # insert ...

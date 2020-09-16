@@ -26,7 +26,7 @@ class table:
 
     self.schema = pc_schema
     self.name = pc_table
-    self.comment = None
+    self.comment = db.tbls(self.name, self.schema)[0]['tbl_comment']
     self.cols = db.tbl_cols(self.schema, self.name)
     self.fnc = dd({})
     for vcl_act in ('d', 'g', 'iu'): # d - DELETE; g - SELECT ... (get); iu - INSERT/UPDATE

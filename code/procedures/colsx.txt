@@ -121,13 +121,13 @@ sys	korisnik	kr_prezime	2	Prezime korisnika	Prezime korisnika	Prezime	Prezime ko
 sys	korisnik	kr_ime	3	Ime korisnika	Ime korisnika	Ime	Ime korisnika	Y
 sys	korisnik	kr_username	4	Korisničko ime korisnika	Korisničko ime korisnika	Kor. ime	Korisničko ime korisnika	Y
 sys	korisnik	kr_password	5	Lozinka korisnika	Lozinka korisnika	Lozinka	Lozinka korisnika	Y
-sys	korisnik	kr_aktivan	6	Korisnik je aktivan?	Korisnik je aktivan?	Aktiv.?	Korisnik je aktivan?	Y
+sys	korisnik	kr_aktivan	6	Korisnik je aktivan?	Korisnik je aktivan?	Aktivan	Korisnik je aktivan?	Y
 sys	korisnik	arl_id	7	ID role	ID role	Id	ID role	N
 sys	lokacija	lk_id	1	ID lokacije	ID lokacije	Id	ID lokacije	N
 sys	lokacija	lk_naziv	2	Naziv lokacije	Naziv lokacije	Naziv	Naziv lokacije	Y
-sys	lokacija	lk_naziv_l	3	Naziv lokacije lokativ	Naziv lokacije lokativ	Naziv	Naziv lokacije lokativ	Y
+sys	lokacija	lk_naziv_l	3	Naziv lokacije lokativ	Naziv lokacije lokativ	Naziv_lokativ	Naziv lokacije lokativ	Y
 sys	lokacija	lk_ip	4	IP adresa lokacije	IP adresa lokacije	IP	IP adresa lokacije	Y
-sys	lokacija	lk_aktivna	5	Lokacija je aktivna?	Lokacija je aktivna?	Aktiv.?	Lokacija je aktivna?	Y
+sys	lokacija	lk_aktivna	5	Lokacija je aktivna?	Lokacija je aktivna?	Aktivna	Lokacija je aktivna?	Y
 sys	raspored	kn_datum	1	Datum	Datum	Datum	Datum	N
 sys	raspored	kr_id	2	ID korisnika	ID korisnika	Id	ID korisnika	N
 sys	raspored	lk_id	3	ID lokacije	ID lokacije	Id	ID lokacije	N

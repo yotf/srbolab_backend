@@ -3,13 +3,13 @@ import json as js
 import psycopg2
 from box import SBox as dd
 
-from pgdb import pgdb
+from procedures.pgdb import pgdb
 
 #---------------------------------------
 # global variables
 #---------------------------------------
 db = pgdb()
-print([js.dumps(dict(tbl)) for tbl in db.tbls()])
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
@@ -29,26 +29,25 @@ class table:
     self.comment = db.tbls(self.name, self.schema)[0]['tbl_comment']
     self.cols = db.tbl_cols(self.schema, self.name)
     self.fnc = dd({})
-    for vcl_act in ('d', 'g', 'iu'): # d - DELETE; g - SELECT ... (get); iu - INSERT/UPDATE
+    for vcl_act in (
+        'd', 'g', 'iu'):  # d - DELETE; g - SELECT ... (get); iu - INSERT/UPDATE
       self.fnc[vcl_act] = {
-                           'name': 'f_{}_{}'.format(self.name, vcl_act),
-                           'fullname': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
-                          }
+          'name': 'f_{}_{}'.format(self.name, vcl_act),
+          'fullname': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
+      }
 
   #= METHOD ==============================
   # res2dct
   #=======================================
   def res2dct(self, pn_res, pc_res):
-
     """  Results to dictionary"""
 
-    return {'rcod': pn_res, 'rmsg': pc_res}
+    return { 'rcod': pn_res, 'rmsg': pc_res }
 
   #= METHOD ==============================
   # prm2json
   #=======================================
   def prm2json(self, pd_row):
-
     """  Parameters to json"""
 
     return js.dumps(pd_row)
@@ -57,7 +56,6 @@ class table:
   # tbl_get
   #=======================================
   def tbl_get(self, *px_prms):
-
     """  Get data; Returns list of all records fetched"""
 
     conn = db.connget()
@@ -79,7 +77,6 @@ class table:
   # tbl_iu
   #=======================================
   def tbl_iu(self, pi_iu, px_rec):
-
     """  Insert/Update data; Returns new table ID/number of records updated & message"""
 
     conn = db.connget()
@@ -92,7 +89,8 @@ class table:
       if vnl_res:
         vcl_res = db.connnotices(conn)
         conn.commit()
-    except (psycopg2.errors.UniqueViolation, psycopg2.errors.CheckViolation) as err:
+    except (psycopg2.errors.UniqueViolation,
+            psycopg2.errors.CheckViolation) as err:
       vcl_res = err.pgerror.splitlines()[0].split(':', 1)[1].strip()
     except:
       raise
@@ -106,7 +104,6 @@ class table:
   # tbl_insert
   #=======================================
   def tbl_insert(self, px_rec):
-
     """  Insert data; Returns new tbl_id & message"""
 
     return self.tbl_iu(0, px_rec)
@@ -115,7 +112,6 @@ class table:
   # tbl_update
   #=======================================
   def tbl_update(self, px_rec):
-
     """  Update data; Returns number of records updated & message"""
 
     return self.tbl_iu(1, px_rec)
@@ -124,7 +120,6 @@ class table:
   # tbl_delete
   #=======================================
   def tbl_delete(self, *pl_prms):
-
     """  Delete data; Returns number of records deleted & message"""
 
     conn = db.connget()

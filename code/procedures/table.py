@@ -9,7 +9,6 @@ from pgdb import pgdb
 # global variables
 #---------------------------------------
 db = pgdb()
-print([js.dumps(dict(tbl)) for tbl in db.tbls()])
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
@@ -22,12 +21,29 @@ class table:
   #= METHOD ==============================
   # __init__
   #=======================================
-  def __init__(self, pc_schema, pc_table):
+  def __init__(self, pc_table, pc_table_p=None):
 
-    self.schema = pc_schema
+
     self.name = pc_table
-    self.comment = db.tbls(self.name, self.schema)[0]['tbl_comment']
-    self.cols = db.tbl_cols(self.schema, self.name)
+    self.name_p = pc_table_p
+    self._init()
+
+  #= METHOD ==============================
+  # _init
+  #=======================================
+  def _init(self):
+
+    """  Results to dictionary"""
+
+    dxl_tbl = db.tbls(self.name)[0]
+    self.schema = dxl_tbl['tbl_schema']
+    self.comment = dxl_tbl['tbl_comment']
+    self.type = dxl_tbl['tbl_type']
+    self.cols = db.tbl_cols(self.name)
+    if self.name_p:
+      for vil_col, dxl_col in enumerate(self.cols):
+        if dxl_col['parent']==self.name_p:
+          self.cols[vil_col]['show'] = False
     self.fnc = dd({})
     for vcl_act in ('d', 'g', 'iu'): # d - DELETE; g - SELECT ... (get); iu - INSERT/UPDATE
       self.fnc[vcl_act] = {
@@ -144,7 +160,6 @@ class table:
       db.connret(conn)
 
     return self.res2dct(vnl_res, vcl_res)
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code

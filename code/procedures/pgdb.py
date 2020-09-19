@@ -53,15 +53,6 @@ class pgdb:
 
     """  Get password from file"""
 
-#    vcl_pwd = None
-#    try:
-#      with open(osp.join(mdir, '.pwd'), 'r') as f:
-#        vcl_pwd = f.read().strip()
-#    except:
-#      print('Nema fajla sa lozinkom!')
-#      raise
-
-#    return vcl_pwd
     return globalv.pgpwd
 
   #= METHOD ==============================
@@ -107,6 +98,26 @@ class pgdb:
     po_conn.notices = []
 
     return vcl_notice
+
+  #= METHOD ==============================
+  # tbls
+  #=======================================
+  def tbls(self, pc_table=None):
+
+    """  Get tables"""
+
+    conn = self.connget()
+    crsr = conn.cursor()
+    try:
+      crsr.callproc('public.f_tbls', [pc_table])
+      dcl_tbls = crsr.fetchall()
+    except:
+      raise
+    finally:
+      crsr.close()
+      self.connret(conn)
+
+    return dcl_tbls
 
   #= METHOD ==============================
   # col_default
@@ -155,7 +166,7 @@ class pgdb:
   #= METHOD ==============================
   # tbl_cols
   #=======================================
-  def tbl_cols(self, pc_schema, pc_table):
+  def tbl_cols(self, pc_table):
 
     """  Get columns for table in schema"""
 
@@ -164,12 +175,13 @@ class pgdb:
 
     lcl_cols = []
     try:
-      crsr.callproc('public.f_tbl_cols', [pc_schema, pc_table])
+      crsr.callproc('public.f_tbl_cols', [pc_table])
       for rec in crsr:
+        vcl_col = rec['col_name']
         lcl_cols.append(
                         {
                          'order': rec['col_ord'],
-                         'name': rec['col_name'],
+                         'name': vcl_col,
                          'type': rec['col_type'][0],
                          'length': rec['col_length'],
                          'decimal': rec['col_dec'],
@@ -179,8 +191,9 @@ class pgdb:
                          'isprimarykey': (rec['col_is_pk']=='Y'),
                          'isforeignkey': (rec['col_is_fk']=='Y'),
                          'comment': rec['col_comment'],
-                         'header': globalv.colsx.get(pc_table, {}).get('columns', {}).get(rec['col_name'], {}).get('header', rec['col_name'].split('_', 1)[1]),
-                         'show': globalv.colsx.get(pc_table, {}).get('columns', {}).get(rec['col_name'], {}).get('show', not rec['col_name'].startswith('id_')),
+                         'parent': rec['tbl_name_p'],
+                         'header': globalv.colsx.get(pc_table, {}).get('columns', {}).get(vcl_col, {}).get('header', vcl_col.split('_', 1)[1]),
+                         'show': globalv.colsx.get(pc_table, {}).get('columns', {}).get(vcl_col, {}).get('show', not vcl_col.startswith('id_')),
                         }
                        )
     except:
@@ -190,26 +203,6 @@ class pgdb:
       self.connret(conn)
 
     return lcl_cols
-
-  #= METHOD ==============================
-  # tbls
-  #=======================================
-  def tbls(self, pc_table=None, pc_schema=None):
-
-    """  Get tables"""
-
-    conn = self.connget()
-    crsr = conn.cursor()
-    try:
-      crsr.callproc('public.f_tbls', [pc_table, pc_schema])
-      dcl_tbls = crsr.fetchall()
-    except:
-      raise
-    finally:
-      crsr.close()
-      self.connret(conn)
-
-    return dcl_tbls
 
   #= METHOD ==============================
   # tbl_rec_cnt

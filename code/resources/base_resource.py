@@ -1,11 +1,15 @@
 import json
-
+import types
 from flask import request
 from flask_restful import Resource, reqparse
 from procedures.table_wrapper import TableWrapper
 
 
-class Location(Resource):
+def generate_resource(schema, table, prefix, id_key="Id"):
+    return types.new_class(table, ( BaseResource, ), {'schema': schema, 'table': table, 'prefix': prefix, 'id_key': id_key}, lambda ns: ns) #TODO
+
+
+class BaseResource(Resource):
   def __init__(self, schema, table, prefix, id_key="Id"):
     self.service = TableWrapper(schema, table, prefix)
     self.item_name = table
@@ -73,7 +77,7 @@ class Location(Resource):
       return { 'message': f'failed to delete {self.item_name}'}, 500
 
 
-class LocationDescription(Resource):
+class ResourceDescription(Resource):
   def __init__(self, schema, table, prefix):
     self.service = TableWrapper(schema, table, prefix)
     self.item_name = table

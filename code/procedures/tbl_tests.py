@@ -179,7 +179,6 @@ def t00(pc_tbl):
       #     delete tbl_id=new tbl_id
       tbl_delete(vil_tbl_id)
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -187,25 +186,25 @@ if __name__ == '__main__':
 
   pass
 
-  #---------------------------------------
-  # global variables
-  #---------------------------------------
+#---------------------------------------
+# global variables
+#---------------------------------------
 
   lcg_tbls = [
-      'emisija',
-      'gorivo',
-      'lokacija',
-      'organizacija',
-      'vozilo_karoserija',
-      'vozilo_klasa',
-      'vozilo_vrsta',
-      'ag_proizvodjac',
-      'ag_homologacija',
-  ]
+              'emisija',
+              'gorivo',
+              'lokacija',
+              'organizacija',
+              'vozilo_karoserija',
+              'vozilo_klasa',
+              'vozilo_vrsta',
+              'ag_proizvodjac',
+              'ag_homologacija',
+             ]
 
-  #---------------------------------------
-  # code
-  #---------------------------------------
+#---------------------------------------
+# code
+#---------------------------------------
 
   try:
     for vcg_tbl in lcg_tbls[-2:]:

@@ -177,23 +177,27 @@ class pgdb:
     try:
       crsr.callproc('public.f_tbl_cols', [pc_table])
       for rec in crsr:
-        vcl_col = rec['col_name']
+        vcl_col_name = rec['column_name']
+        vcl_col_type = rec['column_type'][0]
         lcl_cols.append(
                         {
-                         'order': rec['col_ord'],
-                         'name': vcl_col,
-                         'type': rec['col_type'][0],
-                         'length': rec['col_length'],
-                         'decimal': rec['col_dec'],
-                         'isnotnull': (rec['col_is_nn']=='Y'),
-                         'default': self.col_default(rec['col_default'], rec['col_type'][0]),
-                         'checkconst': self.col_checkconst(rec['col_check'], rec['col_type'][0]),
-                         'isprimarykey': (rec['col_is_pk']=='Y'),
-                         'isforeignkey': (rec['col_is_fk']=='Y'),
-                         'comment': rec['col_comment'],
-                         'parent': rec['tbl_name_p'],
-                         'header': globalv.colsx.get(pc_table, {}).get('columns', {}).get(vcl_col, {}).get('header', vcl_col.split('_', 1)[1]),
-                         'show': globalv.colsx.get(pc_table, {}).get('columns', {}).get(vcl_col, {}).get('show', not vcl_col.startswith('id_')),
+                         'order': rec['column_order'],
+                         'name': vcl_col_name,
+                         'type': vcl_col_type,
+                         'length': rec['column_length'],
+                         'decimal': rec['column_dec'],
+                         'isnotnull': (rec['column_is_nn']=='Y'),
+                         'default': self.col_default(rec['column_default'], vcl_col_type),
+                         'checkconst': self.col_checkconst(rec['column_check'], vcl_col_type),
+                         'isprimarykey': (rec['column_is_pk']=='Y'),
+                         'isforeignkey': (rec['column_is_fk']=='Y'),
+                         'comment': rec['column_comment'],
+                         'parenttable': rec['table_name_p'],
+                         'parentcolumn': rec['column_name_p'],
+                         'header': globalv.colsx.get(pc_table, {}).get('columns', {}).get(vcl_col_name, {}).get('header', vcl_col_name.split('_', 1)[1]),
+                         'show': globalv.colsx.get(pc_table, {}).get('columns', {}).get(vcl_col_name, {}).get('show', not vcl_col_name.endswith('_id')),
+                         'edit': globalv.colsx.get(pc_table, {}).get('columns', {}).get(vcl_col_name, {}).get('show', not vcl_col_name.endswith('_id')),
+                         'control': globalv.colsx.get(pc_table, {}).get('columns', {}).get(vcl_col_name, {}).get('control', 'text'),
                         }
                        )
     except:

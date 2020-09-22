@@ -36,9 +36,9 @@ class table:
     """  Results to dictionary"""
 
     dxl_tbl = db.tbls(self.name)[0]
-    self.schema = dxl_tbl['tbl_schema']
-    self.comment = dxl_tbl['tbl_comment']
-    self.type = dxl_tbl['tbl_type']
+    self.schema = dxl_tbl['table_schema']
+    self.comment = dxl_tbl['table_comment']
+    self.type = dxl_tbl['table_type']
     self.cols = db.tbl_cols(self.name)
     if self.name_p:
       for vil_col, dxl_col in enumerate(self.cols):

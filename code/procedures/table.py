@@ -1,14 +1,19 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# -*- Mode: Python; py-indent-offset: 2 -*-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#  imports
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# system
 import json as js
 
+# site-packages
 import psycopg2
 from box import SBox as dd
-
-from pgdb import pgdb
 
 #---------------------------------------
 # global variables
 #---------------------------------------
-db = pgdb()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
@@ -21,9 +26,9 @@ class table:
   #= METHOD ==============================
   # __init__
   #=======================================
-  def __init__(self, pc_table, pc_table_p=None):
+  def __init__(self, po_db, pc_table, pc_table_p=None):
 
-
+    self.db = po_db
     self.name = pc_table
     self.name_p = pc_table_p
     self._init()
@@ -35,14 +40,14 @@ class table:
 
     """  Results to dictionary"""
 
-    dxl_tbl = db.tbls(self.name)[0]
+    dxl_tbl = self.db.tbls(self.name)[0]
     self.schema = dxl_tbl['table_schema']
     self.comment = dxl_tbl['table_comment']
     self.type = dxl_tbl['table_type']
-    self.cols = db.tbl_cols(self.name)
+    self.cols = self.db.tbl_cols(self.name)
     if self.name_p:
       for vil_col, dxl_col in enumerate(self.cols):
-        if dxl_col['parent']==self.name_p:
+        if dxl_col['parenttable']==self.name_p:
           self.cols[vil_col]['show'] = False
     self.fnc = dd({})
     for vcl_act in ('d', 'g', 'iu'): # d - DELETE; g - SELECT ... (get); iu - INSERT/UPDATE
@@ -76,7 +81,7 @@ class table:
 
     """  Get data; Returns list of all records fetched"""
 
-    conn = db.connget()
+    conn = self.db.connget()
     crsr = conn.cursor()
     vxl_res = None
     try:
@@ -87,7 +92,7 @@ class table:
     finally:
       conn.commit()
       crsr.close()
-      db.connret(conn)
+      self.db.connret(conn)
 
     return vxl_res
 
@@ -98,7 +103,7 @@ class table:
 
     """  Insert/Update data; Returns new table ID/number of records updated & message"""
 
-    conn = db.connget()
+    conn = self.db.connget()
     crsr = conn.cursor()
     vnl_res = -1
     vcl_res = None
@@ -106,7 +111,7 @@ class table:
       crsr.callproc(self.fnc.iu.fullname, [pi_iu, self.prm2json(px_rec)])
       vnl_res = crsr.fetchone()[self.fnc.iu.name]
       if vnl_res:
-        vcl_res = db.connnotices(conn)
+        vcl_res = self.db.connnotices(conn)
         conn.commit()
     except (psycopg2.errors.UniqueViolation, psycopg2.errors.CheckViolation) as err:
       vcl_res = err.pgerror.splitlines()[0].split(':', 1)[1].strip()
@@ -114,7 +119,7 @@ class table:
       raise
     finally:
       crsr.close()
-      db.connret(conn)
+      self.db.connret(conn)
 
     return self.res2dct(vnl_res, vcl_res)
 
@@ -143,7 +148,7 @@ class table:
 
     """  Delete data; Returns number of records deleted & message"""
 
-    conn = db.connget()
+    conn = self.db.connget()
     crsr = conn.cursor()
     vnl_res = -1
     vcl_res = None
@@ -151,13 +156,13 @@ class table:
       crsr.callproc(self.fnc.d.fullname, list(pl_prms))
       vnl_res = crsr.fetchone()[self.fnc.d.name.format(self.name)]
       if vnl_res:
-        vcl_res = db.connnotices(conn)
+        vcl_res = self.db.connnotices(conn)
         conn.commit()
     except Exception as err:
       vcl_res = '{}'.format(err)
     finally:
       crsr.close()
-      db.connret(conn)
+      self.db.connret(conn)
 
     return self.res2dct(vnl_res, vcl_res)
 

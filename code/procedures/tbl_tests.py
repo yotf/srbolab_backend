@@ -16,7 +16,7 @@ import json as js
 
 from box import SBox as dd
 
-from table import db, table
+from .table import db, table
 
 #---------------------------------------
 # global variables

@@ -1,20 +1,23 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # -*- Mode: Python; py-indent-offset: 2 -*-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  imports
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# system
 import os.path as osp
+
+# site-packages
 import psycopg2
 import psycopg2.extras
 from psycopg2 import pool
 
-from config import globalv
+# local
+from .config import getpwd, cols4table
 
 #---------------------------------------
 # global variables
 #---------------------------------------
-#mdir = osp.abspath(osp.dirname(str(__import__(__name__)).split(' ')[-1].strip("'<>")))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
@@ -53,7 +56,8 @@ class pgdb:
 
     """  Get password from file"""
 
-    return globalv.pgpwd
+#    return globalv.pgpwd
+    return getpwd()
 
   #= METHOD ==============================
   # createconnpool
@@ -124,14 +128,14 @@ class pgdb:
   #=======================================
   def col_default(self, pc_col_default, pc_col_type):
 
-    vxl_col_default = None
+    vxl_col_default = pc_col_default
     if pc_col_default:
       if pc_col_type=='c':
-        vxl_col_default = pc_col_default
+        pass
       elif pc_col_type=='i':
-        vxl_col_default = int(pc_col_default)
+        vxl_col_default = int(vxl_col_default)
       elif pc_col_type=='n':
-        vxl_col_default = float(pc_col_default)
+        vxl_col_default = float(vxl_col_default)
       elif pc_col_type=='d':
         pass
       elif pc_col_type=='t':
@@ -176,13 +180,14 @@ class pgdb:
     lcl_cols = []
     try:
       crsr.callproc('public.f_tbl_cols', [pc_table])
+      dxl_cols = cols4table(pc_table)
       for rec in crsr:
         vcl_col_name = rec['column_name']
         vcl_col_type = rec['column_type'][0]
         lcl_cols.append(
                         {
-                         'order': rec['column_order'],
                          'name': vcl_col_name,
+                         'order': rec['column_order'],
                          'type': vcl_col_type,
                          'length': rec['column_length'],
                          'decimal': rec['column_dec'],
@@ -194,10 +199,12 @@ class pgdb:
                          'comment': rec['column_comment'],
                          'parenttable': rec['table_name_p'],
                          'parentcolumn': rec['column_name_p'],
-                         'header': globalv.colsx.get(pc_table, {}).get('columns', {}).get(vcl_col_name, {}).get('header', vcl_col_name.split('_', 1)[1]),
-                         'show': globalv.colsx.get(pc_table, {}).get('columns', {}).get(vcl_col_name, {}).get('show', not vcl_col_name.endswith('_id')),
-                         'edit': globalv.colsx.get(pc_table, {}).get('columns', {}).get(vcl_col_name, {}).get('show', not vcl_col_name.endswith('_id')),
-                         'control': globalv.colsx.get(pc_table, {}).get('columns', {}).get(vcl_col_name, {}).get('control', 'text'),
+                         'label': dxl_cols.get(vcl_col_name, {}).get('label', rec['column_comment']),
+                         'tooltip': dxl_cols.get(vcl_col_name, {}).get('tooltip', rec['column_comment']),
+                         'header': dxl_cols.get(vcl_col_name, {}).get('header', vcl_col_name.split('_', 1)[1]),
+                         'show': dxl_cols.get(vcl_col_name, {}).get('show', not vcl_col_name.endswith('_id')),
+                         'edit': dxl_cols.get(vcl_col_name, {}).get('edit', not vcl_col_name.endswith('_id')),
+                         'control': dxl_cols.get(vcl_col_name, {}).get('control', 'text'),
                         }
                        )
     except:

@@ -56,7 +56,6 @@ class pgdb:
 
     """  Get password from file"""
 
-#    return globalv.pgpwd
     return getpwd()
 
   #= METHOD ==============================

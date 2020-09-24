@@ -5,8 +5,6 @@
 #  imports
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # system
-import sys
-import os
 import os.path as osp
 import sqlite3 as sqll
 
@@ -21,28 +19,6 @@ from box import SBox as dd
 #  classes & functions
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #= METHOD ==============================
-# getdir
-#=======================================
-def getdir():
-
-  """  Get module directory"""
-
-  vbl_ok2go = True
-  vcl_dir = os.path.abspath(os.curdir)
-  while vbl_ok2go:
-    if osp.exists(osp.join(vcl_dir, '.pwd')):
-      vbl_ok2go = False
-    else:
-      vcl_dir, vcl_base = osp.split(vcl_dir)
-      if osp.exists(osp.join(vcl_dir, 'flask_app')):
-#      if vcl_base=='srbolab':
-#        vcl_dir = osp.join(vcl_dir, vcl_base, 'flask_app', 'code', 'procedures')
-        vcl_dir = osp.join(vcl_dir, 'flask_app', 'code', 'procedures')
-        vbl_ok2go = False
-
-  return vcl_dir
-
-#= METHOD ==============================
 # getpwd
 #=======================================
 def getpwd():
@@ -51,7 +27,7 @@ def getpwd():
 
   vcl_pwd = None
   try:
-    with open(osp.join(getdir(), '.pwd'), 'r') as f:
+    with open(osp.join(osp.dirname(__file__), '.pwd'), 'r') as f:
       vcl_pwd = f.read().strip()
   except FileNotFoundError:
     print('Nema fajla sa lozinkom!')
@@ -66,7 +42,7 @@ def getpwd():
 def getcols():
 
   dxl_tblcols = dd({})
-  vcl_colsxf = osp.join(getdir(), 'colsx.db')
+  vcl_colsxf = osp.join(osp.dirname(__file__), 'colsx.db')
   if osp.exists(vcl_colsxf):
     lcl_cols = ['table_name', 'column_name', 'column_order', 'column_type', 'column_length', 'column_dec', 'column_is_nn', 'column_default', 'column_check', 'column_is_pk', 'column_is_fk', 'table_name_p', 'column_name_p', 'column_comment', 'column_label', 'column_header', 'column_tooltip', 'column_show', 'column_edit', 'column_control']
     vcl_sql = """SELECT c.{}

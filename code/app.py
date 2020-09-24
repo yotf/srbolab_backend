@@ -24,7 +24,8 @@ api.add_resource(generate_resource('sys', 'korisnik', 'kr'),
                      'prefix': "kr"
                  })
 api.add_resource(UserLogin, "/login")
-api.add_resource(BaseResource,
+# api.add_resource(BaseResource,
+api.add_resource(generate_resource('sys', 'lokacija', 'lk'),
                  "/locations",
                  resource_class_kwargs={
                      'schema': 'sys',

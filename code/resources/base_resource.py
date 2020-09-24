@@ -1,12 +1,25 @@
 import json
 import types
+
 from flask import request
 from flask_restful import Resource, reqparse
 from procedures.table_wrapper import TableWrapper
 
 
+def initi_resource(self, schema, table, prefix, id_key="Id"):
+  print(schema, table)
+  super(self.__class__, self).__init__(schema, table, prefix, id_key)
+
+
 def generate_resource(schema, table, prefix, id_key="Id"):
-    return types.new_class(table, ( BaseResource, ), {'schema': schema, 'table': table, 'prefix': prefix, 'id_key': id_key}, lambda ns: ns) #TODO
+  return type(
+      table, (BaseResource, ), {
+          '__init__': initi_resource,
+          'schema': schema,
+          'table': table,
+          'prefix': prefix,
+          'id_key': id_key
+      })  #TODO
 
 
 class BaseResource(Resource):
@@ -17,19 +30,23 @@ class BaseResource(Resource):
     self.id_key = id_key
 
   def get(self):
+    print(self.item_name, self.prefix)
     item_id = request.args.get('id')
+    items = self.service.tbl_get()
     try:
       if item_id is not None:
 
         item_id = int(item_id)
         items = self.service.tbl_get(item_id)
         if not len(items):
-          return {'message': f'{self.item_name} with id "{item_id}" does not exist'}, 404
+          return {
+              'message': f"{self.item_name} with id '{item_id}' does not exist"
+          }, 404
         else:
           return self.service.db_to_rest(items[0]), 200
 
       items = self.service.tbl_get()
-      return [self.service.db_to_rest(item) for item in items] , 200
+      return [self.service.db_to_rest(item) for item in items], 200
     except Exception:
       print(Exception.__class__)
       print(f"failed to fetch {self.item_name}")
@@ -45,11 +62,10 @@ class BaseResource(Resource):
     item = parser.parse_args()
 
     try:
-      new_item = self.service.tbl_insert(
-          (self.service.rest_to_db(item)))
+      new_item = self.service.tbl_insert((self.service.rest_to_db(item)))
       item[self.id_key] = new_item["rcod"]
       print(json.dumps(item), json.dumps(new_item))
-      return item , 200
+      return item, 200
     except:
       return { 'message': f"failed to create {self.item_name}"}, 500
 
@@ -63,7 +79,7 @@ class BaseResource(Resource):
     try:
       new_item = self.service.rest_to_db(item)
       update_result = self.service.tbl_update(new_item)
-      return  item, 200
+      return item, 200
     except:
       return { 'message': f"failed to create {self.item_name}"}, 500
 
@@ -86,4 +102,7 @@ class ResourceDescription(Resource):
     try:
       return self.service.col_description(), 200
     except:
-      return {'message': f"failed to fetch column descriptions for '{self.item_name}'" }
+      return {
+          'message':
+          f"failed to fetch column descriptions for '{self.item_name}'"
+      }

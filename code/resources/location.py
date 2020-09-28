@@ -6,10 +6,9 @@ from procedures.table_wrapper import TableWrapper
 
 
 class Location(Resource):
-  def __init__(self, schema, table, prefix, id_key="Id"):
-    self.service = TableWrapper(schema, table, prefix)
+  def __init__(self, schema, table, id_key="Id"):
+    self.service = TableWrapper(schema, table)
     self.item_name = table
-    self.prefix = prefix
     self.id_key = id_key
 
   def get(self):
@@ -20,12 +19,14 @@ class Location(Resource):
         item_id = int(item_id)
         items = self.service.tbl_get(item_id)
         if not len(items):
-          return {'message': f'{self.item_name} with id "{item_id}" does not exist'}, 404
+          return {
+              'message': f'{self.item_name} with id "{item_id}" does not exist'
+          }, 404
         else:
           return self.service.db_to_rest(items[0]), 200
 
       items = self.service.tbl_get()
-      return [self.service.db_to_rest(item) for item in items] , 200
+      return [self.service.db_to_rest(item) for item in items], 200
     except Exception:
       print(Exception.__class__)
       print(f"failed to fetch {self.item_name}")
@@ -41,11 +42,10 @@ class Location(Resource):
     item = parser.parse_args()
 
     try:
-      new_item = self.service.tbl_insert(
-          (self.service.rest_to_db(item)))
+      new_item = self.service.tbl_insert((self.service.rest_to_db(item)))
       item[self.id_key] = new_item["rcod"]
       print(json.dumps(item), json.dumps(new_item))
-      return item , 200
+      return item, 200
     except:
       return { 'message': f"failed to create {self.item_name}"}, 500
 
@@ -59,7 +59,7 @@ class Location(Resource):
     try:
       new_item = self.service.rest_to_db(item)
       update_result = self.service.tbl_update(new_item)
-      return  item, 200
+      return item, 200
     except:
       return { 'message': f"failed to create {self.item_name}"}, 500
 
@@ -74,12 +74,15 @@ class Location(Resource):
 
 
 class LocationDescription(Resource):
-  def __init__(self, schema, table, prefix):
-    self.service = TableWrapper(schema, table, prefix)
+  def __init__(self, schema, table):
+    self.service = TableWrapper(schema, table)
     self.item_name = table
 
   def get(self):
     try:
       return self.service.col_description(), 200
     except:
-      return {'message': f"failed to fetch column descriptions for '{self.item_name}'" }
+      return {
+          'message':
+          f"failed to fetch column descriptions for '{self.item_name}'"
+      }

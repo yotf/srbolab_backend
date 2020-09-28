@@ -14,9 +14,9 @@ class TableWrapper(table):
   #= METHOD ==============================
   # __init__
   #=======================================
-  def __init__(self, schema, table_name, prefix):
-    super().__init__(schema, table_name)
-    self.prefix = prefix
+  def __init__(self, schema, table_name):
+    super().__init__(db, table_name)
+    # super().__init__(db, schema, table_name)
     self.cols = [{
         **col, 'header': col['header'].replace("_", " ")
     } for col in self.cols]

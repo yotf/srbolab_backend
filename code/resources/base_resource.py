@@ -6,31 +6,28 @@ from flask_restful import Resource, reqparse
 from procedures.table_wrapper import TableWrapper
 
 
-def initi_resource(self, schema, table, prefix, id_key="Id"):
-  print(schema, table)
-  super(self.__class__, self).__init__(schema, table, prefix, id_key)
+def initi_resource(self, schema, table, id_key="Id"):
+  super(self.__class__, self).__init__(schema, table, id_key)
 
 
-def generate_resource(schema, table, prefix, id_key="Id"):
+def generate_resource(schema, table, id_key="Id"):
   return type(
       table, (BaseResource, ), {
           '__init__': initi_resource,
           'schema': schema,
           'table': table,
-          'prefix': prefix,
           'id_key': id_key
       })  #TODO
 
 
 class BaseResource(Resource):
-  def __init__(self, schema, table, prefix, id_key="Id"):
-    self.service = TableWrapper(schema, table, prefix)
+  def __init__(self, schema, table, id_key="Id"):
+    print("$$$$$$$$$", schema, table)
+    self.service = TableWrapper(schema, table)
     self.item_name = table
-    self.prefix = prefix
     self.id_key = id_key
 
   def get(self):
-    print(self.item_name, self.prefix)
     item_id = request.args.get('id')
     items = self.service.tbl_get()
     try:
@@ -94,8 +91,8 @@ class BaseResource(Resource):
 
 
 class ResourceDescription(Resource):
-  def __init__(self, schema, table, prefix):
-    self.service = TableWrapper(schema, table, prefix)
+  def __init__(self, schema, table):
+    self.service = TableWrapper(schema, table)
     self.item_name = table
 
   def get(self):

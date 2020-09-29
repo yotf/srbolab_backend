@@ -44,7 +44,7 @@ def getcols():
   dxl_tblcols = dd({})
   vcl_colsxf = osp.join(osp.dirname(__file__), 'colsx.db')
   if osp.exists(vcl_colsxf):
-    lcl_cols = ['table_name', 'column_name', 'column_order', 'column_type', 'column_length', 'column_dec', 'column_is_nn', 'column_default', 'column_check', 'column_is_pk', 'column_is_fk', 'table_name_p', 'column_name_p', 'column_comment', 'column_label', 'column_header', 'column_tooltip', 'column_show', 'column_edit', 'column_control']
+    lcl_cols = ['table_name', 'column_name', 'column_order', 'column_type', 'column_length', 'column_dec', 'column_is_nn', 'column_default', 'column_check', 'column_is_pk', 'column_is_fk', 'table_name_p', 'column_name_p', 'column_comment', 'column_label', 'column_header', 'column_tooltip', 'column_show', 'column_edit', 'column_fill', 'column_pick', 'column_control']
     vcl_sql = """SELECT c.{}
     FROM db_columns c
     ORDER BY c.table_name, c.column_order;""".format(',\n       c.'.join(lcl_cols))
@@ -66,6 +66,8 @@ def getcols():
                                                                    'tooltip':  r.column_tooltip,
                                                                    'show':  (r.column_show=='y'),
                                                                    'edit':  (r.column_edit=='y'),
+                                                                   'fill':  (r.column_fill=='y'),
+                                                                   'pick':  (r.column_pick=='y'),
                                                                    'control':  r.column_control,
                                                                   }
       except:

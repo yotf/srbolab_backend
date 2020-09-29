@@ -14,7 +14,7 @@ class TableWrapper(table):
   #= METHOD ==============================
   # __init__
   #=======================================
-  def __init__(self, schema, table_name):
+  def __init__(self, table_name):
     super().__init__(db, table_name)
     # super().__init__(db, schema, table_name)
     self.cols = [{

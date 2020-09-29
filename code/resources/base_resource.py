@@ -6,24 +6,32 @@ from flask_restful import Resource, reqparse
 from procedures.table_wrapper import TableWrapper
 
 
-def initi_resource(self, schema, table, id_key="Id"):
-  super(self.__class__, self).__init__(schema, table, id_key)
+def initi_resource(self, table, id_key="Id"):
+  super(self.__class__, self).__init__(table, id_key)
 
 
-def generate_resource(schema, table, id_key="Id"):
-  return type(
-      table, (BaseResource, ), {
-          '__init__': initi_resource,
-          'schema': schema,
-          'table': table,
-          'id_key': id_key
-      })  #TODO
+def initi_description(self, table):
+  super(self.__class__, self).__init__(table)
+
+
+def generate_resource(table, id_key="Id"):
+  return type(table, (BaseResource, ), {
+      '__init__': initi_resource,
+      'table': table,
+      'id_key': id_key
+  })  #TODO
+
+
+def generate_description(table):
+  return type(table + "_dsc", (ResourceDescription, ), {
+      '__init__': initi_description,
+      'table': table,
+  })  #TODO
 
 
 class BaseResource(Resource):
-  def __init__(self, schema, table, id_key="Id"):
-    print("$$$$$$$$$", schema, table)
-    self.service = TableWrapper(schema, table)
+  def __init__(self, table, id_key="Id"):
+    self.service = TableWrapper(table)
     self.item_name = table
     self.id_key = id_key
 
@@ -91,8 +99,8 @@ class BaseResource(Resource):
 
 
 class ResourceDescription(Resource):
-  def __init__(self, schema, table):
-    self.service = TableWrapper(schema, table)
+  def __init__(self, table):
+    self.service = TableWrapper(table)
     self.item_name = table
 
   def get(self):

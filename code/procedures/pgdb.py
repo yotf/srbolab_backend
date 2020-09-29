@@ -203,6 +203,8 @@ class pgdb:
                          'header': dxl_cols.get(vcl_col_name, {}).get('header', vcl_col_name.split('_', 1)[1]),
                          'show': dxl_cols.get(vcl_col_name, {}).get('show', not vcl_col_name.endswith('_id')),
                          'edit': dxl_cols.get(vcl_col_name, {}).get('edit', not vcl_col_name.endswith('_id')),
+                         'fill': dxl_cols.get(vcl_col_name, {}).get('fill', not vcl_col_name.endswith('_id')),
+                         'pick': dxl_cols.get(vcl_col_name, {}).get('pick', False),
                          'control': dxl_cols.get(vcl_col_name, {}).get('control', 'text'),
                         }
                        )

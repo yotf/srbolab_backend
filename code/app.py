@@ -20,7 +20,6 @@ api.add_resource(Tables, "/tables")
 for table in db.tbls():
   try:
     url = f"/{table['table_name']}"
-    print(url)
     api.add_resource(generate_resource(table["table_name"]),
                      url,
                      resource_class_kwargs={ 'table': table["table_name"] })

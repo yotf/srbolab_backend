@@ -6,19 +6,18 @@ from flask_restful import Resource, reqparse
 from procedures.table_wrapper import TableWrapper
 
 
-def initi_resource(self, table, id_key="Id"):
-  super(self.__class__, self).__init__(table, id_key)
+def initi_resource(self, table):
+  super(self.__class__, self).__init__(table)
 
 
 def initi_description(self, table):
   super(self.__class__, self).__init__(table)
 
 
-def generate_resource(table, id_key="Id"):
+def generate_resource(table):
   return type(table, (BaseResource, ), {
       '__init__': initi_resource,
       'table': table,
-      'id_key': id_key
   })  #TODO
 
 
@@ -30,10 +29,12 @@ def generate_description(table):
 
 
 class BaseResource(Resource):
-  def __init__(self, table, id_key="Id"):
+  def __init__(self, table):
     self.service = TableWrapper(table)
     self.item_name = table
-    self.id_key = id_key
+    self.primary_key = next(
+        filter(lambda col: print(col) or col["isprimarykey"],
+               self.service.cols))["name"]
 
   def get(self):
     item_id = request.args.get('id')
@@ -48,10 +49,10 @@ class BaseResource(Resource):
               'message': f"{self.item_name} with id '{item_id}' does not exist"
           }, 404
         else:
-          return self.service.db_to_rest(items[0]), 200
+          return (items[0]), 200
 
       items = self.service.tbl_get()
-      return [self.service.db_to_rest(item) for item in items], 200
+      return items, 200
     except Exception:
       print(Exception.__class__)
       print(f"failed to fetch {self.item_name}")
@@ -59,37 +60,35 @@ class BaseResource(Resource):
 
   def post(self):
     request_args = [
-        col_name for col_name in [col['header'] for col in self.service.cols]
-        if col_name != "Id"
+        col_name for col_name in [col['name'] for col in self.service.cols]
+        if col_name != self.primary_key
     ]
     parser = reqparse.RequestParser()
     [parser.add_argument(arg) for arg in request_args]
     item = parser.parse_args()
 
     try:
-      new_item = self.service.tbl_insert((self.service.rest_to_db(item)))
-      item[self.id_key] = new_item["rcod"]
-      print(json.dumps(item), json.dumps(new_item))
+      new_item = self.service.tbl_insert(item)
+      item[self.primary_key] = new_item["rcod"]
       return item, 200
     except:
       return { 'message': f"failed to create {self.item_name}"}, 500
 
   def put(self):
     request_args = [
-        col_name for col_name in [col['header'] for col in self.service.cols]
+        col_name for col_name in [col['name'] for col in self.service.cols]
     ]
     parser = reqparse.RequestParser()
     [parser.add_argument(arg) for arg in request_args]
     item = parser.parse_args()
     try:
-      new_item = self.service.rest_to_db(item)
-      update_result = self.service.tbl_update(new_item)
+      update_result = self.service.tbl_update(item)
       return item, 200
     except:
-      return { 'message': f"failed to create {self.item_name}"}, 500
+      return { 'message': f"failed to update {self.item_name}"}, 500
 
   def delete(self):
-    item_id = request.args.get('id')
+    item_id = request.args.get(self.primary_key)
     try:
       self.service.tbl_delete(item_id)
       return { 'message': f"{self.item_name.capitalize()} deleted"}, 200
@@ -105,7 +104,7 @@ class ResourceDescription(Resource):
 
   def get(self):
     try:
-      return self.service.col_description(), 200
+      return self.service.cols, 200
     except:
       return {
           'message':

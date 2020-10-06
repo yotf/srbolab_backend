@@ -3,47 +3,31 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_restful import Api
 
-from resources.location import Location, LocationDescription
-from resources.user import UserLogin, UserRegister, Users
+from procedures.table_wrapper import db
+from resources.base_resource import generate_description, generate_resource
+from resources.tables import Tables
+
+# from resources.user import UserLogin, UserRegister, Users
 
 app = Flask(__name__)
 app.secret_key = "asdfqwer"
 api = Api(app)
 cors = CORS(app)  #TODO add fixed origin for production
 
-# @app.before_first_request
-# def create_tables():
-#     db.create_all()
-
 jwt = JWTManager(app)
 
-# @app.route('/login', methods=['POST'])
-# def login():
-#     if not request.is_json:
-#         return jsonify({"msg": "Missing JSON in request"}), 400
-
-#     username = request.json.get('username', None)
-#     password = request.json.get('password', None)
-#     if not username:
-#         return jsonify({"msg": "Missing username parameter"}), 400
-#     if not password:
-#         return jsonify({"msg": "Missing password parameter"}), 400
-
-#     if username != 'test' or password != 'test':
-#         return jsonify({"msg": "Bad username or password"}), 401
-
-#     # Identity can be any data that is json serializable
-#     access_token = create_access_token(identity=username)
-#     return jsonify(access_token=access_token), 200
-
-# api.add_resource(Item, "/item/<string:name>")
-# api.add_resource(ItemList, "/items")
-api.add_resource(UserRegister, "/register")
-api.add_resource(Users, "/users")
-api.add_resource(UserLogin, "/login")
-# api.add_resource(LocationList, "/locations")
-api.add_resource(Location, "/locations")
-api.add_resource(LocationDescription, "/locations/description")
+api.add_resource(Tables, "/tables")
+for table in db.tbls():
+  try:
+    url = f"/{table['table_name']}"
+    api.add_resource(generate_resource(table["table_name"]),
+                     url,
+                     resource_class_kwargs={ 'table': table["table_name"] })
+    api.add_resource(generate_description(table["table_name"]),
+                     f"{url}/description",
+                     resource_class_kwargs={ 'table': table["table_name"] })
+  except Exception:
+    print(Exception.__class__, url)
 
 if __name__ == '__main__':
   app.run(port=5000, debug=True)

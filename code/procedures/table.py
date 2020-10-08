@@ -44,7 +44,7 @@ class table:
     self.schema = dxl_tbl['table_schema']
     self.comment = dxl_tbl['table_comment']
     self.type = dxl_tbl['table_type']
-    self.cols = self.db.tbl_cols(self.name)
+    self.cols, self.primarykey = self.db.tbl_cols(self.name)
     if self.name_p:
       for vil_col, dxl_col in enumerate(self.cols):
         if dxl_col['parenttable']==self.name_p:

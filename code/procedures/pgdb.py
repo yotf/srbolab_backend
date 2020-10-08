@@ -109,18 +109,19 @@ class pgdb:
 
     """  Get tables"""
 
+    ldl_tbls = []
     conn = self.connget()
     crsr = conn.cursor()
     try:
       crsr.callproc('public.f_tbls', [pc_table])
-      dcl_tbls = crsr.fetchall()
+      ldl_tbls = crsr.fetchall()
     except:
       raise
     finally:
       crsr.close()
       self.connret(conn)
 
-    return dcl_tbls
+    return ldl_tbls
 
   #= METHOD ==============================
   # col_default
@@ -177,12 +178,15 @@ class pgdb:
     crsr = conn.cursor()
 
     lcl_cols = []
+    lcl_pk_cols = []
     try:
       crsr.callproc('public.f_tbl_cols', [pc_table])
       dxl_cols = cols4table(pc_table)
       for rec in crsr:
         vcl_col_name = rec['column_name']
         vcl_col_type = rec['column_type'][0]
+        if rec['column_is_pk']=='Y':
+          lcl_pk_cols.append(vcl_col_name)
         lcl_cols.append(
                         {
                          'name': vcl_col_name,
@@ -214,7 +218,7 @@ class pgdb:
       crsr.close()
       self.connret(conn)
 
-    return lcl_cols
+    return (lcl_cols, lcl_pk_cols)
 
   #= METHOD ==============================
   # tbl_rec_cnt
@@ -238,6 +242,27 @@ class pgdb:
       self.connret(conn)
 
     return vil_reccount
+
+  #= METHOD ==============================
+  # user_forms
+  #=======================================
+  def user_forms(self, pi_kr_id):
+
+    """  Get application forms for user"""
+
+    ldl_apps = []
+    conn = self.connget()
+    crsr = conn.cursor()
+    try:
+      crsr.callproc('public.f_app', [pi_kr_id])
+      ldl_apps = crsr.fetchall()
+    except:
+      raise
+    finally:
+      crsr.close()
+      self.connret(conn)
+
+    return ldl_apps
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code

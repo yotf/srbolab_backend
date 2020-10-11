@@ -146,3 +146,4 @@ cython_debug/
 # Other
 .pwd
 /.project
+system.db

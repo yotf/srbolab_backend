@@ -21,9 +21,9 @@ from .table import table
 #  classes & functions
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #= CLASS ===============================
-# aplication
+# application
 #=======================================
-class aplication:
+class application:
 
   #= METHOD ==============================
   # __init__
@@ -58,6 +58,8 @@ class aplication:
       for dxl_Tables in pd_tables.get('details', []):
         form_tables(dxl_Tables, pd_tables.table.primarykey, pi_Level+1)
 
+      del pd_tables['table']
+
       return pd_tables
 
     apps = dd({})
@@ -88,7 +90,16 @@ class aplication:
                 dcl_Act['enabled'] = vcl_FormAction in apps[row.aap_id].forms[row.afo_id].useractions.get('actions', [])
                 apps[row.aap_id].forms[row.afo_id].tables.actions[vil_ActIdx] = dcl_Act
 
-    return apps.to_dict()
+    appsl = []
+    for vil_aap_id, dxl_app in sorted(apps.items()):
+      formsl = []
+      for vil_afo_id, dxl_afo in sorted(dxl_app.forms.items()):
+        formsl.append(dxl_afo.to_dict())
+      dxl_app.forms = formsl
+      appsl.append(dxl_app.to_dict())
+
+
+    return appsl
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code

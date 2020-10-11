@@ -21,9 +21,9 @@ from .table import table
 #  classes & functions
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #= CLASS ===============================
-# aplication
+# application
 #=======================================
-class aplication:
+class application:
 
   #= METHOD ==============================
   # __init__

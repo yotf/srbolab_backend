@@ -27,5 +27,5 @@ class Login(Resource):
       return { "msg": "Bad username or password"}, 401
 
     # Identity can be any data that is json serializable
-    access_token = create_access_token(identity=username)
+    access_token = create_access_token(identity={"kr_id": user["kr_id"]})
     return { 'access_token': access_token }, 200

@@ -4,9 +4,13 @@ from flask_jwt_extended import JWTManager
 from flask_restful import Api
 
 from procedures.table_wrapper import db
+from procedures.application import application
 from resources.base_resource import generate_description, generate_resource
 from resources.login import Login
 from resources.tables import Tables
+from resources.forms import Forms
+
+import json
 
 # from resources.user import UserLogin, UserRegister, Users
 
@@ -19,6 +23,7 @@ cors = CORS(app)  #TODO add fixed origin for production
 jwt = JWTManager(app)
 
 api.add_resource(Tables, "/tables")
+api.add_resource(Forms, "/forms")
 api.add_resource(Login, "/login")
 for table in db.tbls():
   try:

@@ -98,7 +98,6 @@ class application:
       dxl_app.forms = formsl
       appsl.append(dxl_app.to_dict())
 
-
     return appsl
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -27,11 +27,10 @@ class table:
   #= METHOD ==============================
   # __init__
   #=======================================
-  def __init__(self, po_db, pc_table, pc_table_p=None):
+  def __init__(self, po_db, pc_table):
 
     self.db = po_db
     self.name = pc_table
-    self.name_p = pc_table_p
     self._init()
 
   #= METHOD ==============================
@@ -44,17 +43,12 @@ class table:
     self.comment = dxl_tbl['table_comment']
     self.type = dxl_tbl['table_type']
     self.cols, self.primarykey = self.db.tbl_cols(self.name)
-    if self.name_p:
-      for vil_col, dxl_col in enumerate(self.cols):
-        if dxl_col['parenttable'] == self.name_p:
-          self.cols[vil_col]['show'] = False
     self.fnc = dd({})
-    for vcl_act in (
-        'd', 'g', 'iu'):  # d - DELETE; g - SELECT ... (get); iu - INSERT/UPDATE
+    for vcl_act in ('d', 'g', 'iu'):  # d - DELETE; g - SELECT ... (get); iu - INSERT/UPDATE
       self.fnc[vcl_act] = {
-          'name': 'f_{}_{}'.format(self.name, vcl_act),
-          'fullname': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
-      }
+                           'name': 'f_{}_{}'.format(self.name, vcl_act),
+                           'fullname': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
+                          }
 
   #= METHOD ==============================
   # res2dct

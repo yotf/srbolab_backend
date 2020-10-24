@@ -38,7 +38,6 @@ class table:
   # _init
   #=======================================
   def _init(self):
-    """  Results to dictionary"""
     dxl_tbl = self.db.tbls(self.name)[0]
     self.schema = dxl_tbl['table_schema']
     self.comment = dxl_tbl['table_comment']
@@ -75,15 +74,14 @@ class table:
   #= METHOD ==============================
   # tbl_get
   #=======================================
-  def tbl_get(self, *px_prms):
+  def tbl_get(self, px_rec):
     """  Get data; Returns list of all records fetched"""
 
     conn = self.db.connget()
     crsr = conn.cursor()
     vxl_res = None
-    proc_args = list(px_prms) if len(list(px_prms)) else ["{}"]
     try:
-      crsr.callproc(self.fnc.g.fullname, proc_args)
+      crsr.callproc(self.fnc.g.fullname, [self.prm2json(px_rec)])
       vxl_res = crsr.fetchall()
     except:
       raise
@@ -97,7 +95,7 @@ class table:
   #= METHOD ==============================
   # tbl_iu
   #=======================================
-  def tbl_iu(self, pi_iu, px_rec):
+  def tbl_iu(self, px_rec):
     """  Insert/Update data; Returns new table ID/number of records updated & message"""
 
     conn = self.db.connget()
@@ -105,7 +103,7 @@ class table:
     vnl_res = -1
     vcl_res = None
     try:
-      crsr.callproc(self.fnc.iu.fullname, [pi_iu, self.prm2json(px_rec)])
+      crsr.callproc(self.fnc.iu.fullname, [self.prm2json(px_rec)])
       vnl_res = crsr.fetchone()[self.fnc.iu.name]
       if vnl_res:
         vcl_res = self.db.connnotices(conn)
@@ -127,7 +125,7 @@ class table:
   def tbl_insert(self, px_rec):
     """  Insert data; Returns new tbl_id & message"""
 
-    return self.tbl_iu(0, px_rec)
+    return self.tbl_iu(px_rec)
 
   #= METHOD ==============================
   # tbl_update
@@ -135,12 +133,12 @@ class table:
   def tbl_update(self, px_rec):
     """  Update data; Returns number of records updated & message"""
 
-    return self.tbl_iu(1, px_rec)
+    return self.tbl_iu(px_rec)
 
   #= METHOD ==============================
   # tbl_delete
   #=======================================
-  def tbl_delete(self, *pl_prms):
+  def tbl_delete(self, px_rec):
     """  Delete data; Returns number of records deleted & message"""
 
     conn = self.db.connget()
@@ -148,7 +146,7 @@ class table:
     vnl_res = -1
     vcl_res = None
     try:
-      crsr.callproc(self.fnc.d.fullname, list(pl_prms))
+      crsr.callproc(self.fnc.d.fullname, [self.prm2json(px_rec)])
       vnl_res = crsr.fetchone()[self.fnc.d.name.format(self.name)]
       if vnl_res:
         vcl_res = self.db.connnotices(conn)

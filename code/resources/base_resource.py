@@ -32,24 +32,27 @@ class BaseResource(Resource):
   def __init__(self, table):
     self.service = TableWrapper(table)
     self.item_name = table
-    self.primary_key = next(
-        filter(lambda col: print(col) or col["isprimarykey"],
-               self.service.cols))["name"]
+    self.primary_keys = self.service.primarykey
 
   def get(self):
-    item_id = request.args.get('id')
-    items = self.service.tbl_get()
+    request_args = [
+        col_name for col_name in [col['name'] for col in self.service.cols]
+    ]
+    query_params = {
+        key: request.args.get(key)
+        for key in request_args if request.args.get(key)
+    }
     try:
-      if item_id is not None:
-
-        item_id = int(item_id)
-        items = self.service.tbl_get(item_id)
+      if len(query_params.items()):
+        print(json.dumps(query_params))
+        items = self.service.tbl_get(json.dumps(query_params))
         if not len(items):
           return {
-              'message': f"{self.item_name} with id '{item_id}' does not exist"
+              'message':
+              f"{self.item_name} with id '{json.dumps(query_params)}' does not exist"
           }, 404
         else:
-          return (items[0]), 200
+          return (items), 200
 
       items = self.service.tbl_get()
       return items, 200

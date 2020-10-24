@@ -39,7 +39,6 @@ class table:
   #=======================================
   def _init(self):
     """  Results to dictionary"""
-
     dxl_tbl = self.db.tbls(self.name)[0]
     self.schema = dxl_tbl['table_schema']
     self.comment = dxl_tbl['table_comment']
@@ -83,7 +82,6 @@ class table:
     crsr = conn.cursor()
     vxl_res = None
     proc_args = list(px_prms) if len(list(px_prms)) else ["{}"]
-    print("@@@@@@@@@@@", proc_args)
     try:
       crsr.callproc(self.fnc.g.fullname, proc_args)
       vxl_res = crsr.fetchall()

@@ -74,7 +74,7 @@ class table:
   #= METHOD ==============================
   # tbl_get
   #=======================================
-  def tbl_get(self, px_rec):
+  def tbl_get(self, px_rec={}):
     """  Get data; Returns list of all records fetched"""
 
     conn = self.db.connget()

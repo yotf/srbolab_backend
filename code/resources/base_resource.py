@@ -42,29 +42,29 @@ class BaseResource(Resource):
         key: request.args.get(key)
         for key in request_args if request.args.get(key)
     }
+    items = self.service.tbl_get()
+    print(json.dumps(query_params))
     try:
       if len(query_params.items()):
-        print(json.dumps(query_params))
-        items = self.service.tbl_get(json.dumps(query_params))
-        if not len(items):
-          return {
-              'message':
-              f"{self.item_name} with id '{json.dumps(query_params)}' does not exist"
-          }, 404
-        else:
-          return (items), 200
+        items = self.service.tbl_get(query_params)
+        # if not len(items):
+        #   return {
+        #       'message':
+        #       f"{self.item_name} with id '{json.dumps(query_params)}' does not exist"
+        #   }, 404
+        # else:
+        return (items), 200
 
       items = self.service.tbl_get()
       return items, 200
     except Exception:
-      print(Exception.__class__)
+      print(Exception.__class__, Exception)
       print(f"failed to fetch {self.item_name}")
       return { 'message': f"failed to fetch {self.item_name}s"}, 500
 
   def post(self):
     request_args = [
         col_name for col_name in [col['name'] for col in self.service.cols]
-        if col_name != self.primary_key
     ]
     parser = reqparse.RequestParser()
     [parser.add_argument(arg) for arg in request_args]
@@ -72,7 +72,8 @@ class BaseResource(Resource):
 
     try:
       new_item = self.service.tbl_insert(item)
-      item[self.primary_key] = new_item["rcod"]
+      item[self.primary_keys[0]] = new_item[
+          "rcod"]  #TODO fix primary key return
       return item, 200
     except:
       return { 'message': f"failed to create {self.item_name}"}, 500
@@ -91,7 +92,7 @@ class BaseResource(Resource):
       return { 'message': f"failed to update {self.item_name}"}, 500
 
   def delete(self):
-    item_id = request.args.get(self.primary_key)
+    item_id = { key: request.args.get(key) for key in self.primary_keys }
     try:
       self.service.tbl_delete(item_id)
       return { 'message': f"{self.item_name.capitalize()} deleted"}, 200

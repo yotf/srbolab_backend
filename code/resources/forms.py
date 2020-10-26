@@ -13,7 +13,7 @@ class Forms(Resource):
   def get(self):
     # try:
     user_identity = get_jwt_identity()
-    role_id = user_service.tbl_get(json.dumps(user_identity))[0]["arl_id"]
+    role_id = user_service.tbl_get(user_identity)[0]["arl_id"]
     # form_groups = application(db, user_identity["kr_id"]).apps #TODO
     form_groups = application(db, 1).apps  #TODO remove
     filtered_form_groups = [{

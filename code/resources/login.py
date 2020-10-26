@@ -21,11 +21,11 @@ class Login(Resource):
     if not password:
       return { "msg": "Missing password parameter"}, 400
 
-    user = user_service.tbl_get(json.dumps({ "kr_username": username }))[0]
+    user = user_service.tbl_get({ "kr_username": username })[0]
     print(user, username, password)
     if username != user["kr_username"] or password != user["kr_password"]:
       return { "msg": "Bad username or password"}, 401
 
     # Identity can be any data that is json serializable
-    access_token = create_access_token(identity={"kr_id": user["kr_id"]})
+    access_token = create_access_token(identity={ "kr_id": user["kr_id"] })
     return { 'access_token': access_token }, 200

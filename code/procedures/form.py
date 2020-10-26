@@ -53,66 +53,84 @@ class predmeti:
                     'kl_naziv': {
                                  'fnc': 'hmlg.f_klijent_g',
                                  'cols': ['kl_naziv'],
+                                 'chars': 3,
                                 }
                     'vz_sasija': {
                                   'fnc': 'sif.f_c_marka_oznaka',
                                   'cols': ['text'],
+                                  'chars': 3,
                                  }
                     'mr_naziv': {
                                  'fnc': 'sif.f_marka_g',
                                  'cols': ['mr_naziv'],
-                                }
+                                 'chars': 1,
+                               }
                     'md_naziv_k': {
                                    'fnc': 'sif.f_marka_g',
                                    'cols': ['mr_id', 'md_naziv_k'],
+                                   'chars': 1,
                                   }
                     'vzpv_oznaka': {
-                                    'fnc': 'sif.f_c_vozilo_podvrsta', # TODO
-                                    'cols': ['text'],
+                                    'fnc': 'sif.f_vozilo_podvrsta_g',
+                                    'cols': ['vzpv_oznaka'],
+                                    'chars': 1,
                                    }
                     'vzk_oznaka': {
                                   'fnc': 'sif.f_v_vzpv_vzk_g',
                                   'cols': ['vzpv_id', 'vzk_oznaka'],
+                                  'chars': 1,
                                   }
                     'vzdo_oznaka': {
                                     'fnc': 'sif.sif.f_v_vzv_vzdo_g',
                                     'cols': ['vzv_id', 'vzdo_oznaka'],
+                                    'chars': 1,
                                    }
                     'vzkl_oznaka': {
                                     'fnc': 'sif.f_v_vzpv_vzkl_g',
                                     'cols': ['vzpv_id', 'vzkl_naziv'],
+                                    'chars': 1,
                                    }
                     'mdt_oznaka': {
                                    'fnc': 'sif.f_model_tip_g',
                                    'cols': ['mdt_oznaka'],
+                                   'chars': 1,
                                    'fnc1': 'sif.f_c_marka_model_tip_var_ver',
                                    'cols1': ['text', 'mr_id', 'md_id', 'mdt_id', 'mdvr_id', 'mdvz_id', 'mt_id',],
+                                   'chars1': 3,
                                   }
                     'mdvr_oznaka': {
                                     'fnc': 'sif.f_model_varijanta_g',
                                     'cols': ['mdvr_oznaka'],
+                                    'chars': 1,
                                     'fnc1': 'sif.f_c_marka_model_tip_var_ver',
                                     'cols1': ['text', 'mr_id', 'md_id', 'mdt_id', 'mdvr_id', 'mdvz_id', 'mt_id',],
+                                    'chars1': 3,
                                    }
                     'mdvz_oznaka': {
                                     'fnc': 'sif.f_model_verzija_g',
                                     'cols': ['mdvz_oznaka'],
+                                    'chars': 1,
                                     'fnc1': 'sif.f_c_marka_model_tip_var_ver',
                                     'cols1': ['text', 'mr_id', 'md_id', 'mdt_id', 'mdvr_id', 'mdvz_id', 'mt_id',],
+                                    'chars': 3,
                                    }
                     'mt_oznaka': {
                                   'fnc': 'sif.f_model_verzija_g',
                                   'cols': ['mt_oznaka'],
+                                  'chars': 1,
                                   'fnc1': 'sif.f_c_marka_model_tip_var_ver_motor',
                                   'cols1': ['text', 'mr_id', 'md_id', 'mdt_id', 'mdvr_id', 'mdvz_id', 'mt_id',],
+                                  'chars': 3,
                                  }
                     'gr_naziv': {
                                  'fnc': 'sif.f_gorivo_g',
                                  'cols': ['gr_naziv'],
+                                 'chars': 1,
                                 }
                     'em_naziv': {
                                  'fnc': 'sif.f_emisija_g',
                                  'cols': ['em_naziv'],
+                                 'chars': 1,
                                 }
                    }
 
@@ -124,6 +142,20 @@ class predmeti:
     """  Results to dictionary"""
 
     return { 'rcod': pn_res, 'rmsg': pc_res }
+
+  #= METHOD ==============================
+  # prm2dct
+  #=======================================
+  def prm2dct(self, px_rec):
+
+    """  Parameters to dict"""
+
+    try:
+      px_rec.get('~')
+    except AttributeError:
+      px_rec = js.loads(px_rec)
+
+    return px_rec
 
   #= METHOD ==============================
   # prm2json

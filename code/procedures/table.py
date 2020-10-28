@@ -107,8 +107,7 @@ class table:
       if vnl_res:
         vcl_res = self.db.connnotices(conn)
         conn.commit()
-    except (psycopg2.errors.UniqueViolation,
-            psycopg2.errors.CheckViolation) as err:
+    except (psycopg2.errors.UniqueViolation, psycopg2.errors.CheckViolation) as err:
       vcl_res = err.pgerror.splitlines()[0].split(':', 1)[1].strip()
     except:
       raise
@@ -133,6 +132,15 @@ class table:
   def tbl_update(self, px_rec):
 
     """  Update data; Returns number of records updated & message"""
+
+    return self.tbl_iu(px_rec)
+
+  #= METHOD ==============================
+  # tbl_copy
+  #=======================================
+  def tbl_copy(self, px_rec):
+
+    """  Insert data; Returns new tbl_id & message"""
 
     return self.tbl_iu(px_rec)
 

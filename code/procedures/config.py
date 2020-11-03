@@ -18,7 +18,80 @@ from box import SBox as dd
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#= METHOD ==============================
+#= FUNCTION ============================
+# getdirfile
+#=======================================
+def getdirfile(pi_sdf_id=0):
+
+  """  Get system dirs & files"""
+
+  dcl_sdf = None
+  vcl_sysf = osp.join(osp.dirname(__file__), 'system.db')
+  if osp.exists(vcl_sysf):
+    vcl_sql = """SELECT t.dir_izvestaji,
+       t.dir_slike,
+       t.dir_dokumenti,
+       t.file_jasperstarter,
+       t.file_java,
+       t.file_ocr
+  FROM sys_dir_file t
+  WHERE t.sdf_id=:pi_sdf_id;"""
+    try:
+      conn = sqll.connect(vcl_sysf, detect_types=sqll.PARSE_COLNAMES|sqll.PARSE_DECLTYPES, isolation_level='IMMEDIATE')
+      crsr = conn.cursor()
+      try:
+        crsr.execute(vcl_sql, {'pi_sdf_id': pi_sdf_id})
+        for r in crsr:
+          dcl_sdf = dd(dict(zip(['reps', 'imgs', 'docs', 'jasperstarter', 'java', 'ocr'], r)))
+      except:
+        raise
+      finally:
+        crsr.close()
+        conn.close()
+    except:
+      raise
+  else:
+    print('Nema fajla sa sistemskim parametrima!')
+
+  return dcl_sdf
+
+#= FUNCTION ============================
+# getpgdb
+#=======================================
+def getpgdb(pi_db_id=0):
+
+  """  Get postgres database parameters"""
+
+  dxl_pgdbprms = None
+  vcl_sysf = osp.join(osp.dirname(__file__), 'system.db')
+  if osp.exists(vcl_sysf):
+    vcl_sql = """SELECT t.db_host,
+       t.db_port,
+       t.db_database,
+       t.db_user,
+       t.db_password
+  FROM db_params t
+  WHERE t.db_id=:pi_db_id;"""
+    try:
+      conn = sqll.connect(vcl_sysf, detect_types=sqll.PARSE_COLNAMES|sqll.PARSE_DECLTYPES, isolation_level='IMMEDIATE')
+      crsr = conn.cursor()
+      try:
+        crsr.execute(vcl_sql, {'pi_db_id': pi_db_id})
+        for r in crsr:
+          dxl_pgdbprms = dd(dict(zip(['host', 'port', 'database', 'user', 'password'], r)))
+      except:
+        raise
+      finally:
+        crsr.close()
+        conn.close()
+    except:
+      raise
+  else:
+    print('Nema fajla sa sistemskim parametrima!')
+
+  return dxl_pgdbprms
+
+#= FUNCTION ============================
 # getpwd
 #=======================================
 def getpwd():
@@ -83,6 +156,7 @@ def getcols():
   return dxl_tblcols
 
 cols = getcols()
+sysdf = getdirfile()
 
 #= FUNCTION ============================
 # cols4table

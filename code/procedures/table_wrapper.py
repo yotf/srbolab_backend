@@ -1,5 +1,6 @@
 import json
 
+from procedures.form import predmeti
 from procedures.pgdb import pgdb
 from procedures.table import table
 
@@ -7,6 +8,7 @@ from procedures.table import table
 # table_wrapper
 #=======================================
 db = pgdb()
+predmeti_service = predmeti(db)
 
 
 class TableWrapper(table):

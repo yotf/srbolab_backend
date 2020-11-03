@@ -43,11 +43,12 @@ class table:
     self.type = dxl_tbl['table_type']
     self.cols, self.primarykey = self.db.tbl_cols(self.name)
     self.fnc = dd({})
-    for vcl_act in ('d', 'g', 'iu'):  # d - DELETE; g - SELECT ... (get); iu - INSERT/UPDATE
+    for vcl_act in (
+        'd', 'g', 'iu'):  # d - DELETE; g - SELECT ... (get); iu - INSERT/UPDATE
       self.fnc[vcl_act] = {
-                           'name': 'f_{}_{}'.format(self.name, vcl_act),
-                           'fullname': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
-                          }
+          'name': 'f_{}_{}'.format(self.name, vcl_act),
+          'fullname': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
+      }
 
   #= METHOD ==============================
   # res2dct

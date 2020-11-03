@@ -43,7 +43,6 @@ class BaseResource(Resource):
         for key in request_args if request.args.get(key)
     }
     items = self.service.tbl_get()
-    print(json.dumps(query_params))
     try:
       if len(query_params.items()):
         items = self.service.tbl_get(query_params)

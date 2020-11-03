@@ -26,8 +26,8 @@ def form(po_db, pi_afo_id):
 
   if pi_afo_id == 430:
     return predmeti(po_db)
-  # elif pi_afo_id==420:
-  # return vozila(po_db)
+  elif pi_afo_id == 420:
+    return vozila(po_db)
   else:
     return None
 
@@ -55,6 +55,19 @@ class predmeti:
             'fnc': 'hmlg.f_klijent_g',
             'cols': ['kl_naziv'],
             'chars': 3,
+            'table': {
+                'name': 'klijent',
+                'cols': [],
+            },
+        },
+        'us_naziv': {
+            'fnc': 'sys.f_usluga_g',
+            'cols': ['us_naziv'],
+            'chars': 1,
+            'table': {
+                'name': 'usluga',
+                'cols': [],
+            },
         },
         'vz_sasija': {
             'fnc': 'sif.f_c_marka_oznaka',
@@ -65,11 +78,19 @@ class predmeti:
             'fnc': 'sif.f_marka_g',
             'cols': ['mr_naziv'],
             'chars': 1,
+            'table': {
+                'name': 'marka',
+                'cols': [],
+            },
         },
         'md_naziv_k': {
-            'fnc': 'sif.f_model_g',
+            'fnc': 'sif.f_marka_g',
             'cols': ['mr_id', 'md_naziv_k'],
             'chars': 1,
+            'table': {
+                'name': 'model',
+                'cols': [],
+            },
         },
         'vzpv_oznaka': {
             'fnc': 'sif.f_vozilo_podvrsta_g',
@@ -98,7 +119,7 @@ class predmeti:
             'chars':
             1,
             'fnc1':
-            'sif.f_c_marka_model_tip_var_ver_motor',
+            'sif.f_c_marka_model_tip_var_ver',
             'cols1': [
                 'text',
                 'mr_id',
@@ -110,6 +131,10 @@ class predmeti:
             ],
             'chars1':
             3,
+            'table': {
+                'name': 'model_tip',
+                'cols': [],
+            },
         },
         'mdvr_oznaka': {
             'fnc':
@@ -118,7 +143,7 @@ class predmeti:
             'chars':
             1,
             'fnc1':
-            'sif.f_c_marka_model_tip_var_ver_motor',
+            'sif.f_c_marka_model_tip_var_ver',
             'cols1': [
                 'text',
                 'mr_id',
@@ -130,6 +155,10 @@ class predmeti:
             ],
             'chars1':
             3,
+            'table': {
+                'name': 'model_varijanta',
+                'cols': [],
+            },
         },
         'mdvz_oznaka': {
             'fnc':
@@ -138,7 +167,7 @@ class predmeti:
             'chars':
             1,
             'fnc1':
-            'sif.f_c_marka_model_tip_var_ver_motor',
+            'sif.f_c_marka_model_tip_var_ver',
             'cols1': [
                 'text',
                 'mr_id',
@@ -150,6 +179,10 @@ class predmeti:
             ],
             'chars':
             3,
+            'table': {
+                'name': 'model_verzija',
+                'cols': [],
+            },
         },
         'mt_oznaka': {
             'fnc':
@@ -170,6 +203,10 @@ class predmeti:
             ],
             'chars':
             3,
+            'table': {
+                'name': 'motor',
+                'cols': [],
+            },
         },
         'gr_naziv': {
             'fnc': 'sif.f_gorivo_g',
@@ -180,8 +217,13 @@ class predmeti:
             'fnc': 'sif.f_emisija_g',
             'cols': ['em_naziv'],
             'chars': 1,
-        }
+        },
     }
+    for vcl_col, dcl_col in self.col_fnc.items():
+      vcl_table = dcl_col.get('table', None)
+      if vcl_table:
+        self.col_fnc[vcl_col]['table']['cols'] = self.db.tbl_cols(
+            self.col_fnc[vcl_col]['table']['name'])[0]
 
   #= METHOD ==============================
   # res2dct
@@ -222,10 +264,8 @@ class predmeti:
     crsr = conn.cursor()
     vxl_res = None
     try:
-      print(pc_fnc, px_rec, type(px_rec))
       crsr.callproc(pc_fnc, [self.prm2json(px_rec)])
       vxl_res = crsr.fetchall()
-      print(len(vxl_res))
     except:
       raise
     finally:

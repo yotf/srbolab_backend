@@ -2,6 +2,7 @@ import json
 import types
 
 from flask import request
+from flask_jwt_extended import get_jwt_claims, get_jwt_identity
 from flask_restful import Resource, reqparse
 from procedures.table_wrapper import TableWrapper
 
@@ -35,6 +36,9 @@ class BaseResource(Resource):
     self.primary_keys = self.service.primarykey
 
   def get(self):
+    jwt_identity = get_jwt_identity()
+    jwt_claims = get_jwt_claims()
+    print(jwt_identity, json.dumps(jwt_identity), jwt_claims)
     request_args = [
         col_name for col_name in [col['name'] for col in self.service.cols]
     ]
@@ -56,8 +60,8 @@ class BaseResource(Resource):
 
       items = self.service.tbl_get()
       return items, 200
-    except Exception:
-      print(Exception.__class__, Exception)
+    except Exception as e:
+      print(e.__class__, e)
       print(f"failed to fetch {self.item_name}")
       return { 'message': f"failed to fetch {self.item_name}s"}, 500
 
@@ -74,7 +78,8 @@ class BaseResource(Resource):
       item[self.primary_keys[0]] = new_item[
           "rcod"]  #TODO fix primary key return
       return item, 200
-    except:
+    except Exception as e:
+      print(e.__class__, e)
       return { 'message': f"failed to create {self.item_name}"}, 500
 
   def put(self):
@@ -87,7 +92,9 @@ class BaseResource(Resource):
     try:
       update_result = self.service.tbl_update(item)
       return item, 200
-    except:
+    except Exception as e:
+      print(item)
+      print(e.__class__, e)
       return { 'message': f"failed to update {self.item_name}"}, 500
 
   def delete(self):

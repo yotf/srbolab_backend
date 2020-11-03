@@ -19,12 +19,10 @@ class Predmeti(Resource):
     body = parser.parse_args()
     fnc_key = "fnc" if body["altFnc"] == "False" else "fnc1"
     filter_params = eval(body["values"])  #TODO
-    print(filter_params)
 
     if (not hasattr(filter_params, body["activeColumn"])):
       filter_params[body["activeColumn"]] = ""
 
     fnc = predmeti_service.col_fnc[body["activeColumn"]][fnc_key]
     items = predmeti_service.data_get(fnc, filter_params)
-    print(fnc, body["values"], len(items))
     return items, 200

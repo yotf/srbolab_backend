@@ -23,6 +23,13 @@ cors = CORS(app)  #TODO add fixed origin for production
 
 jwt = JWTManager(app)
 
+
+@jwt.user_claims_loader
+def add_claims_to_access_token(identity):
+  print(identity, "claims")
+  return { 'hello': identity, 'foo': ['bar', 'baz'] }
+
+
 api.add_resource(Tables, "/tables")
 api.add_resource(Forms, "/forms")
 api.add_resource(Predmeti, "/predmeti")

@@ -58,15 +58,6 @@ class predmeti:
                                            'cols': [],
                                           },
                                 },
-                    'us_naziv': {
-                                 'fnc': 'sys.f_usluga_g',
-                                 'cols': ['us_naziv'],
-                                 'chars': 1,
-                                 'table': {
-                                           'name': 'usluga',
-                                           'cols': [],
-                                          },
-                                },
                     'vz_sasija': {
                                   'fnc': 'sif.f_c_marka_oznaka',
                                   'cols': ['text'],
@@ -172,7 +163,7 @@ class predmeti:
     for vcl_col, dcl_col in self.col_fnc.items():
       vcl_table = dcl_col.get('table', None)
       if vcl_table:
-        self.col_fnc[vcl_col]['table']['cols'] = self.db.tbl_cols(self.col_fnc[vcl_col]['table']['name'])[0]
+        self.col_fnc[vcl_col]['table']['cols'] = [{'name': dc['name'], 'isnotnull': dc['isnotnull']} for dc in self.db.tbl_cols(self.col_fnc[vcl_col]['table']['name'])[0]]
 
   #= METHOD ==============================
   # res2dct

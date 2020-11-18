@@ -184,7 +184,15 @@ class pgdb:
       dxl_cols = cols4table(pc_table)
       for rec in crsr:
         vcl_col_name = rec['column_name']
-        vcl_col_type = rec['column_type'][0]
+        if rec['column_type']=='text':
+          if 'datum' in vcl_col_name:
+            vcl_col_type = 'd'
+          else:
+            vcl_col_type = 'c'
+        elif rec['column_type']=='double precision':
+          vcl_col_type = 'n'
+        else:
+          vcl_col_type = rec['column_type'][0]
         if rec['column_is_pk']=='Y':
           lcl_pk_cols.append(vcl_col_name)
         lcl_cols.append(

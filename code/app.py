@@ -11,29 +11,24 @@ from resources.base_resource import generate_description, generate_resource
 from resources.forms import Forms
 from resources.login import Login
 from resources.predmeti import Predmeti
+from resources.reports import Reports
 from resources.tables import Tables
 
 # from resources.user import UserLogin, UserRegister, Users
 
 app = Flask(__name__)
 app.secret_key = "asdfqwer"
-app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
+app.config['JWT_SECRET_KEY'] = 'asdfqwer-qwerasdf'  # Change this!
 api = Api(app)
-cors = CORS(app)  #TODO add fixed origin for production
+cors = CORS(app, supports_credentials=True)
 
 jwt = JWTManager(app)
-
-
-@jwt.user_claims_loader
-def add_claims_to_access_token(identity):
-  print(identity, "claims")
-  return { 'hello': identity, 'foo': ['bar', 'baz'] }
-
 
 api.add_resource(Tables, "/tables")
 api.add_resource(Forms, "/forms")
 api.add_resource(Predmeti, "/predmeti")
 api.add_resource(Login, "/login")
+api.add_resource(Reports, "/report")
 for table in db.tbls():
   try:
     url = f"/{table['table_name']}"
@@ -43,8 +38,8 @@ for table in db.tbls():
     api.add_resource(generate_description(table["table_name"]),
                      f"{url}/description",
                      resource_class_kwargs={ 'table': table["table_name"] })
-  except Exception:
-    print(Exception.__class__, url)
+  except Exception as e:
+    print(e.__class__, url, e)
 
 if __name__ == '__main__':
   app.run(port=5001, debug=True)

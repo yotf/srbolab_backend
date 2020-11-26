@@ -13,11 +13,12 @@ import subprocess as sbp
 from box import SBox as dd
 
 # local
-from .config import sysdf, getpgdb
+from .config import getpgdb, sysdf
 
 #---------------------------------------
 # global variables
 #---------------------------------------
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
@@ -34,13 +35,18 @@ class report:
 
     self.conn = getpgdb()
     self.cmd_pfx = [sysdf.java, '-jar', sysdf.jasperstarter, 'pr']
-    self.cmd_sfx = ['-r', '-f', 'pdf', '-t', 'generic', '-H', self.conn.host, '--db-port',  self.conn.port, '-n', self.conn.database, '-u', self.conn.user, '-p', self.conn.password, '--db-driver', 'org.postgresql.Driver', '--db-url', 'jdbc:postgresql://{}:{}/{}'.format(self.conn.host, self.conn.port, self.conn.database)]
+    self.cmd_sfx = [
+        '-r', '-f', 'pdf', '-t', 'generic', '-H', self.conn.host, '--db-port',
+        self.conn.port, '-n', self.conn.database, '-u', self.conn.user, '-p',
+        self.conn.password, '--db-driver', 'org.postgresql.Driver', '--db-url',
+        'jdbc:postgresql://{}:{}/{}'.format(self.conn.host, self.conn.port,
+                                            self.conn.database)
+    ]
 
   #= METHOD ==============================
   # run
   #=======================================
   def run(self, pc_UserName, pc_JRFile, pd_RepPrms={}):
-
     """  Generate PDF report file"""
 
     reps = dd({})
@@ -54,7 +60,7 @@ class report:
     if osp.exists(reps.jasper):
       if osp.exists(reps.pdf):
         os.remove(reps.pdf)
-      cmd = self.cmd_pfx+[reps.jasper, '-o', reps.pdfdir]+self.cmd_sfx
+      cmd = self.cmd_pfx + [reps.jasper, '-o', reps.pdfdir] + self.cmd_sfx
 
       if pd_RepPrms:
         cmd.append('-P')
@@ -64,7 +70,11 @@ class report:
           else:
             cmd.append('{}={}'.format(vcl_Prm, vxl_Value))
       try:
-        oxl_Cmd = sbp.Popen(' '.join(cmd), stdout=sbp.PIPE, stderr=sbp.PIPE, shell=True, universal_newlines=True)
+        oxl_Cmd = sbp.Popen(' '.join(cmd),
+                            stdout=sbp.PIPE,
+                            stderr=sbp.PIPE,
+                            shell=True,
+                            universal_newlines=True)
       except:
         raise
       else:
@@ -79,10 +89,12 @@ class report:
 
     return reps.pdf
 
+
+report_service = report()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if __name__=='__main__':
+if __name__ == '__main__':
 
   pass
 

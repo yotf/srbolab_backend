@@ -2,7 +2,7 @@ import json
 import types
 
 from flask import request
-from flask_jwt_extended import get_jwt_claims, get_jwt_identity
+from flask_jwt_extended import get_jwt_claims, get_jwt_identity, jwt_required
 from flask_restful import Resource, reqparse
 from procedures.table_wrapper import TableWrapper
 
@@ -35,10 +35,10 @@ class BaseResource(Resource):
     self.item_name = table
     self.primary_keys = self.service.primarykey
 
+  @jwt_required
   def get(self):
     jwt_identity = get_jwt_identity()
-    jwt_claims = get_jwt_claims()
-    print(jwt_identity, json.dumps(jwt_identity), jwt_claims)
+    print(jwt_identity, json.dumps(jwt_identity))
     request_args = [
         col_name for col_name in [col['name'] for col in self.service.cols]
     ]
@@ -50,12 +50,6 @@ class BaseResource(Resource):
     try:
       if len(query_params.items()):
         items = self.service.tbl_get(query_params)
-        # if not len(items):
-        #   return {
-        #       'message':
-        #       f"{self.item_name} with id '{json.dumps(query_params)}' does not exist"
-        #   }, 404
-        # else:
         return (items), 200
 
       items = self.service.tbl_get()
@@ -65,6 +59,7 @@ class BaseResource(Resource):
       print(f"failed to fetch {self.item_name}")
       return { 'message': f"failed to fetch {self.item_name}s"}, 500
 
+  @jwt_required
   def post(self):
     request_args = [
         col_name for col_name in [col['name'] for col in self.service.cols]
@@ -82,6 +77,7 @@ class BaseResource(Resource):
       print(e.__class__, e)
       return { 'message': f"failed to create {self.item_name}"}, 500
 
+  @jwt_required
   def put(self):
     request_args = [
         col_name for col_name in [col['name'] for col in self.service.cols]
@@ -97,6 +93,7 @@ class BaseResource(Resource):
       print(e.__class__, e)
       return { 'message': f"failed to update {self.item_name}"}, 500
 
+  @jwt_required
   def delete(self):
     item_id = { key: request.args.get(key) for key in self.primary_keys }
     try:
@@ -112,6 +109,7 @@ class ResourceDescription(Resource):
     self.service = TableWrapper(table)
     self.item_name = table
 
+  @jwt_required
   def get(self):
     try:
       return self.service.cols, 200

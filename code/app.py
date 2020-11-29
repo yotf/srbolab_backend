@@ -9,7 +9,7 @@ from procedures.application import application
 from procedures.table_wrapper import db
 from resources.base_resource import generate_description, generate_resource
 from resources.forms import Forms
-from resources.login import Login
+from resources.login import Login, Logout, Refresh
 from resources.predmeti import Predmeti
 from resources.reports import Reports
 from resources.tables import Tables
@@ -28,6 +28,8 @@ api.add_resource(Tables, "/tables")
 api.add_resource(Forms, "/forms")
 api.add_resource(Predmeti, "/predmeti")
 api.add_resource(Login, "/login")
+api.add_resource(Logout, "/logout")
+api.add_resource(Refresh, "/refresh")
 api.add_resource(Reports, "/report")
 for table in db.tbls():
   try:

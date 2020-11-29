@@ -38,9 +38,15 @@ class BaseResource(Resource):
   @jwt_required
   def get(self):
     jwt_identity = get_jwt_identity()
-    print(jwt_identity, json.dumps(jwt_identity))
     request_args = [
-        col_name for col_name in [col['name'] for col in self.service.cols]
+        col_name for col_name in [
+            col['name'] for col in
+            [*self.service.cols, {
+                "name": "limit"
+            }, {
+                "name": "offset"
+            }]
+        ]
     ]
     query_params = {
         key: request.args.get(key)

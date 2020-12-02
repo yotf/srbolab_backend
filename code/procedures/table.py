@@ -44,26 +44,25 @@ class table:
     self.type = dxl_tbl['table_type']
     self.cols, self.primarykey = self.db.tbl_cols(self.name)
     self.fnc = dd({})
-    for vcl_act in ('d', 'g', 'iu'):  # d - DELETE; g - SELECT ... (get); iu - INSERT/UPDATE
+    for vcl_act in (
+        'd', 'g', 'iu'):  # d - DELETE; g - SELECT ... (get); iu - INSERT/UPDATE
       self.fnc[vcl_act] = {
-                           'name': 'f_{}_{}'.format(self.name, vcl_act),
-                           'fullname': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
-                          }
+          'name': 'f_{}_{}'.format(self.name, vcl_act),
+          'fullname': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
+      }
 
   #= METHOD ==============================
   # res2dct
   #=======================================
   def res2dct(self, pn_res, pc_res):
-
     """  Results to dictionary"""
 
-    return {'rcod': pn_res, 'rmsg': pc_res}
+    return { 'rcod': pn_res, 'rmsg': pc_res }
 
   #= METHOD ==============================
   # prm2json
   #=======================================
   def prm2json(self, pd_row):
-
     """  Parameters to json"""
 
     return js.dumps(pd_row)
@@ -71,8 +70,7 @@ class table:
   #= METHOD ==============================
   # tbl_get
   #=======================================
-  def tbl_get(self, px_rec):
-
+  def tbl_get(self, px_rec={}):
     """  Get data; Returns list of all records fetched"""
 
     conn = self.db.connget()
@@ -94,7 +92,6 @@ class table:
   # tbl_iu
   #=======================================
   def tbl_iu(self, px_rec):
-
     """  Insert/Update data; Returns new table ID/number of records updated & message"""
 
     conn = self.db.connget()
@@ -107,7 +104,8 @@ class table:
       if vnl_res:
         vcl_res = self.db.connnotices(conn)
         conn.commit()
-    except (psycopg2.errors.UniqueViolation, psycopg2.errors.CheckViolation) as err:
+    except (psycopg2.errors.UniqueViolation,
+            psycopg2.errors.CheckViolation) as err:
       vcl_res = err.pgerror.splitlines()[0].split(':', 1)[1].strip()
     except:
       raise
@@ -121,7 +119,6 @@ class table:
   # tbl_insert
   #=======================================
   def tbl_insert(self, px_rec):
-
     """  Insert data; Returns new tbl_id & message"""
 
     return self.tbl_iu(px_rec)
@@ -130,7 +127,6 @@ class table:
   # tbl_update
   #=======================================
   def tbl_update(self, px_rec):
-
     """  Update data; Returns number of records updated & message"""
 
     return self.tbl_iu(px_rec)
@@ -139,7 +135,6 @@ class table:
   # tbl_copy
   #=======================================
   def tbl_copy(self, px_rec):
-
     """  Insert data; Returns new tbl_id & message"""
 
     return self.tbl_iu(px_rec)
@@ -148,7 +143,6 @@ class table:
   # tbl_delete
   #=======================================
   def tbl_delete(self, px_rec):
-
     """  Delete data; Returns number of records deleted & message"""
 
     conn = self.db.connget()
@@ -168,6 +162,7 @@ class table:
       self.db.connret(conn)
 
     return self.res2dct(vnl_res, vcl_res)
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code

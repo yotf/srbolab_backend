@@ -14,7 +14,6 @@ from procedures.table_wrapper import TableWrapper
 
 user_service = TableWrapper("v_korisnik")
 whitelist = set()
-users = user_service.tbl_get()
 
 
 class Login(Resource):

@@ -57,7 +57,7 @@ class table:
 
     """  Results to dictionary"""
 
-    return { 'rcod': pn_res, 'rmsg': pc_res }
+    return {'rcod': pn_res, 'rmsg': pc_res}
 
   #= METHOD ==============================
   # prm2json

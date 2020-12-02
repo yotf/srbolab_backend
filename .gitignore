@@ -147,3 +147,5 @@ cython_debug/
 .pwd
 /.project
 system.db
+
+.env

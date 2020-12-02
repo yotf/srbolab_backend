@@ -14,7 +14,7 @@ class Forms(Resource):
     try:
       user_identity = get_jwt_identity()
       role_id = user_service.tbl_get({ "kr_id": user_identity })[0]["arl_id"]
-      form_groups = application(db, user_identity).apps  #TODO
+      form_groups = application(db, user_identity).apps
       filtered_form_groups = [{
           **form_group, "forms":
           [form for form in form_group["forms"] if form["enabled"]]

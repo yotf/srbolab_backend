@@ -24,6 +24,7 @@ class Login(Resource):
 
     username = request.json.get('username', None)
     password = request.json.get('password', None)
+    ipAddress = request.headers.get("publicAddress") or ""
     if not username:
       return { "msg": "Missing username parameter"}, 400
     if not password:
@@ -32,10 +33,10 @@ class Login(Resource):
     user = user_service.tbl_get({ "kr_username": username })[0]
     #TODO change pass verification to sha256_cryp.verify(password, user["kr_passwor"])
     if username != user["kr_username"] or password != user["kr_password"]:
-      userLog(username, "login_failed")
+      userLog(username, "login_failed", ipAddress)
       return { "msg": "Bad username or password"}, 401
 
-    userLog(username, "login")
+    userLog(username, "login", ipAddress)
     access_token = create_access_token(identity=user["kr_id"])
     refresh_token = create_refresh_token(identity=user["kr_id"])
     new_jti = get_jti(access_token)
@@ -64,7 +65,8 @@ class Logout(Resource):
     user_identity = get_jwt_identity()
     username = user_service.tbl_get({ "kr_id":
                                       user_identity })[0]["kr_username"]
-    userLog(username, "logout")
+    ipAddress = request.headers.get("publicAddress") or ""
+    userLog(username, "logout", ipAddress)
     jti = get_raw_jwt()['jti']
     whitelist.remove(jti)
     return { "msg": "Successfully logged out"}, 200
@@ -81,7 +83,7 @@ def remove_jti_from_whitelist_async(jti):
   Timer(10, remove_jti_from_whitelist, (jti, )).start()
 
 
-def userLog(username, action):
+def userLog(username, action, ipAddress):
   now = datetime.datetime.now()
   date = now.strftime("%d.%m.%Y %H:%M:%S")
-  print(f'{date} {username} {action}')
+  print(f'{date} {ipAddress} {username} {action} ')

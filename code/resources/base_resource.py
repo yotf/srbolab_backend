@@ -2,6 +2,7 @@ import json
 import types
 
 from flask import request
+from flask_jwt_extended import get_jwt_claims, get_jwt_identity, jwt_required
 from flask_restful import Resource, reqparse
 from procedures.table_wrapper import TableWrapper
 
@@ -32,36 +33,42 @@ class BaseResource(Resource):
   def __init__(self, table):
     self.service = TableWrapper(table)
     self.item_name = table
-    self.primary_key = next(
-        filter(lambda col: print(col) or col["isprimarykey"],
-               self.service.cols))["name"]
+    self.primary_keys = self.service.primarykey
 
+  @jwt_required
   def get(self):
-    item_id = request.args.get('id')
+    jwt_identity = get_jwt_identity()
+    request_args = [
+        col_name for col_name in [
+            col['name'] for col in
+            [*self.service.cols, {
+                "name": "limit"
+            }, {
+                "name": "offset"
+            }]
+        ]
+    ]
+    query_params = {
+        key: request.args.get(key)
+        for key in request_args if request.args.get(key)
+    }
     items = self.service.tbl_get()
     try:
-      if item_id is not None:
-
-        item_id = int(item_id)
-        items = self.service.tbl_get(item_id)
-        if not len(items):
-          return {
-              'message': f"{self.item_name} with id '{item_id}' does not exist"
-          }, 404
-        else:
-          return (items[0]), 200
+      if len(query_params.items()):
+        items = self.service.tbl_get(query_params)
+        return (items), 200
 
       items = self.service.tbl_get()
       return items, 200
-    except Exception:
-      print(Exception.__class__)
+    except Exception as e:
+      print(e.__class__, e)
       print(f"failed to fetch {self.item_name}")
       return { 'message': f"failed to fetch {self.item_name}s"}, 500
 
+  @jwt_required
   def post(self):
     request_args = [
         col_name for col_name in [col['name'] for col in self.service.cols]
-        if col_name != self.primary_key
     ]
     parser = reqparse.RequestParser()
     [parser.add_argument(arg) for arg in request_args]
@@ -69,11 +76,14 @@ class BaseResource(Resource):
 
     try:
       new_item = self.service.tbl_insert(item)
-      item[self.primary_key] = new_item["rcod"]
+      item[self.primary_keys[0]] = new_item[
+          "rcod"]  #TODO fix primary key return
       return item, 200
-    except:
+    except Exception as e:
+      print(e.__class__, e)
       return { 'message': f"failed to create {self.item_name}"}, 500
 
+  @jwt_required
   def put(self):
     request_args = [
         col_name for col_name in [col['name'] for col in self.service.cols]
@@ -84,11 +94,14 @@ class BaseResource(Resource):
     try:
       update_result = self.service.tbl_update(item)
       return item, 200
-    except:
+    except Exception as e:
+      print(item)
+      print(e.__class__, e)
       return { 'message': f"failed to update {self.item_name}"}, 500
 
+  @jwt_required
   def delete(self):
-    item_id = request.args.get(self.primary_key)
+    item_id = { key: request.args.get(key) for key in self.primary_keys }
     try:
       self.service.tbl_delete(item_id)
       return { 'message': f"{self.item_name.capitalize()} deleted"}, 200
@@ -102,6 +115,7 @@ class ResourceDescription(Resource):
     self.service = TableWrapper(table)
     self.item_name = table
 
+  @jwt_required
   def get(self):
     try:
       return self.service.cols, 200

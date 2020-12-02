@@ -1,30 +1,36 @@
+import json
+
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_restful import Api
 
-from procedures.table_wrapper import db
 from procedures.application import application
+from procedures.table_wrapper import db
 from resources.base_resource import generate_description, generate_resource
-from resources.login import Login
-from resources.tables import Tables
 from resources.forms import Forms
-
-import json
+from resources.login import Login, Logout, Refresh
+from resources.predmeti import Predmeti
+from resources.reports import Reports
+from resources.tables import Tables
 
 # from resources.user import UserLogin, UserRegister, Users
 
 app = Flask(__name__)
 app.secret_key = "asdfqwer"
-app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
+app.config['JWT_SECRET_KEY'] = 'asdfqwer-qwerasdf'  # Change this!
 api = Api(app)
-cors = CORS(app)  #TODO add fixed origin for production
+cors = CORS(app, supports_credentials=True)
 
 jwt = JWTManager(app)
 
 api.add_resource(Tables, "/tables")
 api.add_resource(Forms, "/forms")
+api.add_resource(Predmeti, "/predmeti")
 api.add_resource(Login, "/login")
+api.add_resource(Logout, "/logout")
+api.add_resource(Refresh, "/refresh")
+api.add_resource(Reports, "/report")
 for table in db.tbls():
   try:
     url = f"/{table['table_name']}"
@@ -34,8 +40,8 @@ for table in db.tbls():
     api.add_resource(generate_description(table["table_name"]),
                      f"{url}/description",
                      resource_class_kwargs={ 'table': table["table_name"] })
-  except Exception:
-    print(Exception.__class__, url)
+  except Exception as e:
+    print(e.__class__, url, e)
 
 if __name__ == '__main__':
-  app.run(port=5000, debug=True)
+  app.run(port=5001, debug=True)

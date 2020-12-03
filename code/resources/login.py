@@ -4,12 +4,13 @@ from threading import Timer
 
 from flask import jsonify, request
 from flask_jwt_extended import (JWTManager, create_access_token,
-                                create_refresh_token, get_jti,
-                                get_jwt_identity, get_raw_jwt,
-                                jwt_refresh_token_required, jwt_required,
-                                set_access_cookies, set_refresh_cookies)
+                                create_refresh_token, get_jti, get_jwt_identity,
+                                get_raw_jwt, jwt_refresh_token_required,
+                                jwt_required, set_access_cookies,
+                                set_refresh_cookies)
 from flask_restful import Resource, reqparse
 from passlib.hash import sha256_crypt
+from jwt_init import jwt
 from procedures.table_wrapper import TableWrapper
 
 user_service = TableWrapper("v_korisnik")
@@ -86,3 +87,11 @@ def userLog(username, action, ipAddress):
   now = datetime.datetime.now()
   date = now.strftime("%d.%m.%Y %H:%M:%S")
   print(f'{date} {ipAddress} {username} {action} ')
+
+
+@jwt.token_in_blacklist_loader
+def check_token(token):
+  jti = token['jti']
+  print(jti)
+  print(jti in whitelist)
+  return jti not in whitelist

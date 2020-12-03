@@ -3,14 +3,14 @@ import os
 
 from flask import Flask
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
+from jwt_init import jwt
 from flask_restful import Api
 
 from procedures.application import application
 from procedures.table_wrapper import db
 from resources.base_resource import generate_description, generate_resource
 from resources.forms import Forms
-from resources.login import Login, Logout, Refresh
+from resources.login import Login, Logout, Refresh, whitelist
 from resources.predmeti import Predmeti
 from resources.reports import Reports
 from resources.tables import Tables
@@ -23,7 +23,7 @@ app = Flask(__name__)
 api = Api(app, "/api")
 cors = CORS(app, supports_credentials=True)
 
-jwt = JWTManager(app)
+jwt.init_app(app)
 app.config.from_pyfile('config.py')
 
 api.add_resource(Forms, "/forms")

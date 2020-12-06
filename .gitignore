@@ -148,4 +148,5 @@ cython_debug/
 /.project
 system.db
 
-# .env
+.env
+.env_prod

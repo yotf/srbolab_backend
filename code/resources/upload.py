@@ -60,16 +60,16 @@ class Upload(Resource):
 
 class Images(Resource):
   def get(self):
-    try:
-      pr_id = request.args.get("pr_id")
-      images = {
-          "slike": get_images(pr_id, "slike"),
-          "doc": get_images(pr_id, "doc")
-      }
-      return images, 200
-    except Exception as e:
-      print(e.__class__, e)
-      return { 'message': 'failed to retrive image files'}, 500
+    # try:
+    pr_id = request.args.get("pr_id")
+    images = {
+        "slike": get_images(pr_id, "slike"),
+        "doc": get_images(pr_id, "doc")
+    }
+    return images, 200
+    # except Exception as e:
+    #   print(e.__class__, e)
+    #   return { 'message': 'failed to retrive image files'}, 500
 
   def delete(self):
     try:

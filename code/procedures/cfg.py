@@ -10,8 +10,8 @@ import sqlite3 as sqll
 
 # site-packages
 from box import SBox as dd
-from config import (DOCS_PATH, IMGS_PATH, JASPER_PATH, JAVA_PATH, OCR_PATH,
-                    REPORTS_PATH)
+from config import (DB_PASSWORD, DOCS_PATH, IMGS_PATH, JASPER_PATH, JAVA_PATH,
+                    OCR_PATH, REPORTS_PATH)
 
 #---------------------------------------
 # global variables
@@ -84,16 +84,7 @@ def getpgdb(pi_db_id=0):
 def getpwd():
   """  Get password from file"""
 
-  vcl_pwd = None
-  try:
-    with open(osp.join(osp.dirname(__file__), '.pwd'), 'r') as f:
-      vcl_pwd = f.read().strip()
-  except FileNotFoundError:
-    print('Nema fajla sa lozinkom!')
-  except:
-    raise
-
-  return vcl_pwd
+  return DB_PASSWORD
 
 
 #= FUNCTION ============================

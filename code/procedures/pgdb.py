@@ -12,6 +12,7 @@ import psycopg2
 import psycopg2.extras
 from psycopg2 import pool
 
+from . import util as utl
 # local
 from .cfg import cols4table, getpwd
 
@@ -41,7 +42,7 @@ class pgdb:
     if pc_password:
       vcl_pwd = pc_password
     else:
-      vcl_pwd = self.getpwd()
+      vcl_pwd = getpwd()
     self.dsn = 'user={} password={} host={} port={} dbname={}'.format(
         pc_user, vcl_pwd, pc_host, pn_port, pc_dbname)
     self.createconnpool()
@@ -54,14 +55,6 @@ class pgdb:
 
     if self.connpool:
       self.connpool.closeall()
-
-  #= METHOD ==============================
-  # getpwd
-  #=======================================
-  def getpwd(self):
-    """  Get password from file"""
-
-    return getpwd()
 
   #= METHOD ==============================
   # createconnpool
@@ -290,6 +283,34 @@ class pgdb:
       self.connret(conn)
 
     return ldl_apps
+
+  #= METHOD ==============================
+  # user_login
+  #=======================================
+  def user_login(self, px_rec={}):
+    """  Get application forms for user"""
+
+    vil_kr_id = -900
+    conn = self.connget()
+    crsr = conn.cursor()
+    try:
+      crsr.callproc('adm.f_adm_login', [utl.py2json(px_rec)])
+      vil_kr_id = crsr.fetchone()['f_adm_login']
+      """
+      vil_kr_id:
+         >=0 -- ok
+         -100 -- invalid username or password
+         -200 -- user is not active
+         -900 -- unknown error
+      """
+
+    except:
+      raise
+    finally:
+      crsr.close()
+      self.connret(conn)
+
+    return vil_kr_id
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

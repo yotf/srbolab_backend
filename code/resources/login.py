@@ -11,7 +11,7 @@ from flask_jwt_extended import (JWTManager, create_access_token,
 from flask_restful import Resource, reqparse
 from jwt_init import jwt
 from passlib.hash import sha256_crypt
-from procedures.table_wrapper import TableWrapper
+from procedures.table_wrapper import TableWrapper, db
 
 user_service = TableWrapper("v_korisnik")
 whitelist = set()
@@ -29,16 +29,21 @@ class Login(Resource):
       return { "msg": "Missing username parameter"}, 400
     if not password:
       return { "msg": "Missing password parameter"}, 400
-
-    user = user_service.tbl_get({ "kr_username": username })[0]
-    #TODO change pass verification to sha256_cryp.verify(password, user["kr_passwor"])
-    if username != user["kr_username"] or password != user["kr_password"]:
+    loginStatus = db.user_login({
+        "kr_username": username,
+        "kr_password": password
+    })
+    if loginStatus == -100:
       userLog(username, "login_failed", ipAddress)
-      return { "msg": "Bad username or password"}, 401
+      return { "msg": "Pogrešno korisničko ime ili šifra"}, 401
+    elif loginStatus == -200:
+      return { "msg": "Korsnik nije aktivan"}, 401
+    elif loginStatus == -900:
+      return { "msg": "Došlo je do greške"}, 401
 
     userLog(username, "login", ipAddress)
-    access_token = create_access_token(identity=user["kr_id"])
-    refresh_token = create_refresh_token(identity=user["kr_id"])
+    access_token = create_access_token(identity=loginStatus)
+    refresh_token = create_refresh_token(identity=loginStatus)
     new_jti = get_jti(access_token)
     whitelist.add(new_jti)
     return { 'access_token': access_token, "refresh_token": refresh_token }, 200

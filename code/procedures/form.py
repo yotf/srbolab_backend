@@ -175,10 +175,10 @@ class predmeti:
                 'cols': [],
             },
         },
-        'mto_oznaka': {
+        'mt_oznaka': {
             'fnc':
             'sif.f_model_verzija_g',
-            'cols': ['mto_oznaka'],
+            'cols': ['mt_oznaka'],
             'chars':
             1,
             'fnc1':

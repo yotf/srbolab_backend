@@ -35,13 +35,7 @@ class report:
 
     self.conn = getpgdb()
     self.cmd_pfx = [sysdf.java, '-jar', sysdf.jasperstarter, 'pr']
-    self.cmd_sfx = [
-        '-r', '-f', 'pdf', '-t', 'generic', '-H', self.conn.host, '--db-port',
-        self.conn.port, '-n', self.conn.database, '-u', self.conn.user, '-p',
-        self.conn.password, '--db-driver', 'org.postgresql.Driver', '--db-url',
-        'jdbc:postgresql://{}:{}/{}'.format(self.conn.host, self.conn.port,
-                                            self.conn.database)
-    ]
+    self.cmd_sfx = ['-r', '-f', 'pdf', '-t', 'generic', '-H', self.conn.host, '--db-port', self.conn.port, '-n', self.conn.database, '-u', self.conn.user, '-p', self.conn.password, '--db-driver', 'org.postgresql.Driver', '--db-url', 'jdbc:postgresql://{}:{}/{}'.format(self.conn.host, self.conn.port, self.conn.database)]
 
   #= METHOD ==============================
   # run

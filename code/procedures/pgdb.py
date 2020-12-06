@@ -276,6 +276,34 @@ class pgdb:
 
     return ldl_apps
 
+  #= METHOD ==============================
+  # user_login
+  #=======================================
+  def user_login(self, px_rec={}):
+
+    """  Get application forms for user"""
+
+    vil_kr_id = -900
+    conn = self.connget()
+    crsr = conn.cursor()
+    try:
+      crsr.callproc('adm.f_adm_login', [utl.py2json(px_rec)])
+      vil_kr_id = crsr.fetchone()['f_adm_login']
+      """
+      vil_kr_id:
+         >=0 -- ok
+         -100 -- invalid username or password
+         -200 -- user is not active
+         -900 -- unknown error
+      """
+
+    except:
+      raise
+    finally:
+      crsr.close()
+      self.connret(conn)
+
+    return vil_kr_id
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code

@@ -92,7 +92,7 @@ class predmeti:
                                   'chars': 1,
                                   },
                     'vzdo_oznaka': {
-                                    'fnc': 'sif.sif.f_v_vzv_vzdo_g',
+                                    'fnc': 'sif.f_v_vzv_vzdo_g',
                                     'cols': ['vzv_id', 'vzdo_oznaka'],
                                     'chars': 1,
                                    },

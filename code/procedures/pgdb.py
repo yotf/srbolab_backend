@@ -19,7 +19,6 @@ from .cfg import cols4table, getpwd
 # global variables
 #---------------------------------------
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,19 +30,13 @@ class pgdb:
   #= METHOD ==============================
   # __init__
   #=======================================
-  def __init__(self,
-               pc_password=None,
-               pc_user='postgres',
-               pc_host='localhost',
-               pn_port=5432,
-               pc_dbname='srbolab'):
+  def __init__(self, pc_password=None, pc_user='postgres', pc_host='localhost', pn_port=5432, pc_dbname='srbolab'):
 
     if pc_password:
       vcl_pwd = pc_password
     else:
-      vcl_pwd = self.getpwd()
-    self.dsn = 'user={} password={} host={} port={} dbname={}'.format(
-        pc_user, vcl_pwd, pc_host, pn_port, pc_dbname)
+      vcl_pwd = getpwd()
+    self.dsn = 'user={} password={} host={} port={} dbname={}'.format(pc_user, vcl_pwd, pc_host, pn_port, pc_dbname)
     self.createconnpool()
 
   #= METHOD ==============================
@@ -54,14 +47,6 @@ class pgdb:
 
     if self.connpool:
       self.connpool.closeall()
-
-  #= METHOD ==============================
-  # getpwd
-  #=======================================
-  def getpwd(self):
-    """  Get password from file"""
-
-    return getpwd()
 
   #= METHOD ==============================
   # createconnpool

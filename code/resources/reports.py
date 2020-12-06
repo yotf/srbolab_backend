@@ -30,7 +30,6 @@ class Reports(Resource):
       user_identity = get_jwt_identity()
       username = user_service.tbl_get({ "kr_id":
                                         user_identity })[0]["kr_username"]
-      username = "asd"
       file_path = report_service.run(username, body["type"],
                                      eval(body["values"]))
 

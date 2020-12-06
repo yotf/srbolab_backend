@@ -3,12 +3,13 @@ import os
 
 from flask import Flask
 from flask_cors import CORS
-from jwt_init import jwt
 from flask_restful import Api
 
+from jwt_init import jwt
 from procedures.application import application
 from procedures.table_wrapper import db
-from resources.base_resource import generate_description, generate_resource
+from resources.base_resource import (generate_copy, generate_description,
+                                     generate_resource)
 from resources.forms import Forms
 from resources.login import Login, Logout, Refresh, whitelist
 from resources.predmeti import Predmeti
@@ -41,9 +42,15 @@ for table in db.tbls():
     api.add_resource(generate_resource(table["table_name"]),
                      url,
                      resource_class_kwargs={ 'table': table["table_name"] })
+
     api.add_resource(generate_description(table["table_name"]),
                      f"{url}/description",
                      resource_class_kwargs={ 'table': table["table_name"] })
+
+    api.add_resource(generate_copy(table["table_name"]),
+                     f"{url}/copy",
+                     resource_class_kwargs={ 'table': table["table_name"] })
+
   except Exception as e:
     print(e.__class__, url, e)
 

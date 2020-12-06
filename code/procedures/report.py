@@ -11,13 +11,14 @@ import os.path as osp
 # site-packages
 from box import SBox as dd
 
-# local
-from .config import sysdf, getpgdb
 from . import util as utl
+# local
+from .cfg import getpgdb, sysdf
 
 #---------------------------------------
 # global variables
 #---------------------------------------
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
@@ -34,13 +35,18 @@ class report:
 
     self.conn = getpgdb()
     self.cmd_pfx = [sysdf.java, '-jar', sysdf.jasperstarter, 'pr']
-    self.cmd_sfx = ['-r', '-f', 'pdf', '-t', 'generic', '-H', self.conn.host, '--db-port',  self.conn.port, '-n', self.conn.database, '-u', self.conn.user, '-p', self.conn.password, '--db-driver', 'org.postgresql.Driver', '--db-url', 'jdbc:postgresql://{}:{}/{}'.format(self.conn.host, self.conn.port, self.conn.database)]
+    self.cmd_sfx = [
+        '-r', '-f', 'pdf', '-t', 'generic', '-H', self.conn.host, '--db-port',
+        self.conn.port, '-n', self.conn.database, '-u', self.conn.user, '-p',
+        self.conn.password, '--db-driver', 'org.postgresql.Driver', '--db-url',
+        'jdbc:postgresql://{}:{}/{}'.format(self.conn.host, self.conn.port,
+                                            self.conn.database)
+    ]
 
   #= METHOD ==============================
   # run
   #=======================================
   def run(self, pc_UserName, pc_JRFile, pd_RepPrms={}):
-
     """  Generate PDF report file"""
 
     reps = dd({})
@@ -51,7 +57,7 @@ class report:
     utl.dircheck(reps.pdfdir)
     if osp.exists(reps.jasper):
       utl.filedelete(reps.pdf)
-      cmd = self.cmd_pfx+[reps.jasper, '-o', reps.pdfdir]+self.cmd_sfx
+      cmd = self.cmd_pfx + [reps.jasper, '-o', reps.pdfdir] + self.cmd_sfx
       if pd_RepPrms:
         cmd.append('-P')
         for vcl_Prm, vxl_Value in pd_RepPrms.items():
@@ -70,10 +76,11 @@ class report:
 
     return reps.pdf
 
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if __name__=='__main__':
+if __name__ == '__main__':
 
   pass
 

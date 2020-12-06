@@ -3,14 +3,12 @@ import uuid
 from pathlib import Path
 
 import filetype
+from config import DATA_PATH, FRONTEND_IMGS_PATH
 from flask import request
 from flask_jwt_extended import jwt_required
 from flask_restful import Resource, reqparse
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
-
-data_path = "/home/p/projects/srbolab/data/"
-frontend_resource_path = "/home/p/projects/srbolab/react_app/public/imgs/"
 
 
 class Upload(Resource):
@@ -30,8 +28,8 @@ class Upload(Resource):
       pr_id = args.pr_id
       f_type = args.type if args.type == "slike" or args.type == "doc" else "slike"
       print(args.pr_id, args.type)
-      data_dir = f"{data_path}{pr_id}/{f_type}/"
-      fe_dir = f"{frontend_resource_path}{pr_id}/{f_type}/"
+      data_dir = f"{DATA_PATH}{pr_id}/{f_type}/"
+      fe_dir = f"{FRONTEND_IMGS_PATH}{pr_id}/{f_type}/"
       Path(data_dir).mkdir(parents=True, exist_ok=True)
       Path(fe_dir).mkdir(parents=True, exist_ok=True)
       for f in args.files:
@@ -93,7 +91,7 @@ class Images(Resource):
 
 
 def get_images(pr_id, doc_type):
-  fe_dir = frontend_resource_path + pr_id + "/" + doc_type
+  fe_dir = FRONTEND_IMGS_PATH + pr_id + "/" + doc_type
   Path(fe_dir).mkdir(parents=True, exist_ok=True)
   return [f"{pr_id}/{doc_type}/{filename}" for filename in os.listdir(fe_dir)]
 
@@ -104,8 +102,8 @@ def delete_image(pr_id, f_type, filename):
     return False
 
   try:
-    data_dir = f"{data_path}{pr_id}/{f_type}/{filename}"
-    fe_dir = f"{frontend_resource_path}{pr_id}/{f_type}/{filename}"
+    data_dir = f"{DATA_PATH}{pr_id}/{f_type}/{filename}"
+    fe_dir = f"{FRONTEND_IMGS_PATH}{pr_id}/{f_type}/{filename}"
     os.remove(data_dir)
     os.remove(fe_dir)
     return True

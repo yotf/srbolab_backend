@@ -7,26 +7,37 @@ from flask_restful import Resource, reqparse
 from procedures.table_wrapper import TableWrapper
 
 
-def initi_resource(self, table):
+def init_resource(self, table):
   super(self.__class__, self).__init__(table)
 
 
-def initi_description(self, table):
+def init_description(self, table):
+  super(self.__class__, self).__init__(table)
+
+
+def init_copy(self, table):
   super(self.__class__, self).__init__(table)
 
 
 def generate_resource(table):
   return type(table, (BaseResource, ), {
-      '__init__': initi_resource,
+      '__init__': init_resource,
       'table': table,
-  })  #TODO
+  })
 
 
 def generate_description(table):
   return type(table + "_dsc", (ResourceDescription, ), {
-      '__init__': initi_description,
+      '__init__': init_description,
       'table': table,
-  })  #TODO
+  })
+
+
+def generate_copy(table):
+  return type(table + "_copy", (Copy, ), {
+      '__init__': init_copy,
+      'table': table,
+  })
 
 
 class BaseResource(Resource):
@@ -76,9 +87,12 @@ class BaseResource(Resource):
 
     try:
       new_item = self.service.tbl_insert(item)
-      item[self.primary_keys[0]] = new_item[
-          "rcod"]  #TODO fix primary key return
-      return item, 200
+      if new_item["rcod"] and new_item["rcod"] > 0:
+        item[self.primary_keys[0]] = new_item[
+            "rcod"]  #TODO fix primary key return
+        return item, 200
+      else:
+        return item, 400
     except Exception as e:
       print(e.__class__, e)
       return { 'message': f"failed to create {self.item_name}"}, 500
@@ -93,7 +107,10 @@ class BaseResource(Resource):
     item = parser.parse_args()
     try:
       update_result = self.service.tbl_update(item)
-      return item, 200
+      if update_result["rcod"] and update_result["rcod"] > 0:
+        return item, 200
+      else:
+        return update_result, 400
     except Exception as e:
       print(item)
       print(e.__class__, e)
@@ -124,3 +141,28 @@ class ResourceDescription(Resource):
           'message':
           f"failed to fetch column descriptions for '{self.item_name}'"
       }
+
+
+class Copy(Resource):
+  def __init__(self, table):
+    self.service = TableWrapper(table)
+    self.item_name = table
+    self.primary_keys = self.service.primarykey
+
+  def post(self):
+    request_args = [
+        *self.primary_keys, *[key + "_to" for key in self.primary_keys]
+    ]
+    parser = reqparse.RequestParser()
+    [parser.add_argument(arg) for arg in request_args]
+    item = parser.parse_args()
+
+    try:
+      new_item = self.service.tbl_copy(item)
+      print(new_item)
+      item[self.primary_keys[0]] = new_item[
+          "rcod"]  #TODO fix primary key return
+      return item, 200
+    except Exception as e:
+      print(e.__class__, e)
+      return { 'message': f"failed to create {self.item_name}"}, 500

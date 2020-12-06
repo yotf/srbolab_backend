@@ -6,26 +6,30 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # system
 import os
-import re
 import os.path as osp
+import re
 
 # site-packages
 from box import SBox as dd
 
-# local
-from .config import sysdf, getpgdb
 from . import util as utl
+# local
+from .cfg import getpgdb, sysdf
 
 #---------------------------------------
 # global variables
 #---------------------------------------
-rexs = dd(
-          {
-           're0': re.compile('[\n]{2,}', re.I),
-           're1': re.compile('(Najveća dozvoljena)(\n)(Kategorija.+\n)(masa.+\n)', re.I),
-           're2': re.compile('^(Registarska oznaka|Vlasnik|Ime vlasnika|Adresa vlasnika|Marka|Tip|Godina proizvodnje|Model|Homologacijska oznaka|Broj osovina|Broj šasije|Zapremina motora|Broj motora|Masa|Snaga motora|Nosivost|Odnos snaga/masa|Najveća dozvoljena masa|Kategorija|Pogonsko gorivo|Broj mesta za sedenje|Broj mesta za stajanje):', re.I),
-          }
-         )
+rexs = dd({
+    're0':
+    re.compile('[\n]{2,}', re.I),
+    're1':
+    re.compile('(Najveća dozvoljena)(\n)(Kategorija.+\n)(masa.+\n)', re.I),
+    're2':
+    re.compile(
+        '^(Registarska oznaka|Vlasnik|Ime vlasnika|Adresa vlasnika|Marka|Tip|Godina proizvodnje|Model|Homologacijska oznaka|Broj osovina|Broj šasije|Zapremina motora|Broj motora|Masa|Snaga motora|Nosivost|Odnos snaga/masa|Najveća dozvoljena masa|Kategorija|Pogonsko gorivo|Broj mesta za sedenje|Broj mesta za stajanje):',
+        re.I),
+})
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
@@ -74,7 +78,10 @@ class saobracajna:
 
     with open(pc_txtfile, 'r') as f:
       vcl_txt = f.read()
-    vcl_txt = '\n'.join([l for l in rexs.re1.sub(r'\1 \4\3', rexs.re0.sub(r'\n', vcl_txt)).rstrip().splitlines() if rexs.re2.match(l)])
+    vcl_txt = '\n'.join([
+        l for l in rexs.re1.sub(r'\1 \4\3', rexs.re0.sub(
+            r'\n', vcl_txt)).rstrip().splitlines() if rexs.re2.match(l)
+    ])
 
     return vcl_txt
 
@@ -99,10 +106,11 @@ class saobracajna:
 
     return vxl_res
 
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if __name__=='__main__':
+if __name__ == '__main__':
 
   pass
 

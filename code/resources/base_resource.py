@@ -87,12 +87,13 @@ class BaseResource(Resource):
 
     try:
       new_item = self.service.tbl_insert(item)
+      print(new_item)
       if new_item["rcod"] and new_item["rcod"] > 0:
         item[self.primary_keys[0]] = new_item[
             "rcod"]  #TODO fix primary key return
         return item, 200
       else:
-        return item, 400
+        return new_item, 400
     except Exception as e:
       print(e.__class__, e)
       return { 'message': f"failed to create {self.item_name}"}, 500

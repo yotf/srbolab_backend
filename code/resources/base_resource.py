@@ -87,10 +87,11 @@ class BaseResource(Resource):
 
     try:
       new_item = self.service.tbl_insert(item)
-      print(new_item)
       if new_item["rcod"] and new_item["rcod"] > 0:
         item[self.primary_keys[0]] = new_item[
             "rcod"]  #TODO fix primary key return
+        if item.get("vz_osovine"):
+          del item["vz_osovine"]
         return item, 200
       else:
         return new_item, 400
@@ -106,12 +107,17 @@ class BaseResource(Resource):
 
     parser = reqparse.RequestParser()
     [
-        parser.add_argument(arg, action="append" if arg == "vz_osovine" else "")
-        for arg in request_args
+        parser.add_argument(
+            col["name"],
+            type=int if col["type"] == "i" else str,
+            action="append" if col["name"] == "vz_osovine" else "")
+        for col in self.service.cols
     ]
     item = parser.parse_args()
-    print(json.dumps(item))
     update_result = self.service.tbl_update(item)
+    print(item.get("vz_osovine"))
+    if item.get("vz_osovine"):
+      del item["vz_osovine"]
     try:
       if update_result["rcod"] and update_result["rcod"] > 0:
         return item, 200

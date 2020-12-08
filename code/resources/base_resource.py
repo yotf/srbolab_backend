@@ -110,12 +110,13 @@ class BaseResource(Resource):
         parser.add_argument(
             col["name"],
             type=int if col["type"] == "i" else str,
-            action="append" if col["name"] == "vz_osovine" else "")
+        ) if col["name"] != "vz_osovine" else parser.add_argument(
+            "vz_osovine", type=list, location="json")
         for col in self.service.cols
     ]
     item = parser.parse_args()
+    print(json.dumps(item))
     update_result = self.service.tbl_update(item)
-    print(item.get("vz_osovine"))
     if item.get("vz_osovine"):
       del item["vz_osovine"]
     try:

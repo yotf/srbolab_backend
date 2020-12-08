@@ -56,7 +56,6 @@ class table:
   # res2dct
   #=======================================
   def res2dct(self, pn_res, pc_res):
-
     """  Results to dictionary"""
 
     return { 'rcod': pn_res, 'rmsg': pc_res }
@@ -65,7 +64,6 @@ class table:
   # tbl_get
   #=======================================
   def tbl_get(self, px_rec={}):
-
     """  Get data; Returns list of all records fetched"""
 
     conn = self.db.connget()

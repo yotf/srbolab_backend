@@ -107,7 +107,6 @@ class BaseResource(Resource):
     [parser.add_argument(arg) for arg in request_args]
     item = parser.parse_args()
     update_result = self.service.tbl_update(item)
-    print('{}'.format(update_result))
     try:
       if update_result["rcod"] and update_result["rcod"] > 0:
         return item, 200

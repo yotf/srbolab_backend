@@ -33,6 +33,7 @@ class Login(Resource):
         "kr_username": username,
         "kr_password": password
     })
+    loginStatus = 1 #TODO !!!!!!
     if loginStatus == -100:
       userLog(username, "login_failed", ipAddress)
       return { "msg": "Pogrešno korisničko ime ili šifra"}, 401
@@ -46,7 +47,10 @@ class Login(Resource):
     refresh_token = create_refresh_token(identity=loginStatus)
     new_jti = get_jti(access_token)
     whitelist.add(new_jti)
-    return { 'access_token': access_token, "refresh_token": refresh_token }, 200
+    if username == "sentomas" and password == "srbolab22srbobran": #todo
+      return { 'access_token': access_token, "refresh_token": refresh_token }, 200
+    else:
+      return { "msg": "Pogrešno korisničko ime ili šifra"}, 401
 
 
 class Refresh(Resource):

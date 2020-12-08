@@ -42,6 +42,7 @@ class Login(Resource):
       return { "msg": "Došlo je do greške"}, 401
 
     userLog(username, "login", ipAddress)
+    print(loginStatus, " %^^%^%^")
     access_token = create_access_token(identity=loginStatus)
     refresh_token = create_refresh_token(identity=loginStatus)
     new_jti = get_jti(access_token)

@@ -149,9 +149,9 @@ class pgdb:
       if pc_col_type == 'c':
         vxl_col_checkconst = pc_col_checkconst.split(',')
       elif pc_col_type == 'i':
-        vxl_col_checkconst = [int(n) for n in pc_col_checkconst.split(',')]
+        vxl_col_checkconst = [(n) for n in pc_col_checkconst.split(',')]
       elif pc_col_type == 'n':
-        vxl_col_checkconst = [float(n) for n in pc_col_checkconst.split(',')]
+        vxl_col_checkconst = [(n) for n in pc_col_checkconst.split(',')]
       elif pc_col_type == 'd':
         pass
       elif pc_col_type == 't':

@@ -101,11 +101,18 @@ class BaseResource(Resource):
   @jwt_required
   def put(self):
     request_args = [
-        col_name for col_name in [col['name'] for col in self.service.cols]
+        col_name for col_name in [col['name'] for col in [*self.service.cols]]
     ]
+    if self.item_name == "v_predmet":
+      request_args = [*request_args, "vz_osovine"]
+
     parser = reqparse.RequestParser()
-    [parser.add_argument(arg) for arg in request_args]
+    [
+        parser.add_argument(arg, action="append" if arg == "vz_osovine" else "")
+        for arg in request_args
+    ]
     item = parser.parse_args()
+    print(json.dumps(item["vz_osovine"]), item)
     update_result = self.service.tbl_update(item)
     print(update_result)
     try:

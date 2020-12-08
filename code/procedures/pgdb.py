@@ -12,9 +12,9 @@ import psycopg2
 import psycopg2.extras
 from psycopg2 import pool
 
-from . import util as utl
 # local
 from .cfg import cols4table, getpwd
+from . import util as utl
 
 #---------------------------------------
 # global variables
@@ -32,12 +32,7 @@ class pgdb:
   #= METHOD ==============================
   # __init__
   #=======================================
-  def __init__(self,
-               pc_password=None,
-               pc_user='postgres',
-               pc_host='localhost',
-               pn_port=5432,
-               pc_dbname='srbolab'):
+  def __init__(self, pc_password=None, pc_user='postgres', pc_host='localhost', pn_port=5432, pc_dbname='srbolab'):
 
     if pc_password:
       vcl_pwd = pc_password
@@ -51,6 +46,7 @@ class pgdb:
   # __del__
   #=======================================
   def __del__(self):
+
     """  Close connection pool"""
 
     if self.connpool:
@@ -60,11 +56,11 @@ class pgdb:
   # createconnpool
   #=======================================
   def createconnpool(self):
+
     """  Create connection pool"""
 
     try:
-      self.connpool = psycopg2.pool.SimpleConnectionPool(
-          1, 20, self.dsn, cursor_factory=psycopg2.extras.RealDictCursor)
+      self.connpool = psycopg2.pool.SimpleConnectionPool(1, 20, self.dsn, cursor_factory=psycopg2.extras.RealDictCursor)
     except (Exception, psycopg2.DatabaseError) as error:
       print('Error while connecting to PostgreSQL', error)
 
@@ -72,6 +68,7 @@ class pgdb:
   # connget
   #=======================================
   def connget(self):
+
     """  Get connection from connection pool"""
 
     return self.connpool.getconn()
@@ -80,6 +77,7 @@ class pgdb:
   # connret
   #=======================================
   def connret(self, po_conn):
+
     """  Return connection to connection pool"""
 
     self.connpool.putconn(po_conn)
@@ -88,6 +86,7 @@ class pgdb:
   # connnotices
   #=======================================
   def connnotices(self, po_conn):
+
     """  Return connection notice"""
 
     vcl_notice = ''
@@ -101,6 +100,7 @@ class pgdb:
   # tbls
   #=======================================
   def tbls(self, pc_table=None):
+
     """  Get tables"""
 
     ldl_tbls = []
@@ -124,15 +124,15 @@ class pgdb:
 
     vxl_col_default = pc_col_default
     if pc_col_default:
-      if pc_col_type == 'c':
+      if pc_col_type=='c':
         pass
-      elif pc_col_type == 'i':
+      elif pc_col_type=='i':
         vxl_col_default = int(vxl_col_default)
-      elif pc_col_type == 'n':
+      elif pc_col_type=='n':
         vxl_col_default = float(vxl_col_default)
-      elif pc_col_type == 'd':
+      elif pc_col_type=='d':
         pass
-      elif pc_col_type == 't':
+      elif pc_col_type=='t':
         pass
       else:
         pass
@@ -146,15 +146,21 @@ class pgdb:
 
     vxl_col_checkconst = None
     if pc_col_checkconst:
-      if pc_col_type == 'c':
+      if pc_col_type=='c':
         vxl_col_checkconst = pc_col_checkconst.split(',')
-      elif pc_col_type == 'i':
-        vxl_col_checkconst = [int(n) for n in pc_col_checkconst.split(',')]
-      elif pc_col_type == 'n':
-        vxl_col_checkconst = [float(n) for n in pc_col_checkconst.split(',')]
-      elif pc_col_type == 'd':
+      elif pc_col_type=='i':
+        try:
+          vxl_col_checkconst = [int(n) for n in pc_col_checkconst.split(',')]
+        except:
+          pass
+      elif pc_col_type=='n':
+        try:
+          vxl_col_checkconst = [float(n) for n in pc_col_checkconst.split(',')]
+        except:
+          pass
+      elif pc_col_type=='d':
         pass
-      elif pc_col_type == 't':
+      elif pc_col_type=='t':
         pass
       else:
         pass
@@ -165,6 +171,7 @@ class pgdb:
   # tbl_cols
   #=======================================
   def tbl_cols(self, pc_table):
+
     """  Get columns for table in schema"""
 
     conn = self.connget()
@@ -177,63 +184,42 @@ class pgdb:
       dxl_cols = cols4table(pc_table)
       for rec in crsr:
         vcl_col_name = rec['column_name']
-        if rec['column_type'] == 'text':
+        if rec['column_type']=='text':
           if 'datum' in vcl_col_name:
             vcl_col_type = 'd'
           else:
             vcl_col_type = 'c'
-        elif rec['column_type'] == 'double precision':
+        elif rec['column_type']=='double precision':
           vcl_col_type = 'n'
         else:
           vcl_col_type = rec['column_type'][0]
-        if rec['column_is_pk'] == 'Y':
+        if rec['column_is_pk']=='Y':
           lcl_pk_cols.append(vcl_col_name)
-        lcl_cols.append({
-            'name':
-            vcl_col_name,
-            'order':
-            rec['column_order'],
-            'type':
-            vcl_col_type,
-            'length':
-            rec['column_length'],
-            'decimal':
-            rec['column_dec'],
-            'isnotnull': (rec['column_is_nn'] == 'Y'),
-            'default':
-            self.col_default(rec['column_default'], vcl_col_type),
-            'checkconst':
-            self.col_checkconst(rec['column_check'], vcl_col_type),
-            'isprimarykey': (rec['column_is_pk'] == 'Y'),
-            'isforeignkey': (rec['column_is_fk'] == 'Y'),
-            'comment':
-            rec['column_comment'],
-            'parenttable':
-            rec['table_name_p'],
-            'parentcolumn':
-            rec['column_name_p'],
-            'label':
-            dxl_cols.get(vcl_col_name, {}).get('label', rec['column_comment']),
-            'tooltip':
-            dxl_cols.get(vcl_col_name, {}).get('tooltip',
-                                               rec['column_comment']),
-            'header':
-            dxl_cols.get(vcl_col_name, {}).get('header',
-                                               vcl_col_name.split('_', 1)[1]),
-            'show':
-            dxl_cols.get(vcl_col_name,
-                         {}).get('show', not vcl_col_name.endswith('_id')),
-            'edit':
-            dxl_cols.get(vcl_col_name,
-                         {}).get('edit', not vcl_col_name.endswith('_id')),
-            'fill':
-            dxl_cols.get(vcl_col_name,
-                         {}).get('fill', not vcl_col_name.endswith('_id')),
-            'pick':
-            dxl_cols.get(vcl_col_name, {}).get('pick', False),
-            'control':
-            dxl_cols.get(vcl_col_name, {}).get('control', 'text'),
-        })
+        lcl_cols.append(
+                        {
+                         'name': vcl_col_name,
+                         'order': rec['column_order'],
+                         'type': vcl_col_type,
+                         'length': rec['column_length'],
+                         'decimal': rec['column_dec'],
+                         'isnotnull': (rec['column_is_nn']=='Y'),
+                         'default': self.col_default(rec['column_default'], vcl_col_type),
+                         'checkconst': self.col_checkconst(rec['column_check'], vcl_col_type),
+                         'isprimarykey': (rec['column_is_pk']=='Y'),
+                         'isforeignkey': (rec['column_is_fk']=='Y'),
+                         'comment': rec['column_comment'],
+                         'parenttable': rec['table_name_p'],
+                         'parentcolumn': rec['column_name_p'],
+                         'label': dxl_cols.get(vcl_col_name, {}).get('label', rec['column_comment']),
+                         'tooltip': dxl_cols.get(vcl_col_name, {}).get('tooltip', rec['column_comment']),
+                         'header': dxl_cols.get(vcl_col_name, {}).get('header', vcl_col_name.split('_', 1)[1]),
+                         'show': dxl_cols.get(vcl_col_name, {}).get('show', not vcl_col_name.endswith('_id')),
+                         'edit': dxl_cols.get(vcl_col_name, {}).get('edit', not vcl_col_name.endswith('_id')),
+                         'fill': dxl_cols.get(vcl_col_name, {}).get('fill', not vcl_col_name.endswith('_id')),
+                         'pick': dxl_cols.get(vcl_col_name, {}).get('pick', False),
+                         'control': dxl_cols.get(vcl_col_name, {}).get('control', 'text'),
+                        }
+                       )
     except:
       raise
     finally:
@@ -246,13 +232,13 @@ class pgdb:
   # tbl_rec_cnt
   #=======================================
   def tbl_rec_cnt(self, pc_schema, pc_table):
+
     """  Get table record count"""
 
     conn = self.connget()
     crsr = conn.cursor()
     vil_reccount = 0
-    vcl_sql = """SELECT COUNT(*) AS rc
-  FROM {}.{};""".format(pc_schema, pc_table)
+    vcl_sql = """SELECT COUNT(*) AS rc FROM {}.{};""".format(pc_schema, pc_table)
     try:
       crsr.execute(vcl_sql, [pc_schema])
       vil_reccount = crsr.fetchone()['rc']
@@ -268,6 +254,7 @@ class pgdb:
   # user_forms
   #=======================================
   def user_forms(self, pi_kr_id):
+
     """  Get application forms for user"""
 
     ldl_apps = []
@@ -288,6 +275,7 @@ class pgdb:
   # user_login
   #=======================================
   def user_login(self, px_rec={}):
+
     """  Get application forms for user"""
 
     vil_kr_id = -900
@@ -316,7 +304,7 @@ class pgdb:
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if __name__ == '__main__':
+if __name__=='__main__':
 
   pass
 

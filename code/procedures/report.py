@@ -11,8 +11,8 @@ import os.path as osp
 # site-packages
 from box import SBox as dd
 
-from . import util as utl
 # local
+from . import util as utl
 from .cfg import getpgdb, sysdf
 
 #---------------------------------------
@@ -41,6 +41,7 @@ class report:
   # run
   #=======================================
   def run(self, pc_UserName, pc_JRFile, pd_RepPrms={}):
+
     """  Generate PDF report file"""
 
     reps = dd({})
@@ -51,7 +52,7 @@ class report:
     utl.dircheck(reps.pdfdir)
     if osp.exists(reps.jasper):
       utl.filedelete(reps.pdf)
-      cmd = self.cmd_pfx + [reps.jasper, '-o', reps.pdfdir] + self.cmd_sfx
+      cmd = self.cmd_pfx+[reps.jasper, '-o', reps.pdfdir]+self.cmd_sfx
       if pd_RepPrms:
         cmd.append('-P')
         for vcl_Prm, vxl_Value in pd_RepPrms.items():

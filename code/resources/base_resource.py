@@ -67,9 +67,16 @@ class BaseResource(Resource):
     try:
       if len(query_params.items()):
         items = self.service.tbl_get(query_params)
+        if self.item_name == "v_korisnik":
+          for item in items:
+            item["kr_password"] = ""
         return (items), 200
 
       items = self.service.tbl_get()
+      print(self.item_name)
+      if self.item_name == "v_korisnik":
+        for item in items:
+          item["kr_password"] = ""
       return items, 200
     except Exception as e:
       print(e.__class__, e)
@@ -87,7 +94,8 @@ class BaseResource(Resource):
 
     try:
       new_item = self.service.tbl_insert(item)
-      if new_item["rcod"] and new_item["rcod"] > 0:
+      # if new_item["rcod"] and new_item["rcod"] >= 0:
+      if (new_item["rcod"] and new_item > 0) or new_item["rcod"] == 0:
         get_args = { key: item[key] for key in self.primary_keys }
         new_item = self.service.tbl_get(get_args)[0]
         return new_item, 200
@@ -113,10 +121,10 @@ class BaseResource(Resource):
         for col in self.service.cols
     ]
     item = parser.parse_args()
-    print(item)
     update_result = self.service.tbl_update(item)
     try:
-      if update_result["rcod"] and update_result["rcod"] > 0:
+      if (update_result["rcod"]
+          and update_result > 0) or update_result["rcod"] == 0:
         get_args = { key: item[key] for key in self.primary_keys }
         new_item = self.service.tbl_get(get_args)[0]
         return new_item, 200

@@ -101,7 +101,7 @@ class table:
       if vnl_res:
         vcl_res = self.db.connnotices(conn)
         conn.commit()
-    except (psycopg2.errors.UniqueViolation, psycopg2.errors.CheckViolation) as err:
+    except (psycopg2.errors.UniqueViolation, psycopg2.errors.CheckViolation, psycopg2.errors.NotNullViolation, psycopg2.errors.StringDataRightTruncation) as err:
       vcl_res = err.pgerror.splitlines()[0].split(':', 1)[1].strip()
     except:
       raise
@@ -156,13 +156,13 @@ class table:
         vcl_res = self.db.connnotices(conn)
         conn.commit()
     except Exception as err:
-      vcl_res = '{}'.format(err)
+      vcl_res = err.pgerror.splitlines()[0].split(':', 1)[1].strip()
+#      vcl_res = '{}'.format(err)
     finally:
       crsr.close()
       self.db.connret(conn)
 
     return self.res2dct(vnl_res, vcl_res)
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code

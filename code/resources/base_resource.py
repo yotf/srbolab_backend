@@ -88,11 +88,9 @@ class BaseResource(Resource):
     try:
       new_item = self.service.tbl_insert(item)
       if new_item["rcod"] and new_item["rcod"] > 0:
-        item[self.primary_keys[0]] = new_item[
-            "rcod"]  #TODO fix primary key return
-        if item.get("vz_osovine"):
-          del item["vz_osovine"]
-        return item, 200
+        get_args = { key: item[key] for key in self.primary_keys }
+        new_item = self.service.tbl_get(get_args)[0]
+        return new_item, 200
       else:
         return new_item, 400
     except Exception as e:
@@ -115,13 +113,13 @@ class BaseResource(Resource):
         for col in self.service.cols
     ]
     item = parser.parse_args()
-    print(json.dumps(item))
+    print(item)
     update_result = self.service.tbl_update(item)
-    if item.get("vz_osovine"):
-      del item["vz_osovine"]
     try:
       if update_result["rcod"] and update_result["rcod"] > 0:
-        return item, 200
+        get_args = { key: item[key] for key in self.primary_keys }
+        new_item = self.service.tbl_get(get_args)[0]
+        return new_item, 200
       else:
         return update_result, 400
     except Exception as e:
@@ -133,8 +131,11 @@ class BaseResource(Resource):
   def delete(self):
     item_id = { key: request.args.get(key) for key in self.primary_keys }
     try:
-      self.service.tbl_delete(item_id)
-      return { 'message': f"{self.item_name.capitalize()} deleted"}, 200
+      res = self.service.tbl_delete(item_id)
+      if res["rcod"] >= 0:
+        return { 'message': f"{self.item_name.capitalize()} deleted"}, 200
+      else:
+        return res, 400
     except:
       print(f'failed to delete self.item_name')
       return { 'message': f'failed to delete {self.item_name}'}, 500
@@ -172,7 +173,6 @@ class Copy(Resource):
 
     try:
       new_item = self.service.tbl_copy(item)
-      print(new_item)
       item[self.primary_keys[0]] = new_item[
           "rcod"]  #TODO fix primary key return
       return item, 200

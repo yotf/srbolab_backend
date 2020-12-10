@@ -1,4 +1,3 @@
-import asyncio
 import datetime
 from threading import Timer
 
@@ -10,8 +9,9 @@ from flask_jwt_extended import (JWTManager, create_access_token,
                                 set_access_cookies, set_refresh_cookies)
 from flask_restful import Resource, reqparse
 from jwt_init import jwt
-from passlib.hash import sha256_crypt
 from procedures.table_wrapper import TableWrapper, db
+
+from tokens import create_tokens_table, delete_token, get_tokens, save_token
 
 user_service = TableWrapper("v_korisnik")
 whitelist = set()
@@ -45,7 +45,8 @@ class Login(Resource):
     access_token = create_access_token(identity=loginStatus)
     refresh_token = create_refresh_token(identity=loginStatus)
     new_jti = get_jti(access_token)
-    whitelist.add(new_jti)
+    print(new_jti)
+    save_token(new_jti)
     return { 'access_token': access_token, "refresh_token": refresh_token }, 200
 
 
@@ -60,7 +61,7 @@ class Refresh(Resource):
     current_user = get_jwt_identity()
     access_token = create_access_token(identity=current_user)
     new_jti = get_jti(access_token)
-    whitelist.add(new_jti)
+    save_token(new_jti)
     return { 'access_token': access_token }, 200
 
 
@@ -73,19 +74,12 @@ class Logout(Resource):
     ipAddress = request.headers.get("publicAddress") or ""
     userLog(username, "logout", ipAddress)
     jti = get_raw_jwt()['jti']
-    whitelist.remove(jti)
+    delete_token(jti)
     return { "msg": "Successfully logged out"}, 200
 
 
-def remove_jti_from_whitelist(jti):
-  print(whitelist, jti)
-  if jti in whitelist:
-    whitelist.remove(jti)
-  print(whitelist)
-
-
 def remove_jti_from_whitelist_async(jti):
-  Timer(10, remove_jti_from_whitelist, (jti, )).start()
+  Timer(10, delete_token, (jti, )).start()
 
 
 def userLog(username, action, ipAddress):
@@ -97,4 +91,6 @@ def userLog(username, action, ipAddress):
 @jwt.token_in_blacklist_loader
 def check_token(token):
   jti = token['jti']
-  return jti not in whitelist
+  tokens = get_tokens(jti)
+  print(tokens, len(tokens))
+  return jti not in [token.get("token", "") for token in tokens]

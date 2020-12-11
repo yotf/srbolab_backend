@@ -1,9 +1,7 @@
-import datetime
+import sqlite3
+import time
 from functools import partial
 from threading import Timer
-
-import dateutil.parser as parser
-import sqlie3
 
 
 class Interval(object):
@@ -56,33 +54,32 @@ def create_tokens_table():
   con = db_connect()
   cursor = con.cursor()
   cursor.execute(
-      'CREATE TABLE IF NOT EXISTS tokens (token text PRIMARY KEY, date text);')
+      'CREATE TABLE IF NOT EXISTS tokens (jti text PRIMARY KEY, time integer);')
   con.commit()
   con.close()
 
 
-def get_tokens(token=""):
+def get_tokens(jti=""):
   con = db_connect()
   cursor = con.cursor()
-  if token:
-    cursor.execute(f'SELECT * FROM tokens WHERE token={token};')
+  if jti:
+    cursor.execute(f'SELECT * FROM tokens WHERE jti=? ;', (jti, ))
     rows = cursor.fetchall()
     cursor.close()
-    return [{ "token": row[0], "time": row[1] } for row in rows]
+    return [{ "jti": row[0], "time": row[1] } for row in rows]
   else:
     cursor.execute('SELECT * FROM tokens')
     rows = cursor.fetchall()
     cursor.close()
     con.close()
-    return [{ "token": row[0], "time": row[1] } for row in rows]
+    return [{ "jti": row[0], "time": row[1] } for row in rows]
 
 
-def save_token(token):
+def save_token(jti, time_stamp):
+  time = int(time_stamp)
   con = db_connect()
-  date = datetime.datetime.now().isoformat()
   cursor = con.cursor()
-  cursor.execute("INSERT INTO tokens VALUES (?, ?);", (token, date))
-  print(get_tokens())
+  cursor.execute("INSERT INTO tokens VALUES (?, ?);", (jti, time))
   con.commit()
   cursor.close()
   con.close()
@@ -91,10 +88,21 @@ def save_token(token):
 def delete_token(token):
   con = db_connect()
   cursor = con.cursor()
-  cursor.execute("DELETE FROM tokens WHERE token=?", (token, ))
+  cursor.execute("DELETE FROM tokens WHERE token=? ;", (token, ))
   con.commit()
   cursor.close()
   con.close()
 
 
-create_tokens_table()
+def delete_expired_tokens():
+  print("DELETING STALE TOKENS")
+  current_time = int(1607687754) or int(time.time())
+  con = db_connect()
+  cursor = con.cursor()
+  cursor.execute("DELETE FROM tokens WHERE time <= ? ;", (current_time, ))
+  con.commit()
+  cursor.close()
+  con.close()
+
+
+delete_stale_worker = Interval((60 * 60 * 2), delete_expired_tokens)

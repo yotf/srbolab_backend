@@ -30,8 +30,8 @@ class Upload(Resource):
       print(args.pr_id, args.type)
       data_dir = f"{DATA_PATH}{pr_id}/{f_type}/"
       fe_dir = f"{FRONTEND_IMGS_PATH}{pr_id}/{f_type}/"
-      Path(data_dir).mkdir(parents=True, exist_ok=True, mode=0o755)
-      Path(fe_dir).mkdir(parents=True, exist_ok=True, mode=0o755)
+      Path(data_dir).mkdir(parents=True, exist_ok=True, mode=0o777)
+      Path(fe_dir).mkdir(parents=True, exist_ok=True, mode=0o777)
       for f in args.files:
         isPdf = False
         isImage = filetype.is_image(f)
@@ -53,7 +53,7 @@ class Upload(Resource):
           f.stream.seek(0)
           f.save(link_path)
 
-      os.chmod(link_path, 0o644)
+      os.chmod(link_path, 0o666)
       return { f_type: get_images(pr_id, f_type) }, 200
     except Exception as e:
       print(e.__class__, e)
@@ -61,6 +61,7 @@ class Upload(Resource):
 
 
 class Images(Resource):
+  @jwt_required
   def get(self):
     # try:
     pr_id = request.args.get("pr_id")
@@ -73,6 +74,7 @@ class Images(Resource):
     #   print(e.__class__, e)
     #   return { 'message': 'failed to retrive image files'}, 500
 
+  @jwt_required
   def delete(self):
     try:
       pr_id = request.args.get("pr_id")

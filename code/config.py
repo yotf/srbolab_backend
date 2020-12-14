@@ -8,8 +8,7 @@ load_dotenv(path.join(basedir, '.env'))
 SECRET_KEY = environ.get('FEV_KLJUC') or urandom(32)
 JWT_SECRET_KEY = environ.get('FEV_KLJUC_TKN') or urandom(32)
 JWT_BLACKLIST_ENABLED = True
-JWT_REFRESH_TOKEN_EXPIRES = 2 * 60 * 60
-
+JWT_ACCESS_TOKEN_EXPIRES = 2 * 60 * 60
 if environ.get("FEV_ENV") == "develop":
   load_dotenv(path.join(basedir, ".env_develop"))
 else:

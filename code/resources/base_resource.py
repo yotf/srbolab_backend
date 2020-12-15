@@ -67,6 +67,9 @@ class BaseResource(Resource):
     try:
       if len(query_params.items()):
         items = self.service.tbl_get(query_params)
+        if self.item_name == "v_korisnik":
+          for item in items:
+            del item["kr_password"]
         return (items), 200
 
       items = self.service.tbl_get()

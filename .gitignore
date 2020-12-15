@@ -150,3 +150,4 @@ system.db
 
 .env
 .env_develop
+tokens.db

@@ -12,7 +12,6 @@ class Forms(Resource):
   @jwt_required
   def get(self):
     user_identity = get_jwt_identity()
-    print(user_identity, "SADWQDSAD")
     role_id = user_service.tbl_get({ "kr_id": user_identity })[0]["arl_id"]
     form_groups = application(db, user_identity).apps
     try:

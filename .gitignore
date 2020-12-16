@@ -148,6 +148,6 @@ cython_debug/
 /.project
 system.db
 
-.env
-code/.env_develop
-tokens.db
+*.env
+*.env_develop
+*tokens.db

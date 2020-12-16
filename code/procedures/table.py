@@ -46,7 +46,7 @@ class table:
     self.type = dxl_tbl['table_type']
     self.cols, self.primarykey = self.db.tbl_cols(self.name)
     self.fnc = dd({})
-    for vcl_act in ('d', 'g', 'iu'):  # d - DELETE; g - SELECT ... (get); iu - INSERT/UPDATE
+    for vcl_act in ('d', 'g', 'iu', 'c'):  # d - DELETE; g - SELECT ... (get); iu - INSERT/UPDATE; c - COUNT(*)
       self.fnc[vcl_act] = {
                            'name': 'f_{}_{}'.format(self.name, vcl_act),
                            'fullname': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
@@ -56,6 +56,7 @@ class table:
   # res2dct
   #=======================================
   def res2dct(self, pn_res, pc_res):
+
     """  Results to dictionary"""
 
     return { 'rcod': pn_res, 'rmsg': pc_res }
@@ -63,15 +64,23 @@ class table:
   #= METHOD ==============================
   # tbl_get
   #=======================================
-  def tbl_get(self, px_rec={}):
+  def tbl_get(self, px_rec={}, pb_count=False):
+
     """  Get data; Returns list of all records fetched"""
 
     conn = self.db.connget()
     crsr = conn.cursor()
     vxl_res = None
     try:
+      print('!!! {}'.format(utl.py2json(px_rec)))
       crsr.callproc(self.fnc.g.fullname, [utl.py2json(px_rec)])
       vxl_res = crsr.fetchall()
+      if pb_count:
+        pass
+      try:
+        print('!!! {}\n!!! count: {}\n'.format(utl.py2json(vxl_res[0], 2), len(vxl_res)))
+      except:
+        pass
     except:
       raise
     finally:
@@ -93,7 +102,7 @@ class table:
     vnl_res = -1
     vcl_res = None
     try:
-#      print('{}'.format(px_rec))
+      print('{}'.format(px_rec))
       crsr.callproc(self.fnc.iu.fullname, [utl.py2json(px_rec)])
       vnl_res = crsr.fetchone()[self.fnc.iu.name]
       if vnl_res is None:

@@ -24,11 +24,11 @@ from box import SBox as dd
 #= FUNCTION ============================
 # py2json
 #=======================================
-def py2json(px_py):
+def py2json(px_py, px_indent=None):
 
   """  py to json"""
 
-  return js.dumps(px_py)
+  return js.dumps(px_py, indent=px_indent, separators=(',', ':'))
 
 #= FUNCTION ============================
 # json2py

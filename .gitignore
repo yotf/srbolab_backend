@@ -149,5 +149,5 @@ cython_debug/
 system.db
 
 .env
-.env_develop
+code/.env_develop
 tokens.db

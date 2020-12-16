@@ -11,7 +11,7 @@ from procedures.table_wrapper import db
 from resources.base_resource import (generate_copy, generate_description,
                                      generate_resource)
 from resources.forms import Forms
-from resources.login import Login, Logout, Refresh, whitelist
+from resources.login import Login, Logout, Refresh
 from resources.predmeti import Predmeti
 from resources.reports import Reports
 from resources.tables import Tables

@@ -2,14 +2,17 @@ import json
 import types
 
 from flask import request
+from flask_jwt_extended import jwt_required
 from flask_restful import Resource, reqparse
 from procedures.table_wrapper import predmeti_service
 
 
 class Predmeti(Resource):
+  @jwt_required
   def get(self):
     return predmeti_service.col_fnc
 
+  @jwt_required
   def post(self):
     # try:
     parser = reqparse.RequestParser()

@@ -135,7 +135,7 @@ class BaseResource(Resource):
     update_result = self.service.tbl_update(item)
     try:
       if (update_result["rcod"]
-          and update_result > 0) or update_result["rcod"] == 0:
+          and update_result["rcod"] > 0) or update_result["rcod"] == 0:
         get_args = { key: item[key] for key in self.primary_keys }
         new_item = self.service.tbl_get(get_args)[0]
         return new_item, 200

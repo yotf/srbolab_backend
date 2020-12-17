@@ -23,13 +23,13 @@ class Predmeti(Resource):
     fnc_key = "fnc" if body["altFnc"] == "False" else "fnc1"
     filter_params = dct_type(body["values"])
 
-    if (not hasattr(filter_params, body["activeColumn"])):
-      filter_params[body["activeColumn"]] = ""
+    # if (not hasattr(filter_params, body["activeColumn"])):
+    #   filter_params[body["activeColumn"]] = ""
 
-      fnc = predmeti_service.col_fnc[body["activeColumn"]][fnc_key]
-      print(fnc, filter_params)
-      items = predmeti_service.data_get(fnc, filter_params)
-      return items, 200
+    fnc = predmeti_service.col_fnc[body["activeColumn"]][fnc_key]
+    print(fnc, filter_params)
+    items = predmeti_service.data_get(fnc, filter_params)
+    return items, 200
 
   # except Exception as e:
   #   print(e)

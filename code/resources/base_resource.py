@@ -59,21 +59,19 @@ class BaseResource(Resource):
             }]
         ]
     ]
+    if "kn_datum" in request_args:
+      request_args.append("kn_datum_to")
+
     query_params = {
         key: request.args.get(key)
         for key in request_args if request.args.get(key)
     }
-    items = self.service.tbl_get()
     try:
       if len(query_params.items()):
         items = self.service.tbl_get(query_params)
-        if self.item_name == "v_korisnik":
-          for item in items:
-            item["kr_password"] = ""
-        return (items), 200
+      else:
+        items = self.service.tbl_get()
 
-      items = self.service.tbl_get()
-      print(self.item_name)
       if self.item_name == "v_korisnik":
         for item in items:
           item["kr_password"] = ""

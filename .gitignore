@@ -151,5 +151,6 @@ system.db
 *.env
 *.env_develop
 .env_develop
+*.env_develop
 *tokens.db
 tokens.db

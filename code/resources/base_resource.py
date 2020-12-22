@@ -98,13 +98,6 @@ class BaseResource(Resource):
     ]
     item = parser.parse_args()
 
-    new_item = self.service.tbl_insert(item)
-    print(new_item)
-    get_args = {
-        key: item.get(key, None) if item.get(key, None) else new_item["rcod"]
-        for key in self.primary_keys
-    }
-    new_item = self.service.tbl_get(get_args)[0]
     try:
       new_item = self.service.tbl_insert(item)
       if (new_item["rcod"] and new_item["rcod"] > 0) or new_item["rcod"] == 0:

@@ -85,10 +85,10 @@ def save_token(jti, time_stamp):
   con.close()
 
 
-def delete_token(token):
+def delete_token(jti):
   con = db_connect()
   cursor = con.cursor()
-  cursor.execute("DELETE FROM tokens WHERE token=? ;", (token, ))
+  cursor.execute("DELETE FROM tokens WHERE jti=? ;", (jti, ))
   con.commit()
   cursor.close()
   con.close()
@@ -96,7 +96,7 @@ def delete_token(token):
 
 def delete_expired_tokens():
   print("DELETING STALE TOKENS")
-  current_time = int(1607687754) or int(time.time())
+  current_time = int(time.time())
   con = db_connect()
   cursor = con.cursor()
   cursor.execute("DELETE FROM tokens WHERE time <= ? ;", (current_time, ))

@@ -44,12 +44,13 @@ class Login(Resource):
     userLog(username, "login", ipAddress)
     access_token = create_access_token(identity=loginStatus)
     refresh_token = create_refresh_token(identity=loginStatus)
-    new_jti = get_jti(access_token)
-    raw_token = decode_token(access_token)
-    new_jti = raw_token["jti"]
-    exp_time = raw_token["exp"]
-    print(datetime.datetime.fromtimestamp(int(exp_time)))
-    save_token(new_jti, exp_time)
+    for token in [access_token, refresh_token]:
+      new_jti = get_jti(token)
+      raw_token = decode_token(token)
+      new_jti = raw_token["jti"]
+      exp_time = raw_token["exp"]
+      print(datetime.datetime.fromtimestamp(int(exp_time)))
+      save_token(new_jti, exp_time)
     return { 'access_token': access_token, "refresh_token": refresh_token }, 200
 
 
@@ -95,6 +96,7 @@ def userLog(username, action, ipAddress):
 
 @jwt.token_in_blacklist_loader
 def check_token(token):
+  print(token)
   jti = token['jti']
   tokens = get_tokens(jti)
   return not tokens or not len(tokens)

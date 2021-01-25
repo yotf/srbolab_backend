@@ -72,7 +72,6 @@ class table:
     crsr = conn.cursor()
     vxl_res = None
     try:
-#      print('!!! {} - {}'.format(self.fnc.g.fullname, utl.py2json(px_rec)))
       print('!!! {} - {}'.format(self.fnc.g.fullname, utl.py2json(px_rec)))
       crsr.callproc(self.fnc.g.fullname, [utl.py2json(px_rec)])
       vxl_res = crsr.fetchall()
@@ -80,7 +79,6 @@ class table:
         pass
       try:
         pass
-#        print('!!! {}\n!!! count: {}\n'.format(utl.py2json(vxl_res[0], 2), len(vxl_res)))
       except:
         pass
     except:
@@ -104,8 +102,6 @@ class table:
     vnl_res = -1
     vcl_res = None
     try:
-#      print('!!! {}\n{}'.format(self.fnc.iu.fullname, utl.py2json(px_rec, 2)))
-#      print('!!! {}\n{}'.format(self.fnc.iu.fullname, px_rec))
       crsr.callproc(self.fnc.iu.fullname, [utl.py2json(px_rec)])
       vnl_res = crsr.fetchone()[self.fnc.iu.name]
       if vnl_res is None:
@@ -116,7 +112,6 @@ class table:
     except (psycopg2.errors.UniqueViolation, psycopg2.errors.CheckViolation, psycopg2.errors.NotNullViolation, psycopg2.errors.StringDataRightTruncation) as err:
       vcl_res = err.pgerror.splitlines()[0].split(':', 1)[1].strip()
     except:
-#      print('{}'.format('!!! error'))
       raise
     finally:
       crsr.close()
@@ -170,7 +165,6 @@ class table:
         conn.commit()
     except Exception as err:
       vcl_res = err.pgerror.splitlines()[0].split(':', 1)[1].strip()
-#      vcl_res = '{}'.format(err)
     finally:
       crsr.close()
       self.db.connret(conn)

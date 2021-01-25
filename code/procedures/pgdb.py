@@ -292,6 +292,73 @@ class pgdb:
 
     return vil_kr_id
 
+  #= METHOD ==============================
+  # data4azs
+  #=======================================
+  def data4azs(self, px_rec, pi_opt=1):
+
+    conn = self.connget()
+    crsr = conn.cursor()
+    fnc = 'f_data4azs{}'.format(pi_opt)
+    try:
+      crsr.callproc('hmlg.{}'.format(fnc), [utl.py2json(px_rec)])
+      vcl_str = crsr.fetchone()[fnc]
+    except:
+      raise
+    finally:
+      crsr.close()
+      self.connret(conn)
+
+    return vcl_str
+
+  #= METHOD ==============================
+  # potvrda_b
+  #=======================================
+  def potvrda_b(self, pi_pr_id):
+
+    conn = self.connget()
+    crsr = conn.cursor()
+    vcl_sql = """SELECT t.*
+  FROM hmlg.f_r_potvrda_b(%(pr_id)s) t;"""
+    try:
+      crsr.execute(vcl_sql, {'pr_id': pi_pr_id})
+      vxl_res = crsr.fetchall()
+    except:
+      raise
+    finally:
+      crsr.close()
+      self.connret(conn)
+
+    return vxl_res
+
+  #= METHOD ==============================
+  # potvrda_f
+  #=======================================
+  def potvrda_f(self, pi_pr_id):
+
+    conn = self.connget()
+    crsr = conn.cursor()
+    vcl_sql = """SELECT t.vz_sert_hmlg_tip_lbl AS vz_sert_lbl,
+       t.vz_sert_hmlg_tip AS vz_sert
+  FROM hmlg.f_r_potvrda_f(%(pr_id)s) t
+UNION ALL
+SELECT t.vz_sert_emisija_lbl AS vz_sert_lbl,
+       t.vz_sert_emisija AS vz_sert
+  FROM hmlg.f_r_potvrda_f(%(pr_id)s) t
+UNION ALL
+SELECT t.vz_sert_buka_lbl AS vz_sert_lbl,
+       t.vz_sert_buka AS vz_sert
+  FROM hmlg.f_r_potvrda_f(%(pr_id)s) t;"""
+    try:
+      crsr.execute(vcl_sql, {'pr_id': pi_pr_id})
+      vxl_res = crsr.fetchall()
+    except:
+      raise
+    finally:
+      crsr.close()
+      self.connret(conn)
+
+    return vxl_res
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code

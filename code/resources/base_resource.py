@@ -92,10 +92,11 @@ class BaseResource(Resource):
         parser.add_argument(
             col["name"],
             type=int if col["type"] == "i" else str,
-        ) if col["name"] != "vz_osovine" else parser.add_argument(
-            "vz_osovine", type=list, location="json")
+        ) if col["name"] != "vz_osovine" and col["name"] != "vzs_osovine" else
+        parser.add_argument(col["name"], type=list, location="json")
         for col in self.service.cols
     ]
+
     item = parser.parse_args()
 
     try:
@@ -125,8 +126,8 @@ class BaseResource(Resource):
         parser.add_argument(
             col["name"],
             type=int if col["type"] == "i" else str,
-        ) if col["name"] != "vz_osovine" else parser.add_argument(
-            "vz_osovine", type=list, location="json")
+        ) if col["name"] != "vz_osovine" and col["name"] != "vzs_osovine" else
+        parser.add_argument(col["name"], type=list, location="json")
         for col in self.service.cols
     ]
     item = parser.parse_args()

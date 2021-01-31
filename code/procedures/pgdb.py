@@ -293,6 +293,26 @@ class pgdb:
     return vil_kr_id
 
   #= METHOD ==============================
+  # fir
+  #=======================================
+  def fir(self, pi_fir_id=10):
+
+    conn = self.connget()
+    crsr = conn.cursor()
+    vcl_sql = """SELECT fir.*
+  FROM public.f_firma(%(pr_id)s) fir;"""
+    try:
+      crsr.execute(vcl_sql, {'pr_id': pi_fir_id})
+      vxl_res = crsr.fetchall()[0]
+    except:
+      raise
+    finally:
+      crsr.close()
+      self.connret(conn)
+
+    return vxl_res
+
+  #= METHOD ==============================
   # data4azs
   #=======================================
   def data4azs(self, px_rec, pi_opt=1):
@@ -310,6 +330,41 @@ class pgdb:
       self.connret(conn)
 
     return vcl_str
+
+  #= METHOD ==============================
+  # potvrda_h
+  #=======================================
+  def potvrda_h(self, pi_pr_id):
+
+    conn = self.connget()
+    crsr = conn.cursor()
+    vcl_sql = """WITH
+  h AS
+   (
+    SELECT t.*
+      FROM hmlg.f_r_potvrda_h(%(pr_id)s) t
+  )
+SELECT h.pr_broj_lbl AS h_lbl,
+       h.pr_broj AS h_val
+  FROM h
+UNION ALL
+SELECT h.pr_datum_lbl AS h_lbl,
+       h.pr_datum AS h_val
+  FROM h
+UNION ALL
+SELECT h.pr_sasija_lbl AS h_lbl,
+       h.vz_sasija AS h_val
+  FROM h;"""
+    try:
+      crsr.execute(vcl_sql, {'pr_id': pi_pr_id})
+      vxl_res = crsr.fetchall()
+    except:
+      raise
+    finally:
+      crsr.close()
+      self.connret(conn)
+
+    return vxl_res
 
   #= METHOD ==============================
   # potvrda_b
@@ -338,20 +393,46 @@ class pgdb:
 
     conn = self.connget()
     crsr = conn.cursor()
-    vcl_sql = """SELECT t.vz_sert_hmlg_tip_lbl AS vz_sert_lbl,
-       t.vz_sert_hmlg_tip AS vz_sert
-  FROM hmlg.f_r_potvrda_f(%(pr_id)s) t
+    vcl_sql = """WITH
+  s AS
+   (
+    SELECT t.*
+      FROM hmlg.f_r_potvrda_f(%(pr_id)s) t
+   )
+SELECT s.vz_sert_hmlg_tip_lbl AS vz_sert_lbl,
+       s.vz_sert_hmlg_tip AS vz_sert
+  FROM s
 UNION ALL
-SELECT t.vz_sert_emisija_lbl AS vz_sert_lbl,
-       t.vz_sert_emisija AS vz_sert
-  FROM hmlg.f_r_potvrda_f(%(pr_id)s) t
+SELECT s.vz_sert_emisija_lbl AS vz_sert_lbl,
+       s.vz_sert_emisija AS vz_sert
+  FROM s
 UNION ALL
-SELECT t.vz_sert_buka_lbl AS vz_sert_lbl,
-       t.vz_sert_buka AS vz_sert
-  FROM hmlg.f_r_potvrda_f(%(pr_id)s) t;"""
+SELECT s.vz_sert_buka_lbl AS vz_sert_lbl,
+       s.vz_sert_buka AS vz_sert
+  FROM s;"""
     try:
       crsr.execute(vcl_sql, {'pr_id': pi_pr_id})
       vxl_res = crsr.fetchall()
+    except:
+      raise
+    finally:
+      crsr.close()
+      self.connret(conn)
+
+    return vxl_res
+
+  #= METHOD ==============================
+  # predmet_b
+  #=======================================
+  def predmet_b(self, pi_pr_id):
+
+    conn = self.connget()
+    crsr = conn.cursor()
+    vcl_sql = """SELECT t.*
+  FROM hmlg.f_r_predmet(%(pr_id)s) t;"""
+    try:
+      crsr.execute(vcl_sql, {'pr_id': pi_pr_id})
+      vxl_res = crsr.fetchall()[0]
     except:
       raise
     finally:

@@ -92,19 +92,13 @@ class BaseResource(Resource):
         parser.add_argument(
             col["name"],
             type=int if col["type"] == "i" else str,
-        ) if col["name"] != "vz_osovine" else parser.add_argument(
-            "vz_osovine", type=list, location="json")
+        ) if col["name"] != "vz_osovine" and col["name"] != "vzs_osovine" else
+        parser.add_argument(col["name"], type=list, location="json")
         for col in self.service.cols
     ]
+
     item = parser.parse_args()
 
-    new_item = self.service.tbl_insert(item)
-    print(new_item)
-    get_args = {
-        key: item.get(key, None) if item.get(key, None) else new_item["rcod"]
-        for key in self.primary_keys
-    }
-    new_item = self.service.tbl_get(get_args)[0]
     try:
       new_item = self.service.tbl_insert(item)
       if (new_item["rcod"] and new_item["rcod"] > 0) or new_item["rcod"] == 0:
@@ -132,8 +126,8 @@ class BaseResource(Resource):
         parser.add_argument(
             col["name"],
             type=int if col["type"] == "i" else str,
-        ) if col["name"] != "vz_osovine" else parser.add_argument(
-            "vz_osovine", type=list, location="json")
+        ) if col["name"] != "vz_osovine" and col["name"] != "vzs_osovine" else
+        parser.add_argument(col["name"], type=list, location="json")
         for col in self.service.cols
     ]
     item = parser.parse_args()

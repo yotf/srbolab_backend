@@ -1773,6 +1773,44 @@ class zapisnik_o(SimpleDocTemplateNP):
     self.build(self.DocElm, canvasmaker=HeaderFooterCanvas)
 
 #= CLASS ===============================
+# neusaglasenost
+#=======================================
+class neusaglasenost(SimpleDocTemplateNP):
+
+  #= METHOD ==============================
+  # __init__
+  #=======================================
+  def __init__(
+               self,
+               pi_PrId,
+               pc_PdfFile,
+               pl_PageSize=A4,
+               pb_showBoundary=0,
+               pn_topMargin=10*mm,
+               pn_bottomMargin=10*mm,
+               pn_leftMargin=10*mm,
+               pn_rightMargin=10*mm
+              ):
+
+    SimpleDocTemplate.__init__(
+                               self,
+                               pc_PdfFile,
+                               pagesize=portrait(pl_PageSize),
+                               showBoundary=pb_showBoundary,
+                               topMargin=pn_topMargin,
+                               bottomMargin=pn_bottomMargin,
+                               leftMargin=pn_leftMargin,
+                               rightMargin=pn_rightMargin
+                              )
+
+    data.dget(pi_PrId, True)
+    self.Title = u'IZVOD IZ BAZE O TEHNIČKIM KARAKTERISTIKAMA VOZILA'
+    self.PdfDoc = pc_PdfFile
+    self.DocElm = []
+    self.pdfprep()
+    self.pdfmake()
+
+#= CLASS ===============================
 # report
 #=======================================
 class report:
@@ -1801,26 +1839,27 @@ class report:
     if pc_Report==u'zapisnik':
       if pd_RepPrms['pc_vzpv_oznaka']==u'M1':
         reps.pdf = osp.join(reps.pdfdir, '{}_m1.pdf'.format(pc_Report))
-        r = zapisnik_m1(pd_RepPrms[pi_pr_id], reps.pdf)
+        r = zapisnik_m1(pd_RepPrms[u'pi_pr_id'], reps.pdf)
       elif pd_RepPrms['pc_vzpv_oznaka'] in (u'M2', u'M3'):
         reps.pdf = osp.join(reps.pdfdir, '{}_m2m3.pdf'.format(pc_Report))
-        r = zapisnik_m2m3(pd_RepPrms[pi_pr_id], reps.pdf)
+        r = zapisnik_m2m3(pd_RepPrms[u'pi_pr_id'], reps.pdf)
       elif pd_RepPrms['pc_vzpv_oznaka'][0]==u'L':
         reps.pdf = osp.join(reps.pdfdir, '{}_l.pdf'.format(pc_Report))
         r = zapisnik_l(pd_RepPrms[pi_pr_id], reps.pdf)
       elif pd_RepPrms['pc_vzpv_oznaka']==u'N1':
         reps.pdf = osp.join(reps.pdfdir, '{}_n1.pdf'.format(pc_Report))
-        r = zapisnik_n1(pd_RepPrms[pi_pr_id], reps.pdf)
+        r = zapisnik_n1(pd_RepPrms[u'pi_pr_id'], reps.pdf)
       elif pd_RepPrms['pc_vzpv_oznaka'] in (u'N2', u'N3'):
         reps.pdf = osp.join(reps.pdfdir, '{}_n2n3.pdf'.format(pc_Report))
-        r = zapisnik_n2n3(pd_RepPrms[pi_pr_id], reps.pdf)
+        r = zapisnik_n2n3(pd_RepPrms[u'pi_pr_id'], reps.pdf)
       elif pd_RepPrms['pc_vzpv_oznaka'][0]==u'O':
         reps.pdf = osp.join(reps.pdfdir, '{}_o.pdf'.format(pc_Report))
-        r = zapisnik_o(pd_RepPrms[pi_pr_id], reps.pdf)
+        r = zapisnik_o(pd_RepPrms[u'pi_pr_id'], reps.pdf)
     elif pc_Report==u'potvrda_b':
-      r = potvrda(pd_RepPrms[pi_pr_id], reps.pdf)
+      r = potvrda(pd_RepPrms[u'pi_pr_id'], reps.pdf)
     elif pc_Report==u'neusaglasenost':
-      r = neusaglasenost(pd_RepPrms[pi_pr_id], reps.pdf)
+      pass
+      r = neusaglasenost(pd_RepPrms[u'pi_pr_id'], reps.pdf)
 
     if not osp.exists(reps.pdf):
       reps.pdf = None

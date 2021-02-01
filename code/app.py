@@ -8,6 +8,7 @@ from flask_restful import Api
 from jwt_init import jwt
 from procedures.application import application
 from procedures.table_wrapper import db
+from resources.azs import Azs
 from resources.base_resource import (generate_copy, generate_description,
                                      generate_resource)
 from resources.forms import Forms
@@ -36,6 +37,7 @@ api.add_resource(Reports, "/report")
 api.add_resource(Tables, "/tables")
 api.add_resource(Upload, "/upload")
 api.add_resource(Images, "/images")
+api.add_resource(Azs, "/azs")
 for table in db.tbls():
   try:
     url = f"/{table['table_name']}"

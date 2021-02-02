@@ -112,10 +112,20 @@ regfonts()
 #=======================================
 def tbl_ttl(pc_text):
 
-  oxl_table = Table([[Paragraph(pc_text, pss.psbc)]], hAlign='CENTER')
+  oxl_table = Table([[Paragraph(pc_text, pss.acfb)]], hAlign='CENTER')
+  oxl_table.setStyle(tss.alng)
 
   return oxl_table
 
+#= METHOD ==============================
+# tbl_txt
+#=======================================
+def tbl_txt(pc_text):
+
+  oxl_table = Table([[Paragraph(pc_text, pss.alfn)]], hAlign='LEFT')
+  oxl_table.setStyle(tss.alng)
+
+  return oxl_table
 
 #= CLASS ===============================
 #  Data
@@ -125,28 +135,178 @@ class Data():
   #= METHOD ==============================
   #  __init__
   #=======================================
-  def __init__(self, pi_PrId=None, pb_Potvrda=False):
+  def __init__(self):
 
-    self.fir = dd(db.fir())
-    self.dget(pi_PrId, pb_Potvrda)
+    self.fir = dd(self.fir())
+#    self.dget(pi_PrId, pb_Potvrda)
 
   #= METHOD ==============================
   #  dget
   #=======================================
-  def dget(self, pi_PrId, pb_Potvrda=False):
+  def dget(self, pc_Rep, pd_Pars):
 
-    if pi_PrId:
-      if pb_Potvrda:
-        self.h = [dd(row) for row in db.potvrda_h(pi_PrId)]
-        self.b = [dd(row) for row in db.potvrda_b(pi_PrId)]
-        self.f = [dd(row) for row in db.potvrda_f(pi_PrId)]
-      else:
-        self.pr = dd(db.predmet_b(pi_PrId))
-    else:
-      self.pr = None
-      self.h = None
-      self.b = None
-      self.f = None
+    pars = dd(pd_Pars)
+    vcl_Rep = pc_Rep.lower()
+    if vcl_Rep=='potvrda':
+        self.h = [dd(row) for row in self.potvrda_h(pars.pr_id)]
+        self.b = [dd(row) for row in self.potvrda_b(pars.pr_id)]
+        self.f = [dd(row) for row in self.potvrda_f(pars.pr_id)]
+    elif vcl_Rep.startswith('zapisnik'):
+        self.pr = dd(self.predmet_b(pars.pr_id))
+    elif vcl_Rep=='neusaglasenost':
+        self.pr = dd(self.predmet_b(pars.pr_id))
+    elif vcl_Rep=='raspored':
+      self.rsp = [dd(row) for row in self.raspored(pars.kn_datum)]
+
+  #= METHOD ==============================
+  # fir
+  #=======================================
+  def fir(self, pi_fir_id=10):
+
+    conn = db.connget()
+    crsr = conn.cursor()
+    vcl_sql = """SELECT fir.*
+  FROM public.f_firma(%(pr_id)s) fir;"""
+    try:
+      crsr.execute(vcl_sql, {'pr_id': pi_fir_id})
+      vxl_res = crsr.fetchall()[0]
+    except:
+      raise
+    finally:
+      crsr.close()
+      db.connret(conn)
+
+    return vxl_res
+
+  #= METHOD ==============================
+  # raspored
+  #=======================================
+  def raspored(self, pc_kn_datum):
+
+    conn = db.connget()
+    crsr = conn.cursor()
+    vcl_sql = """SELECT t.*
+  FROM sys.f_r_raspored(%(kn_datum)s) t;"""
+    try:
+      crsr.execute(vcl_sql, {'kn_datum': pc_kn_datum})
+      vxl_res = crsr.fetchall()
+    except:
+      raise
+    finally:
+      crsr.close()
+      db.connret(conn)
+
+    return vxl_res
+
+  #= METHOD ==============================
+  # predmet_b
+  #=======================================
+  def predmet_b(self, pi_pr_id):
+
+    conn = db.connget()
+    crsr = conn.cursor()
+    vcl_sql = """SELECT t.*
+  FROM hmlg.f_r_predmet(%(pr_id)s) t;"""
+    try:
+      crsr.execute(vcl_sql, {'pr_id': pi_pr_id})
+      vxl_res = crsr.fetchall()[0]
+    except:
+      raise
+    finally:
+      crsr.close()
+      db.connret(conn)
+
+    return vxl_res
+
+  #= METHOD ==============================
+  # potvrda_h
+  #=======================================
+  def potvrda_h(self, pi_pr_id):
+
+    conn = db.connget()
+    crsr = conn.cursor()
+    vcl_sql = """WITH
+  h AS
+   (
+    SELECT t.*
+      FROM hmlg.f_r_potvrda_h(%(pr_id)s) t
+  )
+SELECT h.pr_broj_lbl AS h_lbl,
+       h.pr_broj AS h_val
+  FROM h
+UNION ALL
+SELECT h.pr_datum_lbl AS h_lbl,
+       h.pr_datum AS h_val
+  FROM h
+UNION ALL
+SELECT h.pr_sasija_lbl AS h_lbl,
+       h.vz_sasija AS h_val
+  FROM h;"""
+    try:
+      crsr.execute(vcl_sql, {'pr_id': pi_pr_id})
+      vxl_res = crsr.fetchall()
+    except:
+      raise
+    finally:
+      crsr.close()
+      db.connret(conn)
+
+    return vxl_res
+
+  #= METHOD ==============================
+  # potvrda_b
+  #=======================================
+  def potvrda_b(self, pi_pr_id):
+
+    conn = db.connget()
+    crsr = conn.cursor()
+    vcl_sql = """SELECT t.*
+  FROM hmlg.f_r_potvrda_b(%(pr_id)s) t;"""
+    try:
+      crsr.execute(vcl_sql, {'pr_id': pi_pr_id})
+      vxl_res = crsr.fetchall()
+    except:
+      raise
+    finally:
+      crsr.close()
+      db.connret(conn)
+
+    return vxl_res
+
+  #= METHOD ==============================
+  # potvrda_f
+  #=======================================
+  def potvrda_f(self, pi_pr_id):
+
+    conn = db.connget()
+    crsr = conn.cursor()
+    vcl_sql = """WITH
+  s AS
+   (
+    SELECT t.*
+      FROM hmlg.f_r_potvrda_f(%(pr_id)s) t
+   )
+SELECT s.vz_sert_hmlg_tip_lbl AS vz_sert_lbl,
+       s.vz_sert_hmlg_tip AS vz_sert
+  FROM s
+UNION ALL
+SELECT s.vz_sert_emisija_lbl AS vz_sert_lbl,
+       s.vz_sert_emisija AS vz_sert
+  FROM s
+UNION ALL
+SELECT s.vz_sert_buka_lbl AS vz_sert_lbl,
+       s.vz_sert_buka AS vz_sert
+  FROM s;"""
+    try:
+      crsr.execute(vcl_sql, {'pr_id': pi_pr_id})
+      vxl_res = crsr.fetchall()
+    except:
+      raise
+    finally:
+      crsr.close()
+      db.connret(conn)
+
+    return vxl_res
 
 data = Data()
 
@@ -166,51 +326,51 @@ class ParagStyles():
 
   @property
   #= PROPERTY ============================
-  #  psnc
+  #  acfn
   #=======================================
-  def psnc(self):
+  def acfn(self):
 
-    return ParagraphStyle(name='psnc', fontName=fntn.tahoma, fontSize=fnts.s10, alignment=TA_CENTER)
+    return ParagraphStyle(name='acfn', fontName=self.fntnm, fontSize=self.fntsz, alignment=TA_CENTER)
 
   @property
   #= PROPERTY ============================
-  #  psnl
+  #  alfn
   #=======================================
-  def psnl(self):
+  def alfn(self):
 
-    return ParagraphStyle(name='psnl', fontName=self.fntnm, fontSize=self.fntsz, alignment=TA_LEFT)
+    return ParagraphStyle(name='alfn', fontName=self.fntnm, fontSize=self.fntsz, alignment=TA_LEFT)
 
   @property
   #= PROPERTY ============================
-  #  psnr
+  #  arfn
   #=======================================
-  def psnr(self):
+  def arfn(self):
 
-    return ParagraphStyle(name='psnr', fontName=self.fntnm, fontSize=self.fntsz, alignment=TA_RIGHT)
+    return ParagraphStyle(name='arfn', fontName=self.fntnm, fontSize=self.fntsz, alignment=TA_RIGHT)
 
   @property
   #= PROPERTY ============================
-  #  psbc
+  #  acfb
   #=======================================
-  def psbc(self):
+  def acfb(self):
 
-    return ParagraphStyle(name='psbc', fontName=self.fntnmb, fontSize=self.fntsz, alignment=TA_CENTER)
+    return ParagraphStyle(name='acfb', fontName=self.fntnmb, fontSize=self.fntsz, alignment=TA_CENTER)
 
   @property
   #= PROPERTY ============================
-  #  psbl
+  #  alfb
   #=======================================
-  def psbl(self):
+  def alfb(self):
 
-    return ParagraphStyle(name='psbl', fontName=self.fntnmb, fontSize=self.fntsz, alignment=TA_LEFT)
+    return ParagraphStyle(name='alfb', fontName=self.fntnmb, fontSize=self.fntsz, alignment=TA_LEFT)
 
   @property
   #= PROPERTY ============================
-  #  psbr
+  #  arfb
   #=======================================
-  def psbr(self):
+  def arfb(self):
 
-    return ParagraphStyle(name='psbr', fontName=self.fntnmb, fontSize=self.fntsz, alignment=TA_RIGHT)
+    return ParagraphStyle(name='arfb', fontName=self.fntnmb, fontSize=self.fntsz, alignment=TA_RIGHT)
 
 pss = ParagStyles(fnts.s10)
 
@@ -321,9 +481,9 @@ class SimpleDocTemplateNP(SimpleDocTemplate):
     SimpleDocTemplate.addPageTemplates(self, pageTemplates)
 
 #= CLASS ===============================
-#  HeaderFooterCanvas
+#  HdFtCanvas
 #=======================================
-class HeaderFooterCanvas(canvas.Canvas):
+class HdFtCanvas(canvas.Canvas):
 
   #= METHOD ==============================
   #  __init__
@@ -374,7 +534,74 @@ class HeaderFooterCanvas(canvas.Canvas):
                          'mail: {}'.format(data.fir.fir_mail)
                         ]
                        )
-    oxl_pr = Paragraph(vcl_text, pss.psnc)
+    oxl_pr = Paragraph(vcl_text, pss.acfn)
+
+    lll_data = [[oxl_img, oxl_pr]]
+    oxl_table = Table(lll_data, colWidths=[40*mm, 150*mm], hAlign='LEFT')
+    oxl_table.setStyle(tss.acg)
+    oxl_table.wrapOn(self, 0, 0)
+    oxl_table.drawOn(self, 10*mm, A4[1]-20*mm+1)
+
+    vcl_page = 'Strana {} od {}'.format(self._pageNumber, pi_pg_cnt)
+    self.setFont('Tahoma', 10)
+    self.drawString(175*mm, 5*mm, vcl_page)
+    self.restoreState()
+
+#= CLASS ===============================
+#  HdFtCanvasZap
+#=======================================
+class HdFtCanvasZap(canvas.Canvas):
+
+  #= METHOD ==============================
+  #  __init__
+  #=======================================
+  def __init__(self, *args, **kwargs):
+
+    canvas.Canvas.__init__(self, *args, **kwargs)
+    self.pages = []
+    self.width, self.height = A4
+
+  #= METHOD ==============================
+  #  showPage
+  #=======================================
+  def showPage(self):
+
+    self.pages.append(dict(self.__dict__))
+    self._startPage()
+
+  #= METHOD ==============================
+  #  save
+  #=======================================
+  def save(self):
+
+    vil_pg_cnt = len(self.pages)
+    for oxl_page in self.pages:
+      self.__dict__.update(oxl_page)
+      self.drawHeaderFooter(vil_pg_cnt)
+      canvas.Canvas.showPage(self)
+    canvas.Canvas.save(self)
+
+  #= METHOD ==============================
+  #  drawHeaderFooter
+  #=======================================
+  def drawHeaderFooter(self, pi_pg_cnt):
+
+    self.saveState()
+
+    oxl_img = Image(imgs.sl1, kind='proportional')
+    oxl_img.drawHeight = 10*mm
+    oxl_img.drawWidth = 37*mm
+    oxl_img.hAlign = 'CENTER'
+
+    vcl_text = ' '.join(
+                        [
+                         '{}<br/>'.format(data.fir.fir_naziv),
+                         data.fir.fir_adresa_sediste,
+                         'telefon: {}'.format(data.fir.fir_tel1),
+                         'mail: {}'.format(data.fir.fir_mail)
+                        ]
+                       )
+    oxl_pr = Paragraph(vcl_text, pss.acfn)
 
     lll_data = [[oxl_img, oxl_pr]]
     oxl_table = Table(lll_data, colWidths=[40*mm, 150*mm], hAlign='LEFT')
@@ -392,6 +619,75 @@ class HeaderFooterCanvas(canvas.Canvas):
     self.restoreState()
 
 #= CLASS ===============================
+#  HdFtCanvasPot
+#=======================================
+class HdFtCanvasPot(canvas.Canvas):
+
+  #= METHOD ==============================
+  #  __init__
+  #=======================================
+  def __init__(self, *args, **kwargs):
+
+    canvas.Canvas.__init__(self, *args, **kwargs)
+    self.pages = []
+    self.width, self.height = A4
+
+  #= METHOD ==============================
+  #  showPage
+  #=======================================
+  def showPage(self):
+
+    self.pages.append(dict(self.__dict__))
+    self._startPage()
+
+  #= METHOD ==============================
+  #  save
+  #=======================================
+  def save(self):
+
+    vil_pg_cnt = len(self.pages)
+    for oxl_page in self.pages:
+      self.__dict__.update(oxl_page)
+      self.drawWatermark(vil_pg_cnt)
+      canvas.Canvas.showPage(self)
+    canvas.Canvas.save(self)
+
+  #= METHOD ==============================
+  #  drawWatermark
+  #=======================================
+  def drawWatermark(self, pi_pg_cnt):
+
+    self.saveState()
+
+#    vcl_WMText = 'SRBOLAB'
+#    self.setFont('Tahoma', 160)
+#    vcl_WMText = 'NEZVANIČNO'
+    vcl_WMText1 = 'NEZVANIČNA'
+    vcl_WMText2 = 'VERZIJA'
+    self.setFont('Tahoma', 100)
+    self.setStrokeColor((0, 0, 0))
+    self.setFillColor(colors.Color(255, 255, 255, alpha=0.1))
+    self.setLineWidth(0.5)
+    oxl_txt = self.beginText()
+    oxl_txt.setTextRenderMode(2)
+    self._code.append(oxl_txt.getCode())
+    self.rotate(45)
+    self.drawCentredString(180*mm, 25*mm, vcl_WMText1)
+
+    oxl_txt = self.beginText()
+    oxl_txt.setTextRenderMode(2)
+    self._code.append(oxl_txt.getCode())
+    self.drawCentredString(180*mm, -10*mm, vcl_WMText2)
+
+#    oxl_txt = self.beginText()
+#    oxl_txt.setTextRenderMode(2)
+#    self._code.append(oxl_txt.getCode())
+#    self.rotate(-90)
+#    self.drawCentredString(-20*mm, 180*mm, vcl_WMText)
+
+    self.restoreState()
+
+#= CLASS ===============================
 # potvrda
 #=======================================
 class potvrda(SimpleDocTemplateNP):
@@ -403,6 +699,7 @@ class potvrda(SimpleDocTemplateNP):
                self,
                pi_PrId,
                pc_PdfFile,
+               pb_Test=False,
                pl_PageSize=A4,
                pb_showBoundary=0,
                pn_topMargin=10*mm,
@@ -422,7 +719,8 @@ class potvrda(SimpleDocTemplateNP):
                                rightMargin=pn_rightMargin
                               )
 
-    data.dget(pi_PrId, True)
+    data.dget(self.__class__.__name__, dd({'pr_id': pi_PrId}))
+    self.test = pb_Test
     self.Title = u'IZVOD IZ BAZE O TEHNIČKIM KARAKTERISTIKAMA VOZILA'
     self.PdfDoc = pc_PdfFile
     self.DocElm = []
@@ -443,7 +741,7 @@ class potvrda(SimpleDocTemplateNP):
                              'mail: {}'.format(data.fir.fir_mail)
                             ]
                            )
-    oxl_pr = Paragraph(vcl_text, pss.psbl)
+    oxl_pr = Paragraph(vcl_text, pss.alfb)
 
     return oxl_pr
 
@@ -478,7 +776,7 @@ class potvrda(SimpleDocTemplateNP):
 
     lll_data = []
     for vil_row, oxl_row in enumerate(data.h):
-      lll_data.append([Paragraph(nvl(oxl_row.h_lbl), pss.psnl), Paragraph(nvl(oxl_row.h_val), pss.psnl)])
+      lll_data.append([Paragraph(nvl(oxl_row.h_lbl), pss.alfn), Paragraph(nvl(oxl_row.h_val), pss.alfn)])
     oxl_table = Table(lll_data, colWidths=[50*mm, 65*mm], hAlign='LEFT')
     oxl_table.setStyle(tss.alg)
 
@@ -493,10 +791,10 @@ class potvrda(SimpleDocTemplateNP):
     for vil_row, oxl_row in enumerate(data.b):
       lll_data.append(
                       [
-                       Paragraph(nvl(oxl_row.tis_lbl_coc), pss.psnc),
-                       Paragraph(nvl(oxl_row.tis_lbl_drvlc), pss.psnc),
-                       Paragraph(nvl(oxl_row.tis_desc), pss.psnl),
-                       Paragraph(nvl(oxl_row.tis_value), pss.psnl),
+                       Paragraph(nvl(oxl_row.tis_lbl_coc), pss.acfn),
+                       Paragraph(nvl(oxl_row.tis_lbl_drvlc), pss.acfn),
+                       Paragraph(nvl(oxl_row.tis_desc), pss.alfn),
+                       Paragraph(nvl(oxl_row.tis_value), pss.alfn),
                       ]
                      )
 
@@ -512,7 +810,7 @@ class potvrda(SimpleDocTemplateNP):
 
     lll_data = []
     for vil_row, oxl_row in enumerate(data.f):
-      lll_data.append([Paragraph(nvl(oxl_row.vz_sert_lbl), pss.psnl), Paragraph(nvl(oxl_row.vz_sert), pss.psnl)])
+      lll_data.append([Paragraph(nvl(oxl_row.vz_sert_lbl), pss.alfn), Paragraph(nvl(oxl_row.vz_sert), pss.alfn)])
     oxl_table = Table(lll_data, colWidths=[80*mm, 110*mm], hAlign='LEFT')
     oxl_table.setStyle(tss.alg)
 
@@ -524,8 +822,8 @@ class potvrda(SimpleDocTemplateNP):
   def tbl_ftr(self):
 
     lll_data = []
-    lll_data.append([Paragraph(u'POTVRĐUJEMO DA JE OVO VOZILO PROIZVEDENO U SKLADU SA EEC/ECE REGULATIVIMA', pss.psbl)])
-    lll_data.append([Paragraph(u'Ovaj dokument se izdaje (bez pregleda vozila) na osnovu saobraćajne dozvole i važi bez pečata i potpisa', pss.psnl)])
+    lll_data.append([Paragraph(u'POTVRĐUJEMO DA JE OVO VOZILO PROIZVEDENO U SKLADU SA EEC/ECE REGULATIVIMA', pss.alfb)])
+    lll_data.append([Paragraph(u'Ovaj dokument se izdaje (bez pregleda vozila) na osnovu saobraćajne dozvole i važi bez pečata i potpisa', pss.alfn)])
 
     oxl_table = Table(lll_data, hAlign='LEFT')
     oxl_table.setStyle(tss.alng)
@@ -559,7 +857,10 @@ class potvrda(SimpleDocTemplateNP):
   #=======================================
   def pdfmake(self):
 
-    self.build(self.DocElm)
+    if self.test:
+      self.build(self.DocElm, canvasmaker=HdFtCanvasPot)
+    else:
+      self.build(self.DocElm)
 
 #= CLASS ===============================
 # zapisnici
@@ -580,7 +881,7 @@ class zapisnici():
   def tbl_zbr(self):
 
     lll_data = []
-    lll_data = [[Paragraph(u'Broj:', pss.psnc), Paragraph(nvl(data.pr.pr_broj), pss.psnc)]]
+    lll_data = [[Paragraph(u'Broj:', pss.acfn), Paragraph(nvl(data.pr.pr_broj), pss.acfn)]]
     oxl_table = Table(lll_data, colWidths=[20*mm, 40*mm], hAlign='CENTER')
     oxl_ts = tss.acng
     oxl_ts.add('LINEBELOW', (1, 0), (1, 0), lts.t05, colors.black)
@@ -595,9 +896,9 @@ class zapisnici():
   def tbl_zkl(self):
 
     lll_data = []
-    lll_data.append([Paragraph(u'Podnosilac zahteva:', pss.psnl), Paragraph(nvl(data.pr.kl_naziv), pss.psnl)])
-    lll_data.append([Paragraph(u'Adresa:', pss.psnl), Paragraph(nvl(data.pr.kl_adresa), pss.psnl)])
-    lll_data.append([Paragraph(u'Kontakt:', pss.psnl), Paragraph(nvl(data.pr.kl_telefon), pss.psnl)])
+    lll_data.append([Paragraph(u'Podnosilac zahteva:', pss.alfn), Paragraph(nvl(data.pr.kl_naziv), pss.alfn)])
+    lll_data.append([Paragraph(u'Adresa:', pss.alfn), Paragraph(nvl(data.pr.kl_adresa), pss.alfn)])
+    lll_data.append([Paragraph(u'Kontakt:', pss.alfn), Paragraph(nvl(data.pr.kl_telefon), pss.alfn)])
     oxl_table = Table(lll_data, colWidths=[35*mm, 150*mm], hAlign='LEFT')
     oxl_ts = tss.acng
     oxl_ts.add('LINEBELOW', (1, 0), (1, -1), lts.t05, colors.black)
@@ -646,11 +947,11 @@ class zapisnici():
     for lcl_row in lll_data:
       lll_dataf.append(
                        [
-                        Paragraph(lcl_row[0], pss.psnc),
-                        Paragraph(lcl_row[1], pss.psnl),
-                        Paragraph(lcl_row[2], pss.psnl),
-                        Paragraph(lcl_row[3], pss.psnr),
-                        Paragraph(lcl_row[4], pss.psnc),
+                        Paragraph(lcl_row[0], pss.acfn),
+                        Paragraph(lcl_row[1], pss.alfn),
+                        Paragraph(lcl_row[2], pss.alfn),
+                        Paragraph(lcl_row[3], pss.arfn),
+                        Paragraph(lcl_row[4], pss.acfn),
                        ]
                       )
     oxl_table = Table(lll_dataf, colWidths=[7*mm, 48*mm, 90*mm, 38*mm, 7*mm], hAlign='LEFT')
@@ -697,12 +998,12 @@ class zapisnici():
     for vil_row, lcl_row in enumerate(lll_data):
       lll_dataf.append(
                        [
-                        Paragraph(lcl_row[0], (pss.psbc if vil_row==0 else pss.psnl)),
-                        Paragraph(lcl_row[1], pss.psnc),
-                        Paragraph(lcl_row[2], (pss.psnc if vil_row==vil_rows else pss.psnl)),
-                        Paragraph(lcl_row[3], pss.psnl),
-                        Paragraph(lcl_row[4], (pss.psnc if vil_row==vil_rows else pss.psnl)),
-                        Paragraph(lcl_row[5], pss.psnl),
+                        Paragraph(lcl_row[0], (pss.acfb if vil_row==0 else pss.alfn)),
+                        Paragraph(lcl_row[1], pss.acfn),
+                        Paragraph(lcl_row[2], (pss.acfn if vil_row==vil_rows else pss.alfn)),
+                        Paragraph(lcl_row[3], pss.alfn),
+                        Paragraph(lcl_row[4], (pss.acfn if vil_row==vil_rows else pss.alfn)),
+                        Paragraph(lcl_row[5], pss.alfn),
                        ]
                       )
     oxl_table = Table(lll_dataf, rowHeights=[5*mm]*len(lll_data), colWidths=[56*mm, 7*mm, 56*mm, 8*mm, 55*mm, 8*mm], hAlign='LEFT')
@@ -748,11 +1049,11 @@ class zapisnici():
     for vil_row, lcl_row in enumerate(lll_data):
       lll_dataf.append(
                        [
-                        Paragraph(lcl_row[0], (pss.psnc if vil_row<12 else pss.psnl)),
-                        Paragraph(lcl_row[1], pss.psnc),
-                        Paragraph(lcl_row[2], pss.psnl),
-                        Paragraph(lcl_row[3], pss.psnl),
-                        Paragraph(lcl_row[4], pss.psnc),
+                        Paragraph(lcl_row[0], (pss.acfn if vil_row<12 else pss.alfn)),
+                        Paragraph(lcl_row[1], pss.acfn),
+                        Paragraph(lcl_row[2], pss.alfn),
+                        Paragraph(lcl_row[3], pss.alfn),
+                        Paragraph(lcl_row[4], pss.acfn),
                        ]
                       )
     oxl_table = Table(lll_dataf, colWidths=[13*mm, 13*mm, 63*mm, 94*mm, 7*mm], hAlign='LEFT')
@@ -773,7 +1074,7 @@ class zapisnici():
   def tbl_text(self):
 
     lll_data = []
-    lll_data.append([Paragraph(u'', pss.psnl)])
+    lll_data.append([Paragraph(u'', pss.alfn)])
     oxl_table = Table(lll_data, rowHeights=[25*mm], colWidths=[190*mm], hAlign='LEFT')
     oxl_ts = tss.alng
     oxl_table.setStyle(oxl_ts)
@@ -787,9 +1088,9 @@ class zapisnici():
   def tbl_sgn(self):
 
     lll_data = []
-    lll_data.append([Paragraph(u'Datum', pss.psnc), Paragraph(u'', pss.psnl), Paragraph(u'Kontrolor', pss.psnc)])
-    lll_data.append([Paragraph(data.pr.pr_datum, pss.psnc), Paragraph(u'', pss.psnc), Paragraph(u'', pss.psnc)])
-    lll_data.append([Paragraph(u'', pss.psnc), Paragraph(u'', pss.psnc), Paragraph(u'{} {}'.format(data.pr.kr_ime, data.pr.kr_prezime), pss.psnc)])
+    lll_data.append([Paragraph(u'Datum', pss.acfn), Paragraph(u'', pss.alfn), Paragraph(u'Kontrolor', pss.acfn)])
+    lll_data.append([Paragraph(data.pr.pr_datum, pss.acfn), Paragraph(u'', pss.acfn), Paragraph(u'', pss.acfn)])
+    lll_data.append([Paragraph(u'', pss.acfn), Paragraph(u'', pss.acfn), Paragraph(u'{} {}'.format(data.pr.kr_ime, data.pr.kr_prezime), pss.acfn)])
     oxl_table = Table(lll_data, rowHeights=[5*mm, 10*mm, 5*mm], colWidths=[63*mm, 64*mm, 63*mm], hAlign='LEFT')
     oxl_ts = tss.acng
     oxl_ts.add('LINEBELOW', (0, 1), (0, 1), lts.t05, colors.black)
@@ -813,7 +1114,6 @@ class zapisnik_m1(SimpleDocTemplateNP):
                self,
                pi_PrId,
                pc_PdfFile,
-               pc_UserName=None,
                pl_PageSize=A4,
                pb_showBoundary=0,
                pn_topMargin=10*mm,
@@ -833,7 +1133,7 @@ class zapisnik_m1(SimpleDocTemplateNP):
                                rightMargin=pn_rightMargin
                               )
 
-    data.dget(pi_PrId)
+    data.dget(self.__class__.__name__, dd({'pr_id': pi_PrId}))
     self.Title = u'ZAPISNIK O ISPITIVANJU VOZILA VRSTE M1'
     self.PdfDoc = pc_PdfFile
     self.DocElm = []
@@ -892,11 +1192,11 @@ class zapisnik_m1(SimpleDocTemplateNP):
     for vil_row, lcl_row in enumerate(lll_data):
       lll_dataf.append(
                        [
-                        Paragraph(lcl_row[0], (pss.psbc if vil_row==0 else pss.psnr)),
-                        Paragraph(lcl_row[1], pss.psnl),
-                        Paragraph(lcl_row[2], pss.psnl),
-                        Paragraph(lcl_row[3], pss.psnl),
-                        Paragraph(lcl_row[4], pss.psnl),
+                        Paragraph(lcl_row[0], (pss.acfb if vil_row==0 else pss.arfn)),
+                        Paragraph(lcl_row[1], pss.alfn),
+                        Paragraph(lcl_row[2], pss.alfn),
+                        Paragraph(lcl_row[3], pss.alfn),
+                        Paragraph(lcl_row[4], pss.alfn),
                        ]
                       )
     oxl_table = Table(lll_dataf, colWidths=[9*mm, 78*mm, 81*mm, 15*mm, 7*mm], hAlign='LEFT')
@@ -962,7 +1262,7 @@ class zapisnik_m1(SimpleDocTemplateNP):
   #=======================================
   def pdfmake(self):
 
-    self.build(self.DocElm, canvasmaker=HeaderFooterCanvas)
+    self.build(self.DocElm, canvasmaker=HdFtCanvasZap)
 
 #= CLASS ===============================
 # zapisnik_m2m3
@@ -976,7 +1276,6 @@ class zapisnik_m2m3(SimpleDocTemplateNP):
                self,
                pi_PrId,
                pc_PdfFile,
-               pc_UserName=None,
                pl_PageSize=A4,
                pb_showBoundary=0,
                pn_topMargin=10*mm,
@@ -996,7 +1295,7 @@ class zapisnik_m2m3(SimpleDocTemplateNP):
                                rightMargin=pn_rightMargin
                               )
 
-    data.dget(pi_PrId)
+    data.dget(self.__class__.__name__, dd({'pr_id': pi_PrId}))
     self.Title = u'ZAPISNIK O ISPITIVANJU VOZILA VRSTE M2-M3'
     self.PdfDoc = pc_PdfFile
     self.DocElm = []
@@ -1066,11 +1365,11 @@ class zapisnik_m2m3(SimpleDocTemplateNP):
     for vil_row, lcl_row in enumerate(lll_data):
       lll_dataf.append(
                        [
-                        Paragraph(lcl_row[0], (pss.psbc if vil_row==0 else pss.psnr)),
-                        Paragraph(lcl_row[1], pss.psnl),
-                        Paragraph(lcl_row[2], pss.psnl),
-                        Paragraph(lcl_row[3], pss.psnl),
-                        Paragraph(lcl_row[4], pss.psnl),
+                        Paragraph(lcl_row[0], (pss.acfb if vil_row==0 else pss.arfn)),
+                        Paragraph(lcl_row[1], pss.alfn),
+                        Paragraph(lcl_row[2], pss.alfn),
+                        Paragraph(lcl_row[3], pss.alfn),
+                        Paragraph(lcl_row[4], pss.alfn),
                        ]
                       )
     oxl_table = Table(lll_dataf, rowHeights=[4*mm]*len(lll_dataf), colWidths=[9*mm, 75*mm, 84*mm, 15*mm, 7*mm], hAlign='LEFT')
@@ -1140,7 +1439,7 @@ class zapisnik_m2m3(SimpleDocTemplateNP):
   #=======================================
   def pdfmake(self):
 
-    self.build(self.DocElm, canvasmaker=HeaderFooterCanvas)
+    self.build(self.DocElm, canvasmaker=HdFtCanvasZap)
 
 #= CLASS ===============================
 # zapisnik_l
@@ -1154,7 +1453,6 @@ class zapisnik_l(SimpleDocTemplateNP):
                self,
                pi_PrId,
                pc_PdfFile,
-               pc_UserName=None,
                pl_PageSize=A4,
                pb_showBoundary=0,
                pn_topMargin=10*mm,
@@ -1174,7 +1472,7 @@ class zapisnik_l(SimpleDocTemplateNP):
                                rightMargin=pn_rightMargin
                               )
 
-    data.dget(pi_PrId)
+    data.dget(self.__class__.__name__, dd({'pr_id': pi_PrId}))
     self.Title = u'ZAPISNIK O ISPITIVANJU VOZILA VRSTE L'
     self.PdfDoc = pc_PdfFile
     self.DocElm = []
@@ -1227,11 +1525,11 @@ class zapisnik_l(SimpleDocTemplateNP):
     for vil_row, lcl_row in enumerate(lll_data):
       lll_dataf.append(
                        [
-                        Paragraph(lcl_row[0], (pss.psbc if vil_row==0 else pss.psnr)),
-                        Paragraph(lcl_row[1], pss.psnl),
-                        Paragraph(lcl_row[2], pss.psnl),
-                        Paragraph(lcl_row[3], pss.psnl),
-                        Paragraph(lcl_row[4], pss.psnl),
+                        Paragraph(lcl_row[0], (pss.acfb if vil_row==0 else pss.arfn)),
+                        Paragraph(lcl_row[1], pss.alfn),
+                        Paragraph(lcl_row[2], pss.alfn),
+                        Paragraph(lcl_row[3], pss.alfn),
+                        Paragraph(lcl_row[4], pss.alfn),
                        ]
                       )
     oxl_table = Table(lll_dataf, colWidths=[9*mm, 78*mm, 81*mm, 15*mm, 7*mm], hAlign='LEFT')
@@ -1295,7 +1593,7 @@ class zapisnik_l(SimpleDocTemplateNP):
   #=======================================
   def pdfmake(self):
 
-    self.build(self.DocElm, canvasmaker=HeaderFooterCanvas)
+    self.build(self.DocElm, canvasmaker=HdFtCanvasZap)
 
 #= CLASS ===============================
 # zapisnik_n1
@@ -1309,7 +1607,6 @@ class zapisnik_n1(SimpleDocTemplateNP):
                self,
                pi_PrId,
                pc_PdfFile,
-               pc_UserName=None,
                pl_PageSize=A4,
                pb_showBoundary=0,
                pn_topMargin=10*mm,
@@ -1329,7 +1626,7 @@ class zapisnik_n1(SimpleDocTemplateNP):
                                rightMargin=pn_rightMargin
                               )
 
-    data.dget(pi_PrId)
+    data.dget(self.__class__.__name__, dd({'pr_id': pi_PrId}))
     self.Title = u'ZAPISNIK O ISPITIVANJU VOZILA VRSTE N1'
     self.PdfDoc = pc_PdfFile
     self.DocElm = []
@@ -1389,11 +1686,11 @@ class zapisnik_n1(SimpleDocTemplateNP):
     for vil_row, lcl_row in enumerate(lll_data):
       lll_dataf.append(
                        [
-                        Paragraph(lcl_row[0], (pss.psbc if vil_row==0 else pss.psnr)),
-                        Paragraph(lcl_row[1], pss.psnl),
-                        Paragraph(lcl_row[2], pss.psnl),
-                        Paragraph(lcl_row[3], pss.psnl),
-                        Paragraph(lcl_row[4], pss.psnl),
+                        Paragraph(lcl_row[0], (pss.acfb if vil_row==0 else pss.arfn)),
+                        Paragraph(lcl_row[1], pss.alfn),
+                        Paragraph(lcl_row[2], pss.alfn),
+                        Paragraph(lcl_row[3], pss.alfn),
+                        Paragraph(lcl_row[4], pss.alfn),
                        ]
                       )
     oxl_table = Table(lll_dataf, colWidths=[9*mm, 78*mm, 81*mm, 15*mm, 7*mm], hAlign='LEFT')
@@ -1459,7 +1756,7 @@ class zapisnik_n1(SimpleDocTemplateNP):
   #=======================================
   def pdfmake(self):
 
-    self.build(self.DocElm, canvasmaker=HeaderFooterCanvas)
+    self.build(self.DocElm, canvasmaker=HdFtCanvasZap)
 
 #= CLASS ===============================
 # zapisnik_n2n3
@@ -1473,7 +1770,6 @@ class zapisnik_n2n3(SimpleDocTemplateNP):
                self,
                pi_PrId,
                pc_PdfFile,
-               pc_UserName=None,
                pl_PageSize=A4,
                pb_showBoundary=0,
                pn_topMargin=10*mm,
@@ -1493,7 +1789,7 @@ class zapisnik_n2n3(SimpleDocTemplateNP):
                                rightMargin=pn_rightMargin
                               )
 
-    data.dget(pi_PrId)
+    data.dget(self.__class__.__name__, dd({'pr_id': pi_PrId}))
     self.Title = u'ZAPISNIK O ISPITIVANJU VOZILA VRSTE N2-N3'
     self.PdfDoc = pc_PdfFile
     self.DocElm = []
@@ -1557,11 +1853,11 @@ class zapisnik_n2n3(SimpleDocTemplateNP):
     for vil_row, lcl_row in enumerate(lll_data):
       lll_dataf.append(
                        [
-                        Paragraph(lcl_row[0], (pss.psbc if vil_row==0 else pss.psnr)),
-                        Paragraph(lcl_row[1], pss.psnl),
-                        Paragraph(lcl_row[2], pss.psnl),
-                        Paragraph(lcl_row[3], pss.psnl),
-                        Paragraph(lcl_row[4], pss.psnl),
+                        Paragraph(lcl_row[0], (pss.acfb if vil_row==0 else pss.arfn)),
+                        Paragraph(lcl_row[1], pss.alfn),
+                        Paragraph(lcl_row[2], pss.alfn),
+                        Paragraph(lcl_row[3], pss.alfn),
+                        Paragraph(lcl_row[4], pss.alfn),
                        ]
                       )
     oxl_table = Table(lll_dataf, colWidths=[9*mm, 75*mm, 84*mm, 15*mm, 7*mm], hAlign='LEFT')
@@ -1631,7 +1927,7 @@ class zapisnik_n2n3(SimpleDocTemplateNP):
   #=======================================
   def pdfmake(self):
 
-    self.build(self.DocElm, canvasmaker=HeaderFooterCanvas)
+    self.build(self.DocElm, canvasmaker=HdFtCanvasZap)
 
 #= CLASS ===============================
 # zapisnik_o
@@ -1645,7 +1941,6 @@ class zapisnik_o(SimpleDocTemplateNP):
                self,
                pi_PrId,
                pc_PdfFile,
-               pc_UserName=None,
                pl_PageSize=A4,
                pb_showBoundary=0,
                pn_topMargin=10*mm,
@@ -1665,7 +1960,7 @@ class zapisnik_o(SimpleDocTemplateNP):
                                rightMargin=pn_rightMargin
                               )
 
-    data.dget(pi_PrId)
+    data.dget(self.__class__.__name__, dd({'pr_id': pi_PrId}))
     self.Title = u'ZAPISNIK O ISPITIVANJU VOZILA VRSTE O'
     self.PdfDoc = pc_PdfFile
     self.DocElm = []
@@ -1696,7 +1991,6 @@ class zapisnik_o(SimpleDocTemplateNP):
                 ['', u'', u'blatobrani iznad svih točkova u širini točka', u'', u''],
                 ['', u'', u'ZZOP', u'', u''],
                 ['', u'', u'BZOP', u'', u'*'],
-                ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
                 ['', u'x = uređaj/sistem postoji na vozilu,', u'- = uređaj/sistem ne postoji na vozilu', u'', u''],
                 ['', u'&nbsp;'*15+u'N/P = nije primenljivo,', u'&nbsp;'*15+u'* = obavezna homologacija', u'', u''],
                ]
@@ -1704,11 +1998,11 @@ class zapisnik_o(SimpleDocTemplateNP):
     for vil_row, lcl_row in enumerate(lll_data):
       lll_dataf.append(
                        [
-                        Paragraph(lcl_row[0], (pss.psbc if vil_row==0 else pss.psnr)),
-                        Paragraph(lcl_row[1], pss.psnl),
-                        Paragraph(lcl_row[2], pss.psnl),
-                        Paragraph(lcl_row[3], pss.psnl),
-                        Paragraph(lcl_row[4], pss.psnl),
+                        Paragraph(lcl_row[0], (pss.acfb if vil_row==0 else pss.arfn)),
+                        Paragraph(lcl_row[1], pss.alfn),
+                        Paragraph(lcl_row[2], pss.alfn),
+                        Paragraph(lcl_row[3], pss.alfn),
+                        Paragraph(lcl_row[4], pss.alfn),
                        ]
                       )
     oxl_table = Table(lll_dataf, colWidths=[9*mm, 75*mm, 84*mm, 15*mm, 7*mm], hAlign='LEFT')
@@ -1770,7 +2064,7 @@ class zapisnik_o(SimpleDocTemplateNP):
   #=======================================
   def pdfmake(self):
 
-    self.build(self.DocElm, canvasmaker=HeaderFooterCanvas)
+    self.build(self.DocElm, canvasmaker=HdFtCanvasZap)
 
 #= CLASS ===============================
 # neusaglasenost
@@ -1803,12 +2097,265 @@ class neusaglasenost(SimpleDocTemplateNP):
                                rightMargin=pn_rightMargin
                               )
 
-    data.dget(pi_PrId, True)
-    self.Title = u'IZVOD IZ BAZE O TEHNIČKIM KARAKTERISTIKAMA VOZILA'
+    data.dget(self.__class__.__name__, dd({'pr_id': pi_PrId}))
+    self.Title = u'<u>NALAZ O NEUSKLAĐENOSTI (NEUSAGLAŠENOSTI)</u>'
     self.PdfDoc = pc_PdfFile
     self.DocElm = []
     self.pdfprep()
     self.pdfmake()
+
+  #= METHOD ==============================
+  # data_fir
+  #=======================================
+  def data_fir(self):
+
+    vcl_text = 'Na osnovu rešenja Agencije za bezbednost saobraćaja 221-22-00-507/2020-05 od 13.07.2020. kojim je pravno lice {0} {1}, ovlašćeno za poslove ispitivanje vozila, {0} {1} sačinjava'.format(data.fir.fir_naziv, data.fir.fir_opis_s)
+    oxl_pr = Paragraph(vcl_text, pss.alfn)
+
+    return oxl_pr
+
+  #= METHOD ==============================
+  # img_sl
+  #=======================================
+  def img_sl(self):
+
+    oxl_img = Image(imgs.abs1, kind='proportional')
+    oxl_img.drawHeight = 20*mm
+    oxl_img.drawWidth = 50*mm
+    oxl_img.hAlign = 'CENTER'
+
+    return oxl_img
+
+  #= METHOD ==============================
+  # tbl_fir
+  #=======================================
+  def tbl_fir(self):
+
+    oxl_img = self.img_sl()
+    oxl_pr = self.data_fir()
+    oxl_table = Table([[oxl_img, oxl_pr]], colWidths=[55*mm, 135*mm], hAlign='LEFT')
+    oxl_table.setStyle(tss.acg)
+
+    return oxl_table
+
+  #= PROPERTY ============================
+  # tbl_h1
+  #=======================================
+  def tbl_h1(self):
+
+    lll_data = []
+    lll_data.append([Paragraph(u'Broj potvrde o prijemu zahteva:', pss.alfn), Paragraph(u'od dana:', pss.alfn)])
+    oxl_table = Table(lll_data, colWidths=[90*mm, 100*mm], hAlign='LEFT')
+    oxl_ts = tss.alng
+    oxl_table.setStyle(oxl_ts)
+
+    return oxl_table
+
+  #= PROPERTY ============================
+  # tbl_h2
+  #=======================================
+  def tbl_h2(self):
+
+    lll_data = []
+    lll_data.append([Paragraph(u'Broj zapisnika:', pss.alfb)])
+    oxl_table = Table(lll_data, colWidths=[90*mm], hAlign='LEFT')
+    oxl_ts = tss.alng
+    oxl_table.setStyle(oxl_ts)
+
+    return oxl_table
+
+  #= PROPERTY ============================
+  # tbl_zkl
+  #=======================================
+  def tbl_zkl(self):
+
+    lll_data = []
+    lll_data.append([Paragraph(u'Vlasnik: {}'.format(nvl(data.pr.kl_naziv)), pss.alfn)])
+    lll_data.append([Paragraph(u'Adresa: {}'.format(nvl(data.pr.kl_adresa)), pss.alfn)])
+    lll_data.append([Paragraph(u'VIN oznake: {}'.format(nvl(data.pr.vz_sasija)), pss.alfn)])
+    lll_data.append([Paragraph(u'Broj motora: {}'.format(nvl(data.pr.vz_motor)), pss.alfn)])
+    oxl_table = Table(lll_data, hAlign='LEFT')
+    oxl_ts = tss.alng
+    oxl_table.setStyle(oxl_ts)
+
+    return oxl_table
+
+  #= METHOD ==============================
+  # tbl_data
+  #=======================================
+  def tbl_data(self):
+
+    vcl_text = '<br/>'.join(
+                            [
+                             'Ukoliko u roku od 30 dana ne otklonite navedene nedostatke i ne dostavite potrebnu dokumentaciju, smatraćemo da ste odustali od zahteva i postupak će biti obustavljen.',
+                             'Na osnovu rezultata ispitivanja vozila, utvrđeno je da se na vozilu nalaze neusklađenosti sa domaćim propisima i da bi vozilo dobilo pozitivno mišljenje, potrebno je otkloniti neusklađenosti.',
+                            ]
+                           )
+    lll_data = [
+                [Paragraph(nvl(data.pr.pr_napomena), pss.alfn)],
+                [Paragraph(vcl_text, pss.alfn)],
+               ]
+    oxl_table = Table(lll_data, rowHeights=[70*mm, 20*mm], colWidths=[190*mm], hAlign='LEFT')
+    oxl_ts = tss.alg
+    oxl_table.setStyle(oxl_ts)
+
+    return oxl_table
+
+  #= METHOD ==============================
+  # pdfprep
+  #=======================================
+  def pdfprep(self):
+
+    # 1. strana
+    self.DocElm.append(Spacer(0*mm, 0*mm))
+    self.DocElm.append(self.tbl_fir())
+
+    self.DocElm.append(Spacer(0*mm, 5*mm))
+    self.DocElm.append(tbl_ttl(self.Title))
+#    self.DocElm.append(tbl_ttl(self.Title1))
+
+    self.DocElm.append(Spacer(0*mm, 5*mm))
+    self.DocElm.append(self.tbl_h1())
+
+    self.DocElm.append(Spacer(0*mm, 5*mm))
+    self.DocElm.append(self.tbl_h2())
+
+    self.DocElm.append(Spacer(0*mm, 5*mm))
+    self.DocElm.append(self.tbl_zkl())
+
+    self.DocElm.append(Spacer(0*mm, 5*mm))
+    self.DocElm.append(tbl_txt('U toku ispitivanja ustanovljene su sledeće neusaglašenosti:'))
+
+    self.DocElm.append(Spacer(0*mm, 0*mm))
+    self.DocElm.append(self.tbl_data())
+
+    self.DocElm.append(Spacer(0*mm, 5*mm))
+    self.DocElm.append(tbl_txt('Zabranjeno je preštampavanje i umnožavanje.'))
+
+    """
+    self.DocElm.append(Spacer(0*mm, 5*mm))
+    oxl_tbl = self.tbl_data()
+
+    lol_tss = oxl_tbl.split(0*mm, 230*mm)
+    if len(lol_tss)<2:
+      self.DocElm.append(oxl_tbl)
+    else:
+      # ostale strane
+      lol_tbls = []
+      while len(lol_tss)==2:
+        lol_tbls.append(lol_tss[0])
+        lol_tss = lol_tss[1].split(0*mm, 250*mm)
+
+      for vil_ti, oxl_tblp in enumerate(lol_tbls, 1):
+        self.DocElm.append(oxl_tblp)
+        if vil_ti==1:
+          self.DocElm.append(Spacer(0*mm, 15*mm))
+        elif vil_ti<len(lol_tbls):
+          self.DocElm.append(Spacer(0*mm, 17*mm))
+"""
+  #= METHOD ==============================
+  # pdfmake
+  #=======================================
+  def pdfmake(self):
+
+    self.build(self.DocElm)
+
+#= CLASS ===============================
+# raspored
+#=======================================
+class raspored(SimpleDocTemplateNP):
+
+  #= METHOD ==============================
+  # __init__
+  #=======================================
+  def __init__(
+               self,
+               pc_KnDatum,
+               pc_PdfFile,
+               pl_PageSize=A4,
+               pb_showBoundary=0,
+               pn_topMargin=10*mm,
+               pn_bottomMargin=10*mm,
+               pn_leftMargin=10*mm,
+               pn_rightMargin=10*mm
+              ):
+
+    SimpleDocTemplate.__init__(
+                               self,
+                               pc_PdfFile,
+                               pagesize=portrait(pl_PageSize),
+                               showBoundary=pb_showBoundary,
+                               topMargin=pn_topMargin,
+                               bottomMargin=pn_bottomMargin,
+                               leftMargin=pn_leftMargin,
+                               rightMargin=pn_rightMargin
+                              )
+
+    data.dget(self.__class__.__name__, dd({'kn_datum': pc_KnDatum}))
+    self.Title = u'РАСПОРЕД КОНТРОЛОРА ПО ЛОКАЦИЈАМА ЗА ДАН'
+    self.Title1 = u'{}, {}'.format(data.rsp[0].kn_dan, data.rsp[0].kn_datum)
+    self.PdfDoc = pc_PdfFile
+    self.DocElm = []
+    self.pdfprep()
+    self.pdfmake()
+
+  #= METHOD ==============================
+  # tbl_data
+  #=======================================
+  def tbl_data(self):
+
+    lll_data = [[Paragraph('Локација', pss.alfb), Paragraph('Презиме', pss.alfb), Paragraph('Име', pss.alfb)]]
+    for vil_row, row in enumerate(data.rsp):
+      lll_data.append(
+                      [
+                       Paragraph(row.lk_naziv_d, pss.alfn),
+                       Paragraph(row.kr_prezime, pss.alfn),
+                       Paragraph(row.kr_ime, pss.alfn),
+                      ]
+                     )
+    oxl_table = Table(lll_data, colWidths=[45*mm, 45*mm, 45*mm], hAlign='CENTER', repeatRows=1)
+    oxl_ts = tss.alng
+    oxl_ts.add('LINEBELOW', (0, 0), (-1, 0), lts.t05, colors.black)
+    oxl_table.setStyle(oxl_ts)
+
+    return oxl_table
+
+  #= METHOD ==============================
+  # pdfprep
+  #=======================================
+  def pdfprep(self):
+
+    # 1. strana
+    self.DocElm.append(Spacer(0*mm, 20*mm))
+    self.DocElm.append(tbl_ttl(self.Title))
+    self.DocElm.append(tbl_ttl(self.Title1))
+
+    self.DocElm.append(Spacer(0*mm, 5*mm))
+    oxl_tbl = self.tbl_data()
+
+    lol_tss = oxl_tbl.split(0*mm, 230*mm)
+    if len(lol_tss)<2:
+      self.DocElm.append(oxl_tbl)
+    else:
+      # ostale strane
+      lol_tbls = []
+      while len(lol_tss)==2:
+        lol_tbls.append(lol_tss[0])
+        lol_tss = lol_tss[1].split(0*mm, 250*mm)
+
+      for vil_ti, oxl_tblp in enumerate(lol_tbls, 1):
+        self.DocElm.append(oxl_tblp)
+        if vil_ti==1:
+          self.DocElm.append(Spacer(0*mm, 15*mm))
+        elif vil_ti<len(lol_tbls):
+          self.DocElm.append(Spacer(0*mm, 17*mm))
+
+  #= METHOD ==============================
+  # pdfmake
+  #=======================================
+  def pdfmake(self):
+
+    self.build(self.DocElm, canvasmaker=HdFtCanvas)
 
 #= CLASS ===============================
 # report
@@ -1836,35 +2383,40 @@ class report:
     utl.dircheck(reps.pdfdir)
     utl.filedelete(reps.pdf)
 
-    if pc_Report==u'zapisnik':
-      if pd_RepPrms['pc_vzpv_oznaka']==u'M1':
-        reps.pdf = osp.join(reps.pdfdir, '{}_m1.pdf'.format(pc_Report))
-        r = zapisnik_m1(pd_RepPrms[u'pi_pr_id'], reps.pdf)
-      elif pd_RepPrms['pc_vzpv_oznaka'] in (u'M2', u'M3'):
-        reps.pdf = osp.join(reps.pdfdir, '{}_m2m3.pdf'.format(pc_Report))
-        r = zapisnik_m2m3(pd_RepPrms[u'pi_pr_id'], reps.pdf)
-      elif pd_RepPrms['pc_vzpv_oznaka'][0]==u'L':
-        reps.pdf = osp.join(reps.pdfdir, '{}_l.pdf'.format(pc_Report))
-        r = zapisnik_l(pd_RepPrms[pi_pr_id], reps.pdf)
-      elif pd_RepPrms['pc_vzpv_oznaka']==u'N1':
-        reps.pdf = osp.join(reps.pdfdir, '{}_n1.pdf'.format(pc_Report))
-        r = zapisnik_n1(pd_RepPrms[u'pi_pr_id'], reps.pdf)
-      elif pd_RepPrms['pc_vzpv_oznaka'] in (u'N2', u'N3'):
-        reps.pdf = osp.join(reps.pdfdir, '{}_n2n3.pdf'.format(pc_Report))
-        r = zapisnik_n2n3(pd_RepPrms[u'pi_pr_id'], reps.pdf)
-      elif pd_RepPrms['pc_vzpv_oznaka'][0]==u'O':
-        reps.pdf = osp.join(reps.pdfdir, '{}_o.pdf'.format(pc_Report))
-        r = zapisnik_o(pd_RepPrms[u'pi_pr_id'], reps.pdf)
-    elif pc_Report==u'potvrda_b':
-      r = potvrda(pd_RepPrms[u'pi_pr_id'], reps.pdf)
-    elif pc_Report==u'neusaglasenost':
-      pass
-      r = neusaglasenost(pd_RepPrms[u'pi_pr_id'], reps.pdf)
-
+    vcl_Report = pc_Report.lower()
+    vil_pr_id = pd_RepPrms.get('pi_pr_id', 0)
+    vcl_vzpv_oznaka = pd_RepPrms.get('pc_vzpv_oznaka', '')
+    vbl_test = pd_RepPrms.get('pb_test', False)
+    vcl_kn_datum = pd_RepPrms.get('kn_datum', '')
+    if vil_pr_id:
+      if vcl_Report==u'zapisnik':
+        if vcl_vzpv_oznaka:
+          if vcl_vzpv_oznaka==u'M1':
+            reps.pdf = osp.join(reps.pdfdir, '{}_m1.pdf'.format(vcl_Report))
+            r = zapisnik_m1(vil_pr_id, reps.pdf)
+          elif vcl_vzpv_oznaka in (u'M2', u'M3'):
+            reps.pdf = osp.join(reps.pdfdir, '{}_m2m3.pdf'.format(vcl_Report))
+            r = zapisnik_m2m3(vil_pr_id, reps.pdf)
+          elif vcl_vzpv_oznaka[0]==u'L':
+            reps.pdf = osp.join(reps.pdfdir, '{}_l.pdf'.format(vcl_Report))
+            r = zapisnik_l(pd_RepPrms[pi_pr_id], reps.pdf)
+          elif vcl_vzpv_oznaka==u'N1':
+            reps.pdf = osp.join(reps.pdfdir, '{}_n1.pdf'.format(vcl_Report))
+            r = zapisnik_n1(vil_pr_id, reps.pdf)
+          elif vcl_vzpv_oznaka in (u'N2', u'N3'):
+            reps.pdf = osp.join(reps.pdfdir, '{}_n2n3.pdf'.format(vcl_Report))
+            r = zapisnik_n2n3(vil_pr_id, reps.pdf)
+          elif vcl_vzpv_oznaka[0]==u'O':
+            reps.pdf = osp.join(reps.pdfdir, '{}_o.pdf'.format(vcl_Report))
+            r = zapisnik_o(vil_pr_id, reps.pdf)
+      elif vcl_Report in [u'potvrda', u'potvrda_b']:
+        r = potvrda(vil_pr_id, reps.pdf, vbl_test)
+      elif vcl_Report==u'neusaglasenost':
+        r = neusaglasenost(vil_pr_id, reps.pdf)
+    elif vcl_Report=='raspored':
+      r = raspored(vcl_kn_datum, reps.pdf)
     if not osp.exists(reps.pdf):
-      reps.pdf = None
-      print('{}'.format(vcl_CmdRes))
-      print('Izveštaj "{}" ne postoji!'.format(reps.pdf))
+      print('Izveštaj "{}" nije generisan!'.format(reps.pdf))
 
     return reps.pdf
 

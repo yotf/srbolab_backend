@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#=======================================
+# copy_jasper_files
+#=======================================
+function copy_jasper_files()
+{
+
+  local jrdir="/home/zeljko/JaspersoftWorkspace/MyReports"
+  local jr_fls
+  declare -a jr_fls
+  jr_fls=($(ls *.jasper -v -r -l | grep -o -P -e "\w{1,}\.jasper"))
+  if [[ ${#jr_fls[@]} -gt 0 ]] ; then
+    for jr in "${jr_fls[@]}"; do
+      if [[ -f $jrdir/$jr ]] ; then
+        if [[ $jr -ot $jrdir/$jr ]] ; then
+          cp -T -u "$jrdir/$jr" "$jr"
+          echo "$jrdir/$jr => $jr" 
+        fi
+      fi
+    done
+  else
+    echo ""
+    echo "There are no .jasper files."
+  fi
+
+}
+
+copy_jasper_files

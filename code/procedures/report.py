@@ -21,6 +21,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
 
 from box import SBox as dd
+from datetime import datetime as dtdt
 
 # local
 from .pgdb import pgdb
@@ -96,11 +97,22 @@ def regfonts():
   """  Register .ttf fonts"""
 
   dcl_Fonts = {
-               'Tahoma' : 'tahoma.ttf',
-               'Tahoma Bold' : 'tahomabd.ttf',
-               'Verdana' : 'verdana.ttf',
-               'Courier New' : 'cour.ttf',
-               'Consolas' : 'consola.ttf',
+               'Tahoma': 'tahoma.ttf',
+               'Tahoma Bold': 'tahomabd.ttf',
+               'Tahoma Italic': 'tahomai.ttf',
+               'Tahoma Bold Italic': 'tahomabdi.ttf',
+               'Verdana': 'verdana.ttf',
+               'Verdana Bold': 'verdanab.ttf',
+               'Verdana Italic': 'verdanai.ttf',
+               'Verdana Bold Italic': 'verdanaz.ttf',
+               'Courier New': 'cour.ttf',
+               'Courier New Bold': 'courbd.ttf',
+               'Courier New Italic': 'couri.ttf',
+               'Courier New Bold Italic': 'courbi.ttf',
+               'Consolas': 'consola.ttf',
+               'Consolas Bold': 'consolab.ttf',
+               'Consolas Italic': 'consolai.ttf',
+               'Consolas Bold Italic': 'consolaz.ttf',
               }
   for vcl_FntNme, vcl_FntFle in dcl_Fonts.items():
     pdfmetrics.registerFont(TTFont(vcl_FntNme, osp.join(sysdf.reps, 'fonts', vcl_FntFle)))
@@ -139,6 +151,7 @@ class Data():
 
     self.fir = dd(self.fir())
 #    self.dget(pi_PrId, pb_Potvrda)
+    self.cd = dtdt.date(dtdt.today()).strftime('%d.%m.%Y')
 
   #= METHOD ==============================
   #  dget
@@ -1089,7 +1102,7 @@ class zapisnici():
 
     lll_data = []
     lll_data.append([Paragraph(u'Datum', pss.acfn), Paragraph(u'', pss.alfn), Paragraph(u'Kontrolor', pss.acfn)])
-    lll_data.append([Paragraph(data.pr.pr_datum, pss.acfn), Paragraph(u'', pss.acfn), Paragraph(u'', pss.acfn)])
+    lll_data.append([Paragraph(data.cd, pss.acfn), Paragraph(u'', pss.acfn), Paragraph(u'', pss.acfn)])
     lll_data.append([Paragraph(u'', pss.acfn), Paragraph(u'', pss.acfn), Paragraph(u'{} {}'.format(data.pr.kr_ime, data.pr.kr_prezime), pss.acfn)])
     oxl_table = Table(lll_data, rowHeights=[5*mm, 10*mm, 5*mm], colWidths=[63*mm, 64*mm, 63*mm], hAlign='LEFT')
     oxl_ts = tss.acng
@@ -2115,6 +2128,24 @@ class neusaglasenost(SimpleDocTemplateNP):
     return oxl_pr
 
   #= METHOD ==============================
+  # data_fir1
+  #=======================================
+  def data_fir1(self):
+
+    vcl_text = '<br/>'.join(
+                            [
+                             data.fir.fir_naziv,
+                             data.fir.fir_adresa_sediste,
+                             data.fir.fir_opis,
+                             'telefon: {}'.format(data.fir.fir_tel1),
+                             'mail: {}'.format(data.fir.fir_mail)
+                            ]
+                           )
+    oxl_pr = Paragraph(vcl_text, pss.alfb)
+
+    return oxl_pr
+
+  #= METHOD ==============================
   # img_sl
   #=======================================
   def img_sl(self):
@@ -2170,12 +2201,14 @@ class neusaglasenost(SimpleDocTemplateNP):
   def tbl_zkl(self):
 
     lll_data = []
-    lll_data.append([Paragraph(u'Vlasnik: {}'.format(nvl(data.pr.kl_naziv)), pss.alfn)])
-    lll_data.append([Paragraph(u'Adresa: {}'.format(nvl(data.pr.kl_adresa)), pss.alfn)])
-    lll_data.append([Paragraph(u'VIN oznake: {}'.format(nvl(data.pr.vz_sasija)), pss.alfn)])
-    lll_data.append([Paragraph(u'Broj motora: {}'.format(nvl(data.pr.vz_motor)), pss.alfn)])
-    oxl_table = Table(lll_data, hAlign='LEFT')
+    lll_data.append([Paragraph(u'Vlasnik: {}'.format(nvl(data.pr.kl_naziv)), pss.alfn), self.data_fir1()])
+    lll_data.append([Paragraph(u'Adresa: {}'.format(nvl(data.pr.kl_adresa)), pss.alfn), ''])
+    lll_data.append([Paragraph(u'VIN oznake: {}'.format(nvl(data.pr.vz_sasija)), pss.alfn), ''])
+    lll_data.append([Paragraph(u'Broj motora: {}'.format(nvl(data.pr.vz_motor)), pss.alfn), ''])
+    oxl_table = Table(lll_data, colWidths=[120*mm, 70*mm], hAlign='LEFT')
     oxl_ts = tss.alng
+    oxl_ts.add('SPAN', (-1, 0), (-1, -1))
+    oxl_ts.add('BOX', (-1, 0), (-1, -1), lts.t05, colors.black)
     oxl_table.setStyle(oxl_ts)
 
     return oxl_table
@@ -2195,8 +2228,38 @@ class neusaglasenost(SimpleDocTemplateNP):
                 [Paragraph(nvl(data.pr.pr_napomena), pss.alfn)],
                 [Paragraph(vcl_text, pss.alfn)],
                ]
-    oxl_table = Table(lll_data, rowHeights=[70*mm, 20*mm], colWidths=[190*mm], hAlign='LEFT')
+    oxl_table = Table(lll_data, rowHeights=[90*mm, 18*mm], colWidths=[190*mm], hAlign='LEFT')
     oxl_ts = tss.alg
+    oxl_ts.add('VALIGN', (0, 0), (-1, -1), 'TOP')
+    oxl_table.setStyle(oxl_ts)
+
+    return oxl_table
+
+  #= METHOD ==============================
+  # tbl_sgn
+  #=======================================
+  def tbl_sgn(self):
+
+
+    lll_data = [
+                [u'Podnosilac zahteva', u'', u'{}<br/>{}, {}'.format(data.fir.fir_naziv_s, data.fir.fir_opis_s, data.fir.fir_mesto_sediste)],
+                [u'', u'', u''],
+               ]
+    lll_dataf = []
+    for vil_row, lcl_row in enumerate(lll_data):
+      lll_dataf.append(
+                       [
+                        Paragraph(lcl_row[0], pss.acfn),
+                        Paragraph(lcl_row[1], pss.acfn),
+                        Paragraph(lcl_row[2], pss.acfn),
+                       ]
+                      )
+    oxl_table = Table(lll_dataf, rowHeights=[5*mm, 10*mm], colWidths=[60*mm, 70*mm, 60*mm], hAlign='LEFT')
+
+    oxl_ts = tss.acng
+    oxl_ts.add('ALIGN', (0, 0), (0, 0), 'LEFT')
+    oxl_ts.add('LINEBELOW', (0, -1), (0, -1), lts.t05, colors.black)
+    oxl_ts.add('LINEBELOW', (-1, -1), (-1, -1), lts.t05, colors.black)
     oxl_table.setStyle(oxl_ts)
 
     return oxl_table
@@ -2226,12 +2289,17 @@ class neusaglasenost(SimpleDocTemplateNP):
     self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(tbl_txt('U toku ispitivanja ustanovljene su sledeće neusaglašenosti:'))
 
-    self.DocElm.append(Spacer(0*mm, 0*mm))
+    self.DocElm.append(Spacer(0*mm, 2*mm))
     self.DocElm.append(self.tbl_data())
 
-    self.DocElm.append(Spacer(0*mm, 5*mm))
+    self.DocElm.append(Spacer(0*mm, 2*mm))
     self.DocElm.append(tbl_txt('Zabranjeno je preštampavanje i umnožavanje.'))
 
+    self.DocElm.append(Spacer(0*mm, 40*mm))
+    self.DocElm.append(tbl_txt(u'Datum: {}'.format(data.cd)))
+
+    self.DocElm.append(Spacer(0*mm, 2*mm))
+    self.DocElm.append(self.tbl_sgn())
     """
     self.DocElm.append(Spacer(0*mm, 5*mm))
     oxl_tbl = self.tbl_data()
@@ -2376,6 +2444,7 @@ class report:
 
     """  Generate PDF report file"""
 
+#    print('{}; {}; {}'.format(pc_UserName, pc_Report, pd_RepPrms={}))
     reps = dd({})
     reps['pdfdir'] = osp.join(sysdf.reps, 'pdf', pc_UserName)
     reps['pdf'] = osp.join(reps.pdfdir, '{}.pdf'.format(pc_Report))
@@ -2387,7 +2456,7 @@ class report:
     vil_pr_id = pd_RepPrms.get('pi_pr_id', 0)
     vcl_vzpv_oznaka = pd_RepPrms.get('pc_vzpv_oznaka', '')
     vbl_test = pd_RepPrms.get('pb_test', False)
-    vcl_kn_datum = pd_RepPrms.get('kn_datum', '')
+    vcl_kn_datum = pd_RepPrms.get('pc_kn_datum', '')
     if vil_pr_id:
       if vcl_Report==u'zapisnik':
         if vcl_vzpv_oznaka:

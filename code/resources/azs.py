@@ -1,4 +1,5 @@
 import json
+import traceback
 
 from flask_jwt_extended import get_jwt_claims, get_jwt_identity, jwt_required
 from flask_restful import Resource, reqparse
@@ -17,5 +18,6 @@ class Azs(Resource):
       query = db.data4azs({ "pr_id": body["pr_id"] }, string_type)
       return { "query": query, "type": body["type"] }
     except Exception as e:
+      traceback.print_exc()
       print(e.__class__, e)
       return { 'message': 'failed to fetch data'}, 500

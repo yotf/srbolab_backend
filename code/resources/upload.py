@@ -1,5 +1,6 @@
 import os
 import uuid
+import traceback
 from pathlib import Path
 
 import filetype
@@ -56,6 +57,7 @@ class Upload(Resource):
       os.chmod(link_path, 0o666)
       return { f_type: get_images(pr_id, f_type) }, 200
     except Exception as e:
+      traceback.print_exc()
       print(e.__class__, e)
       return { 'message': 'failed to save files'}, 500
 
@@ -63,16 +65,17 @@ class Upload(Resource):
 class Images(Resource):
   @jwt_required
   def get(self):
-    # try:
-    pr_id = request.args.get("pr_id")
-    images = {
-        "slike": get_images(pr_id, "slike"),
-        "doc": get_images(pr_id, "doc")
-    }
-    return images, 200
-    # except Exception as e:
-    #   print(e.__class__, e)
-    #   return { 'message': 'failed to retrive image files'}, 500
+    try:
+      pr_id = request.args.get("pr_id")
+      images = {
+          "slike": get_images(pr_id, "slike"),
+          "doc": get_images(pr_id, "doc")
+      }
+      return images, 200
+    except Exception as e:
+      traceback.print_exc()
+      print(e.__class__, e)
+      return { 'message': 'failed to retrive image files'}, 500
 
   @jwt_required
   def delete(self):
@@ -91,6 +94,7 @@ class Images(Resource):
         return { "message": "slika nije obrisana"}, 400
     except Exception as e:
       print(e)
+      traceback.print_exc()
       return { "message": "slika nije obrisana"}, 400
 
 
@@ -112,5 +116,6 @@ def delete_image(pr_id, f_type, filename):
     os.remove(fe_dir)
     return True
   except Exception as e:
+    traceback.print_exc()
     print(e)
     return False

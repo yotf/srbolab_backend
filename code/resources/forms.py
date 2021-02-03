@@ -1,5 +1,6 @@
 import datetime
 import json
+import traceback
 
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
@@ -22,5 +23,6 @@ class Forms(Resource):
       } for form_group in form_groups]
       return filtered_form_groups, 200
     except Exception as e:
+      traceback.print_exc()
       print(e.__class__, e)
       return { 'message': 'failed to fetch forms'}, 500

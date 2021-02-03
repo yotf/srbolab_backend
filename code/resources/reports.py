@@ -1,5 +1,6 @@
 import json
 import os
+import traceback
 
 from flask import send_file
 from flask_jwt_extended import get_jwt_claims, get_jwt_identity, jwt_required
@@ -35,5 +36,6 @@ class Reports(Resource):
 
       return send_file(file_path)
     except Exception as e:
+      traceback.print_exc()
       print(e.__class__, e)
       return { 'message': 'failed to fetch forms'}, 500

@@ -1,5 +1,6 @@
 import json
 import types
+import traceback
 
 from flask import request
 from flask_jwt_extended import get_jwt_claims, get_jwt_identity, jwt_required
@@ -77,6 +78,7 @@ class BaseResource(Resource):
           item["kr_password"] = ""
       return items, 200
     except Exception as e:
+      traceback.print_exc()
       print(e.__class__, e)
       print(f"failed to fetch {self.item_name}")
       return { 'message': f"failed to fetch {self.item_name}s"}, 500
@@ -112,6 +114,7 @@ class BaseResource(Resource):
       else:
         return new_item, 400
     except Exception as e:
+      traceback.print_exc()
       print(e.__class__, e)
       return { 'message': f"failed to create {self.item_name}"}, 500
 
@@ -141,6 +144,7 @@ class BaseResource(Resource):
       else:
         return update_result, 400
     except Exception as e:
+      traceback.print_exc()
       print(item)
       print(e.__class__, e)
       return { 'message': f"failed to update {self.item_name}"}, 500
@@ -195,5 +199,6 @@ class Copy(Resource):
           "rcod"]  #TODO fix primary key return
       return item, 200
     except Exception as e:
+      traceback.print_exc()
       print(e.__class__, e)
       return { 'message': f"failed to create {self.item_name}"}, 500

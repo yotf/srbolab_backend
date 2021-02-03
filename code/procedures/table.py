@@ -72,7 +72,7 @@ class table:
     crsr = conn.cursor()
     vxl_res = None
     try:
-      print('!!! {} - {}'.format(self.fnc.g.fullname, utl.py2json(px_rec)))
+#      print('!!! {} - {}'.format(self.fnc.g.fullname, utl.py2json(px_rec)))
       crsr.callproc(self.fnc.g.fullname, [utl.py2json(px_rec)])
       vxl_res = crsr.fetchall()
       if pb_count:

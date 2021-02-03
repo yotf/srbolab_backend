@@ -15,11 +15,10 @@ else:
   load_dotenv(path.join(basedir, ".env_prod"))
 
 DATA_PATH = environ.get("FEV_DATA_PATH")
+ASSETS_PATH = environ.get("FEV_ASSETS_PATH")
 FRONTEND_IMGS_PATH = environ.get("FEV_FRONTEND_IMGS_PATH")
-JAVA_PATH = environ.get("FEV_JAVA")
-JASPER_PATH = environ.get("FEV_JASPER")
 IMGS_PATH = f"{DATA_PATH}imgs"
-REPORTS_PATH = f"{DATA_PATH}reports"
+REPORTS_PATH = f"{ASSETS_PATH}reports"
 DOCS_PATH = f"{DATA_PATH}documents"
 OCR_PATH = f"{DATA_PATH}ocr"
 DB_PASSWORD = environ.get("FEV_DB_PASSWORD")

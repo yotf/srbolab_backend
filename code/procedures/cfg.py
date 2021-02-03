@@ -10,7 +10,7 @@ import sqlite3 as sqll
 
 # site-packages
 from box import SBox as dd
-from config import (DB_PASSWORD, DOCS_PATH, IMGS_PATH, JASPER_PATH, JAVA_PATH, OCR_PATH, REPORTS_PATH)
+from config import (DB_PASSWORD, DOCS_PATH, IMGS_PATH, OCR_PATH, REPORTS_PATH)
 
 #---------------------------------------
 # global variables
@@ -31,8 +31,6 @@ def getdirfile(pi_sdf_id=0):
                 'reps': REPORTS_PATH,
                 'imgs': IMGS_PATH,
                 'docs': DOCS_PATH,
-                'jasperstarter': JASPER_PATH,
-                'java': JAVA_PATH,
                 'ocr': OCR_PATH
                }
               )

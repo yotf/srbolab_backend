@@ -62,8 +62,20 @@ fntn = dd(
           {
            u'tahoma': 'Tahoma',
            u'tahomab': 'Tahoma Bold',
+           u'tahomai': 'Tahoma Italic',
+           u'tahomabi': 'Tahoma Bold Italic',
+           u'verdana': 'Verdana',
+           u'verdanab': 'Verdana Bold',
+           u'verdanai': 'Verdana Italic',
+           u'verdanabi': 'Verdana Bold Italic',
            u'consolas': 'Consolas',
+           u'consolasb': 'Consolas Bold',
+           u'consolasi': 'Consolas Italic',
+           u'consolabi': 'Consolas Bold Italic',
            u'couriernew': 'Courier New',
+           u'couriernewb': 'Courier New Bold',
+           u'couriernewi': 'Courier New Italic',
+           u'couriernewbi': 'Courier New Bold Italic',
           }
          )
 

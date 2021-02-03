@@ -5,26 +5,28 @@
 #  imports
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # system
-import locale as lc
 import os
 import os.path as osp
+import locale as lc
 
-from box import SBox as dd
+# site-packages
+from reportlab.platypus import *
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_RIGHT
-from reportlab.lib.pagesizes import A4, portrait
-from reportlab.lib.styles import ParagraphStyle
+from reportlab.pdfgen import canvas
 from reportlab.lib.units import mm
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfgen import canvas
-# site-packages
-from reportlab.platypus import *
+from reportlab.lib.pagesizes import A4, portrait
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
 
-from . import util as utl
-from .cfg import getpgdb, sysdf
+from box import SBox as dd
+from datetime import datetime as dtdt
+
 # local
 from .pgdb import pgdb
+from . import util as utl
+from .cfg import getpgdb, sysdf
 
 #---------------------------------------
 # setings
@@ -36,39 +38,46 @@ lc.setlocale(lc.LC_ALL, '')
 #---------------------------------------
 db = pgdb()
 
-imgs = dd({
-    u'sl1': osp.join(sysdf.reps, u'srbolab-logo.png'),
-    u'abs1': osp.join(sysdf.reps, u'abs-logo.png'),
-})
+imgs = dd(
+          {
+           u'sl1': osp.join(sysdf.reps, u'srbolab-logo.png'),
+           u'abs1': osp.join(sysdf.reps, u'abs-logo.png'),
+          }
+         )
 
-fnts = dd({
-    u's6': 6,
-    u's7': 7,
-    u's8': 8,
-    u's9': 9,
-    u's10': 10,
-    u's11': 11,
-    u's12': 12,
-    u's14': 14,
-})
+fnts = dd(
+          {
+           u's6': 6,
+           u's7': 7,
+           u's8': 8,
+           u's9': 9,
+           u's10': 10,
+           u's11': 11,
+           u's12': 12,
+           u's14': 14,
+          }
+         )
 
-fntn = dd({
-    u'tahoma': 'Tahoma',
-    u'tahomab': 'Tahoma Bold',
-    u'consolas': 'Consolas',
-    u'couriernew': 'Courier New',
-})
+fntn = dd(
+          {
+           u'tahoma': 'Tahoma',
+           u'tahomab': 'Tahoma Bold',
+           u'consolas': 'Consolas',
+           u'couriernew': 'Courier New',
+          }
+         )
 
-lts = dd({
-    u't025': 0.5,
-    u't05': 0.5,
-    u't075': 0.75,
-    u't1': 1,
-    u't125': 1.25,
-    u't15': 1.5,
-    u't175': 1.75,
-})
-
+lts = dd(
+         {
+          u't025': 0.5,
+          u't05': 0.5,
+          u't075': 0.75,
+          u't1': 1,
+          u't125': 1.25,
+          u't15': 1.5,
+          u't175': 1.75,
+         }
+        )
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
@@ -80,27 +89,35 @@ def nvl(px_cval, px_nval=u''):
 
   return (px_nval if px_cval is None else px_cval)
 
-
 #= FUNCTION ============================
 # regfonts
 #=======================================
 def regfonts():
+
   """  Register .ttf fonts"""
 
   dcl_Fonts = {
-      'Tahoma': 'tahoma.ttf',
-      'Tahoma Bold': 'tahomabd.ttf',
-      'Verdana': 'verdana.ttf',
-      'Courier New': 'cour.ttf',
-      'Consolas': 'consola.ttf',
-  }
+               'Tahoma': 'tahoma.ttf',
+               'Tahoma Bold': 'tahomabd.ttf',
+               'Tahoma Italic': 'tahomai.ttf',
+               'Tahoma Bold Italic': 'tahomabdi.ttf',
+               'Verdana': 'verdana.ttf',
+               'Verdana Bold': 'verdanab.ttf',
+               'Verdana Italic': 'verdanai.ttf',
+               'Verdana Bold Italic': 'verdanaz.ttf',
+               'Courier New': 'cour.ttf',
+               'Courier New Bold': 'courbd.ttf',
+               'Courier New Italic': 'couri.ttf',
+               'Courier New Bold Italic': 'courbi.ttf',
+               'Consolas': 'consola.ttf',
+               'Consolas Bold': 'consolab.ttf',
+               'Consolas Italic': 'consolai.ttf',
+               'Consolas Bold Italic': 'consolaz.ttf',
+              }
   for vcl_FntNme, vcl_FntFle in dcl_Fonts.items():
-    pdfmetrics.registerFont(
-        TTFont(vcl_FntNme, osp.join(sysdf.reps, 'fonts', vcl_FntFle)))
-
+    pdfmetrics.registerFont(TTFont(vcl_FntNme, osp.join(sysdf.reps, 'fonts', vcl_FntFle)))
 
 regfonts()
-
 
 #= METHOD ==============================
 # tbl_ttl
@@ -134,6 +151,7 @@ class Data():
 
     self.fir = dd(self.fir())
 #    self.dget(pi_PrId, pb_Potvrda)
+    self.cd = dtdt.date(dtdt.today()).strftime('%d.%m.%Y')
 
   #= METHOD ==============================
   #  dget
@@ -303,9 +321,7 @@ SELECT s.vz_sert_buka_lbl AS vz_sert_lbl,
 
     return vxl_res
 
-
 data = Data()
-
 
 #= CLASS ===============================
 #  ParagStyles
@@ -327,14 +343,7 @@ class ParagStyles():
   #=======================================
   def acfn(self):
 
-<<<<<<< HEAD
     return ParagraphStyle(name='acfn', fontName=self.fntnm, fontSize=self.fntsz, alignment=TA_CENTER)
-=======
-    return ParagraphStyle(name='psnc',
-                          fontName=fntn.tahoma,
-                          fontSize=fnts.s10,
-                          alignment=TA_CENTER)
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
   @property
   #= PROPERTY ============================
@@ -342,14 +351,7 @@ class ParagStyles():
   #=======================================
   def alfn(self):
 
-<<<<<<< HEAD
     return ParagraphStyle(name='alfn', fontName=self.fntnm, fontSize=self.fntsz, alignment=TA_LEFT)
-=======
-    return ParagraphStyle(name='psnl',
-                          fontName=self.fntnm,
-                          fontSize=self.fntsz,
-                          alignment=TA_LEFT)
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
   @property
   #= PROPERTY ============================
@@ -357,14 +359,7 @@ class ParagStyles():
   #=======================================
   def arfn(self):
 
-<<<<<<< HEAD
     return ParagraphStyle(name='arfn', fontName=self.fntnm, fontSize=self.fntsz, alignment=TA_RIGHT)
-=======
-    return ParagraphStyle(name='psnr',
-                          fontName=self.fntnm,
-                          fontSize=self.fntsz,
-                          alignment=TA_RIGHT)
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
   @property
   #= PROPERTY ============================
@@ -372,14 +367,7 @@ class ParagStyles():
   #=======================================
   def acfb(self):
 
-<<<<<<< HEAD
     return ParagraphStyle(name='acfb', fontName=self.fntnmb, fontSize=self.fntsz, alignment=TA_CENTER)
-=======
-    return ParagraphStyle(name='psbc',
-                          fontName=self.fntnmb,
-                          fontSize=self.fntsz,
-                          alignment=TA_CENTER)
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
   @property
   #= PROPERTY ============================
@@ -387,14 +375,7 @@ class ParagStyles():
   #=======================================
   def alfb(self):
 
-<<<<<<< HEAD
     return ParagraphStyle(name='alfb', fontName=self.fntnmb, fontSize=self.fntsz, alignment=TA_LEFT)
-=======
-    return ParagraphStyle(name='psbl',
-                          fontName=self.fntnmb,
-                          fontSize=self.fntsz,
-                          alignment=TA_LEFT)
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
   @property
   #= PROPERTY ============================
@@ -402,18 +383,9 @@ class ParagStyles():
   #=======================================
   def arfb(self):
 
-<<<<<<< HEAD
     return ParagraphStyle(name='arfb', fontName=self.fntnmb, fontSize=self.fntsz, alignment=TA_RIGHT)
-=======
-    return ParagraphStyle(name='psbr',
-                          fontName=self.fntnmb,
-                          fontSize=self.fntsz,
-                          alignment=TA_RIGHT)
-
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
 pss = ParagStyles(fnts.s10)
-
 
 #= CLASS ===============================
 #  TblStyles
@@ -433,16 +405,18 @@ class TblStyles():
   #=======================================
   def alg(self):
 
-    return TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-        ('TOPPADDING', (0, 0), (-1, -1), 1),
-        ('LEFTPADDING', (0, 0), (-1, -1), 3),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
-        ('INNERGRID', (0, 0), (-1, -1), lts.t05, colors.black),
-        ('BOX', (0, 0), (-1, -1), lts.t05, colors.black),
-    ])
+    return TableStyle(
+                      [
+                       ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                       ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                       ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
+                       ('TOPPADDING', (0, 0), (-1, -1), 1),
+                       ('LEFTPADDING', (0, 0), (-1, -1), 3),
+                       ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+                       ('INNERGRID', (0, 0), (-1, -1), lts.t05, colors.black),
+                       ('BOX', (0, 0), (-1, -1), lts.t05, colors.black),
+                      ]
+                     )
 
   @property
   #= PROPERTY ============================
@@ -450,16 +424,18 @@ class TblStyles():
   #=======================================
   def acg(self):
 
-    return TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-        ('TOPPADDING', (0, 0), (-1, -1), 1),
-        ('LEFTPADDING', (0, 0), (-1, -1), 3),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
-        ('INNERGRID', (0, 0), (-1, -1), lts.t05, colors.black),
-        ('BOX', (0, 0), (-1, -1), lts.t05, colors.black),
-    ])
+    return TableStyle(
+                      [
+                       ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                       ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                       ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
+                       ('TOPPADDING', (0, 0), (-1, -1), 1),
+                       ('LEFTPADDING', (0, 0), (-1, -1), 3),
+                       ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+                       ('INNERGRID', (0, 0), (-1, -1), lts.t05, colors.black),
+                       ('BOX', (0, 0), (-1, -1), lts.t05, colors.black),
+                      ]
+                     )
 
   @property
   #= PROPERTY ============================
@@ -467,38 +443,40 @@ class TblStyles():
   #=======================================
   def alng(self):
 
-    return TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-        ('TOPPADDING', (0, 0), (-1, -1), 1),
-        ('LEFTPADDING', (0, 0), (-1, -1), 3),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
-    ])
-
+    return TableStyle(
+                      [
+                       ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                       ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                       ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
+                       ('TOPPADDING', (0, 0), (-1, -1), 1),
+                       ('LEFTPADDING', (0, 0), (-1, -1), 3),
+                       ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+                      ]
+                     )
   @property
   #= PROPERTY ============================
   #  acng
   #=======================================
   def acng(self):
 
-    return TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-        ('TOPPADDING', (0, 0), (-1, -1), 1),
-        ('LEFTPADDING', (0, 0), (-1, -1), 3),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
-    ])
-
+    return TableStyle(
+                      [
+                       ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                       ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                       ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
+                       ('TOPPADDING', (0, 0), (-1, -1), 1),
+                       ('LEFTPADDING', (0, 0), (-1, -1), 3),
+                       ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+                      ]
+                     )
 
 tss = TblStyles()
-
 
 #= CLASS ===============================
 # SimpleDocTemplateNP
 #=======================================
 class SimpleDocTemplateNP(SimpleDocTemplate):
+
   """SimpleDocTemplate with frame with no padding"""
 
   #= METHOD ==============================
@@ -508,13 +486,12 @@ class SimpleDocTemplateNP(SimpleDocTemplate):
 
     if pageTemplates:
       oxl_fme = pageTemplates[0].frames[0]
-      oxl_fme._leftPadding = 0
-      oxl_fme._rightPadding = 0
-      oxl_fme._topPadding = 0
-      oxl_fme._bottomPadding = 0
+      oxl_fme._leftPadding=0
+      oxl_fme._rightPadding=0
+      oxl_fme._topPadding=0
+      oxl_fme._bottomPadding=0
       oxl_fme._geom()
     SimpleDocTemplate.addPageTemplates(self, pageTemplates)
-
 
 #= CLASS ===============================
 #  HdFtCanvas
@@ -625,11 +602,10 @@ class HdFtCanvasZap(canvas.Canvas):
     self.saveState()
 
     oxl_img = Image(imgs.sl1, kind='proportional')
-    oxl_img.drawHeight = 10 * mm
-    oxl_img.drawWidth = 37 * mm
+    oxl_img.drawHeight = 10*mm
+    oxl_img.drawWidth = 37*mm
     oxl_img.hAlign = 'CENTER'
 
-<<<<<<< HEAD
     vcl_text = ' '.join(
                         [
                          '{}<br/>'.format(data.fir.fir_naziv),
@@ -639,30 +615,21 @@ class HdFtCanvasZap(canvas.Canvas):
                         ]
                        )
     oxl_pr = Paragraph(vcl_text, pss.acfn)
-=======
-    vcl_text = ' '.join([
-        '{}<br/>'.format(data.fir.fir_naziv), data.fir.fir_adresa_sediste,
-        'telefon: {}'.format(data.fir.fir_tel1),
-        'mail: {}'.format(data.fir.fir_mail)
-    ])
-    oxl_pr = Paragraph(vcl_text, pss.psnc)
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
     lll_data = [[oxl_img, oxl_pr]]
-    oxl_table = Table(lll_data, colWidths=[40 * mm, 150 * mm], hAlign='LEFT')
+    oxl_table = Table(lll_data, colWidths=[40*mm, 150*mm], hAlign='LEFT')
     oxl_table.setStyle(tss.acg)
     oxl_table.wrapOn(self, 0, 0)
-    oxl_table.drawOn(self, 10 * mm, A4[1] - 20 * mm + 1)
+    oxl_table.drawOn(self, 10*mm, A4[1]-20*mm+1)
 
-    if self._pageNumber == pi_pg_cnt:
+    if self._pageNumber==pi_pg_cnt:
       oxl_table = zap.tbl_sgn
       oxl_table.wrapOn(self, 0, 0)
-      oxl_table.drawOn(self, 10 * mm, A4[1] - 280 * mm)
+      oxl_table.drawOn(self, 10*mm, A4[1]-280*mm)
     vcl_page = 'Strana {} od {}'.format(self._pageNumber, pi_pg_cnt)
     self.setFont('Tahoma', 10)
-    self.drawString(175 * mm, 5 * mm, vcl_page)
+    self.drawString(175*mm, 5*mm, vcl_page)
     self.restoreState()
-
 
 #= CLASS ===============================
 #  HdFtCanvasPot
@@ -741,25 +708,29 @@ class potvrda(SimpleDocTemplateNP):
   #= METHOD ==============================
   # __init__
   #=======================================
-  def __init__(self,
+  def __init__(
+               self,
                pi_PrId,
                pc_PdfFile,
                pb_Test=False,
                pl_PageSize=A4,
                pb_showBoundary=0,
-               pn_topMargin=10 * mm,
-               pn_bottomMargin=10 * mm,
-               pn_leftMargin=10 * mm,
-               pn_rightMargin=10 * mm):
+               pn_topMargin=10*mm,
+               pn_bottomMargin=10*mm,
+               pn_leftMargin=10*mm,
+               pn_rightMargin=10*mm
+              ):
 
-    SimpleDocTemplate.__init__(self,
+    SimpleDocTemplate.__init__(
+                               self,
                                pc_PdfFile,
                                pagesize=portrait(pl_PageSize),
                                showBoundary=pb_showBoundary,
                                topMargin=pn_topMargin,
                                bottomMargin=pn_bottomMargin,
                                leftMargin=pn_leftMargin,
-                               rightMargin=pn_rightMargin)
+                               rightMargin=pn_rightMargin
+                              )
 
     data.dget(self.__class__.__name__, dd({'pr_id': pi_PrId}))
     self.test = pb_Test
@@ -774,7 +745,6 @@ class potvrda(SimpleDocTemplateNP):
   #=======================================
   def data_fir(self):
 
-<<<<<<< HEAD
     vcl_text = '<br/>'.join(
                             [
                              data.fir.fir_naziv,
@@ -785,14 +755,6 @@ class potvrda(SimpleDocTemplateNP):
                             ]
                            )
     oxl_pr = Paragraph(vcl_text, pss.alfb)
-=======
-    vcl_text = '<br/>'.join([
-        data.fir.fir_naziv, data.fir.fir_adresa_sediste, data.fir.fir_opis,
-        'telefon: {}'.format(data.fir.fir_tel1),
-        'mail: {}'.format(data.fir.fir_mail)
-    ])
-    oxl_pr = Paragraph(vcl_text, pss.psbl)
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
     return oxl_pr
 
@@ -802,8 +764,8 @@ class potvrda(SimpleDocTemplateNP):
   def img_sl(self):
 
     oxl_img = Image(imgs.sl1, kind='proportional')
-    oxl_img.drawHeight = 30 * mm
-    oxl_img.drawWidth = 115 * mm
+    oxl_img.drawHeight = 30*mm
+    oxl_img.drawWidth = 115*mm
     oxl_img.hAlign = 'CENTER'
 
     return oxl_img
@@ -815,9 +777,7 @@ class potvrda(SimpleDocTemplateNP):
 
     oxl_img = self.img_sl()
     oxl_pr = self.data_fir()
-    oxl_table = Table([[oxl_img, oxl_pr]],
-                      colWidths=[115 * mm, 75 * mm],
-                      hAlign='LEFT')
+    oxl_table = Table([[oxl_img, oxl_pr]], colWidths=[115*mm, 75*mm], hAlign='LEFT')
     oxl_table.setStyle(tss.alg)
 
     return oxl_table
@@ -829,16 +789,8 @@ class potvrda(SimpleDocTemplateNP):
 
     lll_data = []
     for vil_row, oxl_row in enumerate(data.h):
-<<<<<<< HEAD
       lll_data.append([Paragraph(nvl(oxl_row.h_lbl), pss.alfn), Paragraph(nvl(oxl_row.h_val), pss.alfn)])
     oxl_table = Table(lll_data, colWidths=[50*mm, 65*mm], hAlign='LEFT')
-=======
-      lll_data.append([
-          Paragraph(nvl(oxl_row.h_lbl), pss.psnl),
-          Paragraph(nvl(oxl_row.h_val), pss.psnl)
-      ])
-    oxl_table = Table(lll_data, colWidths=[50 * mm, 65 * mm], hAlign='LEFT')
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
     oxl_table.setStyle(tss.alg)
 
     return oxl_table
@@ -850,7 +802,6 @@ class potvrda(SimpleDocTemplateNP):
 
     lll_data = []
     for vil_row, oxl_row in enumerate(data.b):
-<<<<<<< HEAD
       lll_data.append(
                       [
                        Paragraph(nvl(oxl_row.tis_lbl_coc), pss.acfn),
@@ -861,18 +812,6 @@ class potvrda(SimpleDocTemplateNP):
                      )
 
     oxl_table = Table(lll_data, colWidths=[11*mm, 15*mm, 100*mm, 64*mm], hAlign='LEFT')
-=======
-      lll_data.append([
-          Paragraph(nvl(oxl_row.tis_lbl_coc), pss.psnc),
-          Paragraph(nvl(oxl_row.tis_lbl_drvlc), pss.psnc),
-          Paragraph(nvl(oxl_row.tis_desc), pss.psnl),
-          Paragraph(nvl(oxl_row.tis_value), pss.psnl),
-      ])
-
-    oxl_table = Table(lll_data,
-                      colWidths=[11 * mm, 15 * mm, 100 * mm, 64 * mm],
-                      hAlign='LEFT')
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
     oxl_table.setStyle(tss.alg)
 
     return oxl_table
@@ -884,16 +823,8 @@ class potvrda(SimpleDocTemplateNP):
 
     lll_data = []
     for vil_row, oxl_row in enumerate(data.f):
-<<<<<<< HEAD
       lll_data.append([Paragraph(nvl(oxl_row.vz_sert_lbl), pss.alfn), Paragraph(nvl(oxl_row.vz_sert), pss.alfn)])
     oxl_table = Table(lll_data, colWidths=[80*mm, 110*mm], hAlign='LEFT')
-=======
-      lll_data.append([
-          Paragraph(nvl(oxl_row.vz_sert_lbl), pss.psnl),
-          Paragraph(nvl(oxl_row.vz_sert), pss.psnl)
-      ])
-    oxl_table = Table(lll_data, colWidths=[80 * mm, 110 * mm], hAlign='LEFT')
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
     oxl_table.setStyle(tss.alg)
 
     return oxl_table
@@ -904,21 +835,8 @@ class potvrda(SimpleDocTemplateNP):
   def tbl_ftr(self):
 
     lll_data = []
-<<<<<<< HEAD
     lll_data.append([Paragraph(u'POTVRĐUJEMO DA JE OVO VOZILO PROIZVEDENO U SKLADU SA EEC/ECE REGULATIVIMA', pss.alfb)])
     lll_data.append([Paragraph(u'Ovaj dokument se izdaje (bez pregleda vozila) na osnovu saobraćajne dozvole i važi bez pečata i potpisa', pss.alfn)])
-=======
-    lll_data.append([
-        Paragraph(
-            u'POTVRĐUJEMO DA JE OVO VOZILO PROIZVEDENO U SKLADU SA EEC/ECE REGULATIVIMA',
-            pss.psbl)
-    ])
-    lll_data.append([
-        Paragraph(
-            u'Ovaj dokument se izdaje (bez pregleda vozila) na osnovu saobraćajne dozvole i važi bez pečata i potpisa',
-            pss.psnl)
-    ])
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
     oxl_table = Table(lll_data, hAlign='LEFT')
     oxl_table.setStyle(tss.alng)
@@ -930,21 +848,21 @@ class potvrda(SimpleDocTemplateNP):
   #=======================================
   def pdfprep(self):
 
-    self.DocElm.append(Spacer(0 * mm, 0 * mm))
+    self.DocElm.append(Spacer(0*mm, 0*mm))
     self.DocElm.append(self.tbl_fir())
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(self.tbl_h())
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(tbl_ttl(self.Title))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(self.tbl_b())
 
     self.DocElm.append(self.tbl_f())
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(self.tbl_ftr())
 
   #= METHOD ==============================
@@ -956,7 +874,6 @@ class potvrda(SimpleDocTemplateNP):
       self.build(self.DocElm, canvasmaker=HdFtCanvasPot)
     else:
       self.build(self.DocElm)
-
 
 #= CLASS ===============================
 # zapisnici
@@ -977,16 +894,8 @@ class zapisnici():
   def tbl_zbr(self):
 
     lll_data = []
-<<<<<<< HEAD
     lll_data = [[Paragraph(u'Broj:', pss.acfn), Paragraph(nvl(data.pr.pr_broj), pss.acfn)]]
     oxl_table = Table(lll_data, colWidths=[20*mm, 40*mm], hAlign='CENTER')
-=======
-    lll_data = [[
-        Paragraph(u'Broj:', pss.psnc),
-        Paragraph(nvl(data.pr.pr_broj), pss.psnc)
-    ]]
-    oxl_table = Table(lll_data, colWidths=[20 * mm, 40 * mm], hAlign='CENTER')
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
     oxl_ts = tss.acng
     oxl_ts.add('LINEBELOW', (1, 0), (1, 0), lts.t05, colors.black)
     oxl_table.setStyle(oxl_ts)
@@ -1000,26 +909,10 @@ class zapisnici():
   def tbl_zkl(self):
 
     lll_data = []
-<<<<<<< HEAD
     lll_data.append([Paragraph(u'Podnosilac zahteva:', pss.alfn), Paragraph(nvl(data.pr.kl_naziv), pss.alfn)])
     lll_data.append([Paragraph(u'Adresa:', pss.alfn), Paragraph(nvl(data.pr.kl_adresa), pss.alfn)])
     lll_data.append([Paragraph(u'Kontakt:', pss.alfn), Paragraph(nvl(data.pr.kl_telefon), pss.alfn)])
     oxl_table = Table(lll_data, colWidths=[35*mm, 150*mm], hAlign='LEFT')
-=======
-    lll_data.append([
-        Paragraph(u'Podnosilac zahteva:', pss.psnl),
-        Paragraph(nvl(data.pr.kl_naziv), pss.psnl)
-    ])
-    lll_data.append([
-        Paragraph(u'Adresa:', pss.psnl),
-        Paragraph(nvl(data.pr.kl_adresa), pss.psnl)
-    ])
-    lll_data.append([
-        Paragraph(u'Kontakt:', pss.psnl),
-        Paragraph(nvl(data.pr.kl_telefon), pss.psnl)
-    ])
-    oxl_table = Table(lll_data, colWidths=[35 * mm, 150 * mm], hAlign='LEFT')
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
     oxl_ts = tss.acng
     oxl_ts.add('LINEBELOW', (1, 0), (1, -1), lts.t05, colors.black)
     oxl_table.setStyle(oxl_ts)
@@ -1032,40 +925,39 @@ class zapisnici():
   def tbl_zvd(self, pc_zap):
 
     lcl_vzdok = nvl(data.pr.pvd_oznaka).split(u'/')
-    lcl_vzdokx = [u''] * 4
+    lcl_vzdokx = [u'']*4
     for vcl_vzdok in lcl_vzdok:
-      if vcl_vzdok == u'SD':
+      if vcl_vzdok==u'SD':
         lcl_vzdokx[0] = u'x'
-      elif vcl_vzdok == u'OD':
+      elif vcl_vzdok==u'OD':
         lcl_vzdokx[1] = u'x'
-      elif vcl_vzdok == u'COC':
+      elif vcl_vzdok==u'COC':
         lcl_vzdokx[2] = u'x'
-      elif vcl_vzdok == u'PP':
+      elif vcl_vzdok==u'PP':
         lcl_vzdokx[3] = u'x'
 
-    lcl_extra = [u''] * 4
-    if pc_zap == u'M1':
+    lcl_extra = [u'']*4
+    if pc_zap==u'M1':
       lcl_extra = [u'STAKLA:', u'PR. PLOČICA (VW):', u'GORIVO:', u'AC:']
-    elif pc_zap == u'M2M3':
+    elif pc_zap==u'M2M3':
       lcl_extra = [u'', u'', u'STAKLA:', u'GORIVO:']
-    elif pc_zap == u'L':
+    elif pc_zap==u'L':
       lcl_extra = [u'', u'', u'', u'GORIVO:']
-    elif pc_zap == u'N1':
+    elif pc_zap==u'N1':
       lcl_extra = [u'', u'STAKLA:', u'PR. PLOČICA (VW):', u'GORIVO:']
-    elif pc_zap == u'N2N3':
+    elif pc_zap==u'N2N3':
       lcl_extra = [u'', u'', u'STAKLA:', u'GORIVO:']
-
+      
     lll_data = [
-        [u'Dostavljena dokumentacija', u'', u'', u'', u''],
-        [lcl_vzdokx[0], u'Saobraćajna dozvola', u'', lcl_extra[0], u''],
-        [lcl_vzdokx[1], u'Odgovarajući dokument', u'', lcl_extra[1], u''],
-        [lcl_vzdokx[2], u'COC dokument', u'', lcl_extra[2], u''],
-        [lcl_vzdokx[3], u'Potvrda pr. proizvođača', u'', lcl_extra[3], u''],
-    ]
+                [u'Dostavljena dokumentacija', u'', u'', u'', u''],
+                [lcl_vzdokx[0], u'Saobraćajna dozvola', u'', lcl_extra[0], u''],
+                [lcl_vzdokx[1], u'Odgovarajući dokument', u'', lcl_extra[1], u''],
+                [lcl_vzdokx[2], u'COC dokument', u'', lcl_extra[2], u''],
+                [lcl_vzdokx[3], u'Potvrda pr. proizvođača', u'', lcl_extra[3], u''],
+               ]
 
     lll_dataf = []
     for lcl_row in lll_data:
-<<<<<<< HEAD
       lll_dataf.append(
                        [
                         Paragraph(lcl_row[0], pss.acfn),
@@ -1076,18 +968,6 @@ class zapisnici():
                        ]
                       )
     oxl_table = Table(lll_dataf, colWidths=[7*mm, 48*mm, 90*mm, 38*mm, 7*mm], hAlign='LEFT')
-=======
-      lll_dataf.append([
-          Paragraph(lcl_row[0], pss.psnc),
-          Paragraph(lcl_row[1], pss.psnl),
-          Paragraph(lcl_row[2], pss.psnl),
-          Paragraph(lcl_row[3], pss.psnr),
-          Paragraph(lcl_row[4], pss.psnc),
-      ])
-    oxl_table = Table(lll_dataf,
-                      colWidths=[7 * mm, 48 * mm, 90 * mm, 38 * mm, 7 * mm],
-                      hAlign='LEFT')
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
     oxl_ts = tss.alng
     oxl_ts.add('BOX', (0, 0), (-1, -1), lts.t05, colors.black)
@@ -1105,72 +985,30 @@ class zapisnici():
   #=======================================
   def tbl_hmlgo(self, pc_zap=u'*'):
 
-    if pc_zap == u'O':
+    if pc_zap==u'O':
       lll_data = [
-          [
-              u'Zadnje poziciono svetlo', u'', u'Zadnji katadiopteri', u'',
-              u'Bočni katadiopteri', u''
-          ],
-          [
-              u'Zadnje stop svetlo', u'', u'Zadnje gabaritno svetlo', u'',
-              u'Pneumatici', u''
-          ],
-          [
-              u'Zadnji pokazivač pravca', u'', u'Prednje gabaritno svetlo', u'',
-              u'', u''
-          ],
-          [
-              u'Svetla registarske tablice', u'', u'Bočna poziciona svetla',
-              u'', u'', u''
-          ],
-      ]
+                  [u'Zadnje poziciono svetlo', u'', u'Zadnji katadiopteri', u'', u'Bočni katadiopteri', u''],
+                  [u'Zadnje stop svetlo', u'', u'Zadnje gabaritno svetlo', u'', u'Pneumatici', u''],
+                  [u'Zadnji pokazivač pravca', u'', u'Prednje gabaritno svetlo', u'', u'', u''],
+                  [u'Svetla registarske tablice', u'', u'Bočna poziciona svetla', u'', u'', u''],
+                 ]
     else:
       lll_data = [
-          [
-              u'Prednje glavno svetlo', u'', u'Zadnji pokazivač pravca', u'',
-              u'Zadnje gabaritno svetlo', u''
-          ],
-          [
-              u'Prednje poziciono svetlo', u'', u'Svetla registarske tablice',
-              u'', u'Bočna poziciona svetla', u''
-          ],
-          [
-              u'Prednje svetlo za maglu', u'', u'Zadnji katadiopteri', u'',
-              u'Bočni katadiopteri', u''
-          ],
-          [
-              u'Prednji pokazivač pravca', u'', u'Svetla za vožnju u nazad',
-              u'', u'Sigurnosni pojasevi', u''
-          ],
-          [
-              u'Dnevno svetlo za vožnju', u'', u'Sv. za vožnju pri skretanju',
-              u'', u'Sigurnosna stakla', u''
-          ],
-          [
-              u'Zadnje poziciono svetlo', u'', u'Zadnja svetla za maglu', u'',
-              u'Retrovizori', u''
-          ],
-          [
-              u'Zadnje stop svetlo', u'', u'Parkirno svetlo', u'',
-              u'Vučni uređaj', u''
-          ],
-          [
-              u'Pomoćno stop svetlo', u'', u'Prednje gabaritno svetlo', u'',
-              u'Pneumatici', u''
-          ],
-          [u'', u'', u'', u'', u'', u''],
-      ]
-    lll_data.insert(
-        0, [u'KONTROLISANJE HOMOLOGACIONIH OZNAKA', u'', u'', u'', u'', u''])
-    lll_data.append([
-        'x = uređaj-sistem postoji na vozilu,', u'',
-        u'- = uređaj-sistem ne postoji na vozilu,', u'',
-        u'N/P = nije primenljivo', u''
-    ])
+                  [u'Prednje glavno svetlo', u'', u'Zadnji pokazivač pravca', u'', u'Zadnje gabaritno svetlo', u''],
+                  [u'Prednje poziciono svetlo', u'', u'Svetla registarske tablice', u'', u'Bočna poziciona svetla', u''],
+                  [u'Prednje svetlo za maglu', u'', u'Zadnji katadiopteri', u'', u'Bočni katadiopteri', u''],
+                  [u'Prednji pokazivač pravca', u'', u'Svetla za vožnju u nazad', u'', u'Sigurnosni pojasevi', u''],
+                  [u'Dnevno svetlo za vožnju', u'', u'Sv. za vožnju pri skretanju', u'', u'Sigurnosna stakla', u''],
+                  [u'Zadnje poziciono svetlo', u'', u'Zadnja svetla za maglu', u'', u'Retrovizori', u''],
+                  [u'Zadnje stop svetlo', u'', u'Parkirno svetlo', u'', u'Vučni uređaj', u''],
+                  [u'Pomoćno stop svetlo', u'', u'Prednje gabaritno svetlo', u'', u'Pneumatici', u''],
+                  [u'', u'', u'', u'', u'', u''],
+                 ]
+    lll_data.insert(0, [u'KONTROLISANJE HOMOLOGACIONIH OZNAKA', u'', u'', u'', u'', u''])
+    lll_data.append(['x = uređaj-sistem postoji na vozilu,', u'', u'- = uređaj-sistem ne postoji na vozilu,', u'', u'N/P = nije primenljivo', u''])
     vil_rows = len(lll_data)
     lll_dataf = []
     for vil_row, lcl_row in enumerate(lll_data):
-<<<<<<< HEAD
       lll_dataf.append(
                        [
                         Paragraph(lcl_row[0], (pss.acfb if vil_row==0 else pss.alfn)),
@@ -1182,23 +1020,6 @@ class zapisnici():
                        ]
                       )
     oxl_table = Table(lll_dataf, rowHeights=[5*mm]*len(lll_data), colWidths=[56*mm, 7*mm, 56*mm, 8*mm, 55*mm, 8*mm], hAlign='LEFT')
-=======
-      lll_dataf.append([
-          Paragraph(lcl_row[0], (pss.psbc if vil_row == 0 else pss.psnl)),
-          Paragraph(lcl_row[1], pss.psnc),
-          Paragraph(lcl_row[2],
-                    (pss.psnc if vil_row == vil_rows else pss.psnl)),
-          Paragraph(lcl_row[3], pss.psnl),
-          Paragraph(lcl_row[4],
-                    (pss.psnc if vil_row == vil_rows else pss.psnl)),
-          Paragraph(lcl_row[5], pss.psnl),
-      ])
-    oxl_table = Table(
-        lll_dataf,
-        rowHeights=[5 * mm] * len(lll_data),
-        colWidths=[56 * mm, 7 * mm, 56 * mm, 8 * mm, 55 * mm, 8 * mm],
-        hAlign='LEFT')
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
     oxl_ts = tss.alng
     oxl_ts.add('ALIGN', (0, 0), (-1, 0), 'CENTER')
@@ -1220,50 +1041,25 @@ class zapisnici():
   def tbl_vzdata(self, pc_zap=u'*'):
 
     lll_data = []
-    lll_data.append([
-        u'0.10.', u'(E)', u'Identifikaciona oznaka (VIN)', data.pr.vz_sasija,
-        u''
-    ])
-    if pc_zap != u'O':
-      lll_data.append(
-          [u'21', u'(P)', u'Oznaka motora', data.pr.mto_oznaka, u''])
-    lll_data.append([
-        u'0.1.', u'(D.1)', u'Marka (komercijalni naziv proizvođača)',
-        data.pr.mr_naziv, u''
-    ])
-    lll_data.append(
-        [u'0.2.1.', u'(D.3)', u'Komercijalna oznaka', data.pr.md_naziv_k, u''])
+    lll_data.append([u'0.10.', u'(E)', u'Identifikaciona oznaka (VIN)', data.pr.vz_sasija, u''])
+    if pc_zap!=u'O':
+      lll_data.append([u'21', u'(P)', u'Oznaka motora', data.pr.mto_oznaka, u''])
+    lll_data.append([u'0.1.', u'(D.1)', u'Marka (komercijalni naziv proizvođača)', data.pr.mr_naziv, u''])
+    lll_data.append([u'0.2.1.', u'(D.3)', u'Komercijalna oznaka', data.pr.md_naziv_k, u''])
     lll_data.append([u'0.4', u'(J)', u'Vrsta', data.pr.vz_kategorija, u''])
-    lll_data.append(
-        [u'38.', u'(J.1)', u'Oznaka oblika karoserije', data.pr.vz_vzk, u''])
-    lll_data.append([
-        u'0.2.', u'(D.2)', u'Tip / Varijanta / Verzija', data.pr.vz_mdtvv, u''
-    ])
-    lll_data.append([
-        u'16.', u'(F.1)', u'Najveća dozvoljena masa [kg]', data.pr.vz_masa_max,
-        u''
-    ])
-    lll_data.append([
-        u'16.2.', u'(N)', u'Najveće dozvolj. oso. opterećenje [kg]',
-        data.pr.vz_os_nosivost, u''
-    ])
-    lll_data.append(
-        [u'1.', u'(L)', u'Broj osovina i točkova', data.pr.vz_os_broj, u''])
-    if pc_zap != u'O':
-      lll_data.append([
-          u'42.', u'(S.1)', u'Broj mesta za sedenje', data.pr.vz_mesta_sedenje,
-          u''
-      ])
+    lll_data.append([u'38.', u'(J.1)', u'Oznaka oblika karoserije', data.pr.vz_vzk, u''])
+    lll_data.append([u'0.2.', u'(D.2)', u'Tip / Varijanta / Verzija', data.pr.vz_mdtvv, u''])
+    lll_data.append([u'16.', u'(F.1)', u'Najveća dozvoljena masa [kg]', data.pr.vz_masa_max, u''])
+    lll_data.append([u'16.2.', u'(N)', u'Najveće dozvolj. oso. opterećenje [kg]', data.pr.vz_os_nosivost, u''])
+    lll_data.append([u'1.', u'(L)', u'Broj osovina i točkova', data.pr.vz_os_broj, u''])
+    if pc_zap!=u'O':
+      lll_data.append([u'42.', u'(S.1)', u'Broj mesta za sedenje', data.pr.vz_mesta_sedenje, u''])
     lll_data.append([u'35.', u'', u'Pneumatici', data.pr.vz_os_pneumatici, u''])
-    lll_data.append([
-        u'Uređaj za spajanje vučnog i priključnog vozila (da/ne)', u'', u'',
-        data.pr.vz_kuka, u''
-    ])
+    lll_data.append([u'Uređaj za spajanje vučnog i priključnog vozila (da/ne)', u'', u'', data.pr.vz_kuka, u''])
     lll_data.append([u'Očitana kilometraža', u'', u'', data.pr.vz_km, u''])
 
     lll_dataf = []
     for vil_row, lcl_row in enumerate(lll_data):
-<<<<<<< HEAD
       lll_dataf.append(
                        [
                         Paragraph(lcl_row[0], (pss.acfn if vil_row<12 else pss.alfn)),
@@ -1274,18 +1070,6 @@ class zapisnici():
                        ]
                       )
     oxl_table = Table(lll_dataf, colWidths=[13*mm, 13*mm, 63*mm, 94*mm, 7*mm], hAlign='LEFT')
-=======
-      lll_dataf.append([
-          Paragraph(lcl_row[0], (pss.psnc if vil_row < 12 else pss.psnl)),
-          Paragraph(lcl_row[1], pss.psnc),
-          Paragraph(lcl_row[2], pss.psnl),
-          Paragraph(lcl_row[3], pss.psnl),
-          Paragraph(lcl_row[4], pss.psnc),
-      ])
-    oxl_table = Table(lll_dataf,
-                      colWidths=[13 * mm, 13 * mm, 63 * mm, 94 * mm, 7 * mm],
-                      hAlign='LEFT')
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
     oxl_ts = tss.alg
     oxl_ts.add('ALIGN', (0, 1), (0, -1), 'CENTER')
@@ -1303,16 +1087,8 @@ class zapisnici():
   def tbl_text(self):
 
     lll_data = []
-<<<<<<< HEAD
     lll_data.append([Paragraph(u'', pss.alfn)])
     oxl_table = Table(lll_data, rowHeights=[25*mm], colWidths=[190*mm], hAlign='LEFT')
-=======
-    lll_data.append([Paragraph(u'', pss.psnl)])
-    oxl_table = Table(lll_data,
-                      rowHeights=[25 * mm],
-                      colWidths=[190 * mm],
-                      hAlign='LEFT')
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
     oxl_ts = tss.alng
     oxl_table.setStyle(oxl_ts)
 
@@ -1325,32 +1101,10 @@ class zapisnici():
   def tbl_sgn(self):
 
     lll_data = []
-<<<<<<< HEAD
     lll_data.append([Paragraph(u'Datum', pss.acfn), Paragraph(u'', pss.alfn), Paragraph(u'Kontrolor', pss.acfn)])
-    lll_data.append([Paragraph(data.pr.pr_datum, pss.acfn), Paragraph(u'', pss.acfn), Paragraph(u'', pss.acfn)])
+    lll_data.append([Paragraph(data.cd, pss.acfn), Paragraph(u'', pss.acfn), Paragraph(u'', pss.acfn)])
     lll_data.append([Paragraph(u'', pss.acfn), Paragraph(u'', pss.acfn), Paragraph(u'{} {}'.format(data.pr.kr_ime, data.pr.kr_prezime), pss.acfn)])
     oxl_table = Table(lll_data, rowHeights=[5*mm, 10*mm, 5*mm], colWidths=[63*mm, 64*mm, 63*mm], hAlign='LEFT')
-=======
-    lll_data.append([
-        Paragraph(u'Datum', pss.psnc),
-        Paragraph(u'', pss.psnl),
-        Paragraph(u'Kontrolor', pss.psnc)
-    ])
-    lll_data.append([
-        Paragraph(data.pr.pr_datum, pss.psnc),
-        Paragraph(u'', pss.psnc),
-        Paragraph(u'', pss.psnc)
-    ])
-    lll_data.append([
-        Paragraph(u'', pss.psnc),
-        Paragraph(u'', pss.psnc),
-        Paragraph(u'{} {}'.format(data.pr.kr_ime, data.pr.kr_prezime), pss.psnc)
-    ])
-    oxl_table = Table(lll_data,
-                      rowHeights=[5 * mm, 10 * mm, 5 * mm],
-                      colWidths=[63 * mm, 64 * mm, 63 * mm],
-                      hAlign='LEFT')
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
     oxl_ts = tss.acng
     oxl_ts.add('LINEBELOW', (0, 1), (0, 1), lts.t05, colors.black)
     oxl_ts.add('LINEBELOW', (2, 1), (2, 1), lts.t05, colors.black)
@@ -1359,9 +1113,7 @@ class zapisnici():
 
     return oxl_table
 
-
 zap = zapisnici()
-
 
 #= CLASS ===============================
 # zapisnik_m1
@@ -1371,24 +1123,28 @@ class zapisnik_m1(SimpleDocTemplateNP):
   #= METHOD ==============================
   # __init__
   #=======================================
-  def __init__(self,
+  def __init__(
+               self,
                pi_PrId,
                pc_PdfFile,
                pl_PageSize=A4,
                pb_showBoundary=0,
-               pn_topMargin=10 * mm,
-               pn_bottomMargin=10 * mm,
-               pn_leftMargin=10 * mm,
-               pn_rightMargin=10 * mm):
+               pn_topMargin=10*mm,
+               pn_bottomMargin=10*mm,
+               pn_leftMargin=10*mm,
+               pn_rightMargin=10*mm
+              ):
 
-    SimpleDocTemplate.__init__(self,
+    SimpleDocTemplate.__init__(
+                               self,
                                pc_PdfFile,
                                pagesize=portrait(pl_PageSize),
                                showBoundary=pb_showBoundary,
                                topMargin=pn_topMargin,
                                bottomMargin=pn_bottomMargin,
                                leftMargin=pn_leftMargin,
-                               rightMargin=pn_rightMargin)
+                               rightMargin=pn_rightMargin
+                              )
 
     data.dget(self.__class__.__name__, dd({'pr_id': pi_PrId}))
     self.Title = u'ZAPISNIK O ISPITIVANJU VOZILA VRSTE M1'
@@ -1403,93 +1159,50 @@ class zapisnik_m1(SimpleDocTemplateNP):
   def tbl_ppv(self):
 
     lll_data = [
-        [
-            'KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'',
-            u''
-        ],
-        [
-            '1', u'uređaji za upravlj. - sistem za upravljanje',
-            u'komanda na levoj strani', u'', u'*'
-        ],
-        [
-            '2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna',
-            u'', u'*'
-        ],
-        ['', u'', u'pomoćna', u'', u'*'],
-        ['', u'', u'parkirna', u'', u'*'],
-        ['', u'', u'ABS (ako ima)', u'', u'*'],
-        [
-            '3', u'uređaji za osvetljavanje puta',
-            u'svetlosno i svetlosno signalni uređaji', u'', u'*'
-        ],
-        ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
-        ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
-        [
-            '4', u'uređaji koji omogućuju normalnu vidljivost',
-            u'retrovizori spoljni oba i unutrašnji', u'', u'*'
-        ],
-        ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
-        ['', u'', u'uređaj za brisanje', u'', u''],
-        ['', u'', u'uređaj za kvašenje', u'', u''],
-        ['5', u'uređaj za davanje zvučnih znakova', u'', u'', u'*'],
-        [
-            '6', u'uređaji za kontrolu i davanje znakova',
-            u'brzinomer sa odometrom', u'', u''
-        ],
-        ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
-        ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
-        [
-            '7', u'uređaji za odvođenje i regulisanje izduvnih gasova',
-            u'katalizator', u'', u'*'
-        ],
-        ['', u'', u'ne u desnu stranu i u gabaritima izduva', u'', u''],
-        [
-            '8', u'uređaji za spajanje vučnog i priključnog vozila',
-            u'rastavljen ne sme da premaši gabarit', u'', u'*'
-        ],
-        ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
-        [
-            '10', u'uređaji za oslanjanje',
-            u'bez kontakta točkova i karoserije', u'', u''
-        ],
-        [
-            '11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama',
-            u'', u''
-        ],
-        ['12', u'elektro uređaji i instalacija', u'', u'', u''],
-        ['13', u'pogonski uređaj', u'', u'', u''],
-        [
-            '14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču',
-            u'', u''
-        ],
-        [
-            '15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja',
-            u'opšta konstrukcija', u'', u'*'
-        ],
-        ['', u'', u'VIN', u'', u''],
-        ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
-        ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
-        ['', u'', u'reklamne table u gabaritima', u'', u''],
-        ['', u'', u'prostor za tablicu', u'', u''],
-        ['', u'', u'unutrašnja rasveta', u'', u''],
-        ['', u'', u'dvostepene brave', u'', u''],
-        ['', u'', u'blatobrani iznad svih točkova u širini točka', u'', u''],
-        ['', u'', u'branik najmanje napred najistureniji', u'', u''],
-        ['', u'', u'pojasevi za sva mesta', u'', u'*'],
-        ['', u'', u'priključak za vuču neispravnog vozula', u'', u'*'],
-        ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
-        [
-            '', u'x = uređaj/sistem postoji na vozilu,',
-            u'- = uređaj/sistem ne postoji na vozilu', u'', u''
-        ],
-        [
-            '', u'&nbsp;' * 15 + u'N/P = nije primenljivo,',
-            u'&nbsp;' * 15 + u'* = obavezna homologacija', u'', u''
-        ],
-    ]
+                ['KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'', u''],
+                ['1', u'uređaji za upravlj. - sistem za upravljanje', u'komanda na levoj strani', u'', u'*'],
+                ['2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna', u'', u'*'],
+                ['', u'', u'pomoćna', u'', u'*'],
+                ['', u'', u'parkirna', u'', u'*'],
+                ['', u'', u'ABS (ako ima)', u'', u'*'],
+                ['3', u'uređaji za osvetljavanje puta', u'svetlosno i svetlosno signalni uređaji', u'', u'*'],
+                ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
+                ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
+                ['4', u'uređaji koji omogućuju normalnu vidljivost', u'retrovizori spoljni oba i unutrašnji', u'', u'*'],
+                ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
+                ['', u'', u'uređaj za brisanje', u'', u''],
+                ['', u'', u'uređaj za kvašenje', u'', u''],
+                ['5', u'uređaj za davanje zvučnih znakova', u'', u'', u'*'],
+                ['6', u'uređaji za kontrolu i davanje znakova', u'brzinomer sa odometrom', u'', u''],
+                ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
+                ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
+                ['7', u'uređaji za odvođenje i regulisanje izduvnih gasova', u'katalizator', u'', u'*'],
+                ['', u'', u'ne u desnu stranu i u gabaritima izduva', u'', u''],
+                ['8', u'uređaji za spajanje vučnog i priključnog vozila', u'rastavljen ne sme da premaši gabarit', u'', u'*'],
+                ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
+                ['10', u'uređaji za oslanjanje', u'bez kontakta točkova i karoserije', u'', u''],
+                ['11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama', u'', u''],
+                ['12', u'elektro uređaji i instalacija', u'', u'', u''],
+                ['13', u'pogonski uređaj', u'', u'', u''],
+                ['14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču', u'', u''],
+                ['15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja', u'opšta konstrukcija', u'', u'*'],
+                ['', u'', u'VIN', u'', u''],
+                ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
+                ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
+                ['', u'', u'reklamne table u gabaritima', u'', u''],
+                ['', u'', u'prostor za tablicu', u'', u''],
+                ['', u'', u'unutrašnja rasveta', u'', u''],
+                ['', u'', u'dvostepene brave', u'', u''],
+                ['', u'', u'blatobrani iznad svih točkova u širini točka', u'', u''],
+                ['', u'', u'branik najmanje napred najistureniji', u'', u''],
+                ['', u'', u'pojasevi za sva mesta', u'', u'*'],
+                ['', u'', u'priključak za vuču neispravnog vozula', u'', u'*'],
+                ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
+                ['', u'x = uređaj/sistem postoji na vozilu,', u'- = uređaj/sistem ne postoji na vozilu', u'', u''],
+                ['', u'&nbsp;'*15+u'N/P = nije primenljivo,', u'&nbsp;'*15+u'* = obavezna homologacija', u'', u''],
+               ]
     lll_dataf = []
     for vil_row, lcl_row in enumerate(lll_data):
-<<<<<<< HEAD
       lll_dataf.append(
                        [
                         Paragraph(lcl_row[0], (pss.acfb if vil_row==0 else pss.arfn)),
@@ -1500,18 +1213,6 @@ class zapisnik_m1(SimpleDocTemplateNP):
                        ]
                       )
     oxl_table = Table(lll_dataf, colWidths=[9*mm, 78*mm, 81*mm, 15*mm, 7*mm], hAlign='LEFT')
-=======
-      lll_dataf.append([
-          Paragraph(lcl_row[0], (pss.psbc if vil_row == 0 else pss.psnr)),
-          Paragraph(lcl_row[1], pss.psnl),
-          Paragraph(lcl_row[2], pss.psnl),
-          Paragraph(lcl_row[3], pss.psnl),
-          Paragraph(lcl_row[4], pss.psnl),
-      ])
-    oxl_table = Table(lll_dataf,
-                      colWidths=[9 * mm, 78 * mm, 81 * mm, 15 * mm, 7 * mm],
-                      hAlign='LEFT')
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
     oxl_ts = tss.alng
     oxl_ts.add('ALIGN', (0, 1), (0, -3), 'RIGHT')
@@ -1542,31 +1243,31 @@ class zapisnik_m1(SimpleDocTemplateNP):
   def pdfprep(self):
 
     # 1. strana
-    self.DocElm.append(Spacer(0 * mm, 35 * mm))
+    self.DocElm.append(Spacer(0*mm, 35*mm))
     self.DocElm.append(tbl_ttl(self.Title))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zbr)
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zkl)
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zvd(u'M1'))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_vzdata())
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_hmlgo())
 
     # 2. strana
     self.DocElm.append(PageBreak())
 
-    self.DocElm.append(Spacer(0 * mm, 15 * mm))
+    self.DocElm.append(Spacer(0*mm, 15*mm))
     self.DocElm.append(self.tbl_ppv())
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_text)
 
   #= METHOD ==============================
@@ -1576,7 +1277,6 @@ class zapisnik_m1(SimpleDocTemplateNP):
 
     self.build(self.DocElm, canvasmaker=HdFtCanvasZap)
 
-
 #= CLASS ===============================
 # zapisnik_m2m3
 #=======================================
@@ -1585,24 +1285,28 @@ class zapisnik_m2m3(SimpleDocTemplateNP):
   #= METHOD ==============================
   # __init__
   #=======================================
-  def __init__(self,
+  def __init__(
+               self,
                pi_PrId,
                pc_PdfFile,
                pl_PageSize=A4,
                pb_showBoundary=0,
-               pn_topMargin=10 * mm,
-               pn_bottomMargin=10 * mm,
-               pn_leftMargin=10 * mm,
-               pn_rightMargin=10 * mm):
+               pn_topMargin=10*mm,
+               pn_bottomMargin=10*mm,
+               pn_leftMargin=10*mm,
+               pn_rightMargin=10*mm
+              ):
 
-    SimpleDocTemplate.__init__(self,
+    SimpleDocTemplate.__init__(
+                               self,
                                pc_PdfFile,
                                pagesize=portrait(pl_PageSize),
                                showBoundary=pb_showBoundary,
                                topMargin=pn_topMargin,
                                bottomMargin=pn_bottomMargin,
                                leftMargin=pn_leftMargin,
-                               rightMargin=pn_rightMargin)
+                               rightMargin=pn_rightMargin
+                              )
 
     data.dget(self.__class__.__name__, dd({'pr_id': pi_PrId}))
     self.Title = u'ZAPISNIK O ISPITIVANJU VOZILA VRSTE M2-M3'
@@ -1617,122 +1321,61 @@ class zapisnik_m2m3(SimpleDocTemplateNP):
   def tbl_ppv(self):
 
     lll_data = [
-        [
-            'KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'',
-            u''
-        ],
-        [
-            '1', u'uređaji za upravlj. - sistem za upravljanje',
-            u'komanda na levoj strani', u'', u'*'
-        ],
-        [
-            '2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna',
-            u'', u'*'
-        ],
-        ['', u'', u'pomoćna', u'', u'*'],
-        ['', u'', u'parkirna', u'', u'*'],
-        ['', u'', u'ABS (ako ima)', u'', u'*'],
-        ['', u'', u'usporač', u'', u'*'],
-        [
-            '3', u'uređaji za osvetljavanje puta',
-            u'svetlosno i svetlosno signalni uređaji', u'', u'*'
-        ],
-        ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
-        ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
-        [
-            '4', u'uređaji koji omogućuju normalnu vidljivost',
-            u'retrovizori spoljni oba i unutrašnji', u'', u'*'
-        ],
-        ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
-        ['', u'', u'uređaj za brisanje', u'', u''],
-        ['', u'', u'uređaj za kvašenje', u'', u''],
-        [
-            '5', u'uređaj za davanje zvučnih znakova',
-            u'uključujući i signal pri kretanju unazad', u'', u''
-        ],
-        [
-            '6', u'uređaji za kontrolu i davanje znakova',
-            u'brzinomer sa odometrom', u'', u''
-        ],
-        ['', u'', u'indikator pritiska u sistemu za radno kočenje', u'', u''],
-        ['', u'', u'digitalni tahograf', u'', u''],
-        ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
-        ['', u'', u'ograničavač brzine do 100 km/H', u'', u'*'],
-        [
-            '', u'', u'svetlosni signal za kontrolu zatvorenih vrata (kl I/II)',
-            u'', u''
-        ],
-        [
-            '', u'', u'uređaj za dav. i prim. znakova od putnika (kl I/II)',
-            u'', u''
-        ],
-        ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
-        [
-            '7', u'uređaji za odvođenje i regulisanje izduvnih gasova',
-            u'katalizator', u'', u'*'
-        ],
-        ['', u'', u'ne u desnu stranu i u gabaritima izduva', u'', u''],
-        [
-            '8', u'uređaji za spajanje vučnog i priključnog vozila',
-            u'rastavljen ne sme da premaši gabarit', u'', u'*'
-        ],
-        ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
-        [
-            '10', u'uređaji za oslanjanje',
-            u'bez kontakta točkova i karoserije', u'', u''
-        ],
-        [
-            '11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama',
-            u'', u''
-        ],
-        [
-            '12', u'elektro uređaji i instalacija',
-            u'prekidač svih strujnih kola osim taho. i bezb. uređa', u'', u''
-        ],
-        [
-            '13', u'pogonski uređaj',
-            u'nije moguće povređivanje vozača i putnika', u'', u''
-        ],
-        [
-            '14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču',
-            u'', u''
-        ],
-        [
-            '15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja',
-            u'opšta konstrukcija', u'', u'*'
-        ],
-        ['', u'', u'VIN', u'', u''],
-        ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
-        ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
-        ['', u'', u'reklamne table u gabaritima', u'', u''],
-        ['', u'', u'prostor za tablicu', u'', u''],
-        ['', u'', u'slobodna površina za stajanje putnika', u'', u''],
-        ['', u'', u'pričvršćenost alata, pribora, uređaja i opreme', u'', u''],
-        ['', u'', u'izlaz u slučaju opasnosti (na krovu i vrata)', u'', u''],
-        ['', u'', u'uređaj za provetravanje', u'', u''],
-        ['', u'', u'unutrašnja rasveta', u'', u''],
-        ['', u'', u'dvostepene brave', u'', u''],
-        ['', u'', u'blatobrani iznad svih točkova u širini točka', u'', u''],
-        ['', u'', u'branik najmanje napred najistureniji', u'', u''],
-        ['', u'', u'pojasevi za sva mesta', u'', u'*'],
-        [
-            '', u'', u'putnički prost. obezbeđen od prodora štetnih gasova',
-            u'', u''
-        ],
-        ['', u'', u'priključak za vuču neispravnog vozila', u'', u'*'],
-        ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
-        [
-            '', u'x = uređaj/sistem postoji na vozilu,',
-            u'- = uređaj/sistem ne postoji na vozilu', u'', u''
-        ],
-        [
-            '', u'&nbsp;' * 15 + u'N/P = nije primenljivo,',
-            u'&nbsp;' * 15 + u'* = obavezna homologacija', u'', u''
-        ],
-    ]
+                ['KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'', u''],
+                ['1', u'uređaji za upravlj. - sistem za upravljanje', u'komanda na levoj strani', u'', u'*'],
+                ['2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna', u'', u'*'],
+                ['', u'', u'pomoćna', u'', u'*'],
+                ['', u'', u'parkirna', u'', u'*'],
+                ['', u'', u'ABS (ako ima)', u'', u'*'],
+                ['', u'', u'usporač', u'', u'*'],
+                ['3', u'uređaji za osvetljavanje puta', u'svetlosno i svetlosno signalni uređaji', u'', u'*'],
+                ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
+                ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
+                ['4', u'uređaji koji omogućuju normalnu vidljivost', u'retrovizori spoljni oba i unutrašnji', u'', u'*'],
+                ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
+                ['', u'', u'uređaj za brisanje', u'', u''],
+                ['', u'', u'uređaj za kvašenje', u'', u''],
+                ['5', u'uređaj za davanje zvučnih znakova', u'uključujući i signal pri kretanju unazad', u'', u''],
+                ['6', u'uređaji za kontrolu i davanje znakova', u'brzinomer sa odometrom', u'', u''],
+                ['', u'', u'indikator pritiska u sistemu za radno kočenje', u'', u''],
+                ['', u'', u'digitalni tahograf', u'', u''],
+                ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
+                ['', u'', u'ograničavač brzine do 100 km/H', u'', u'*'],
+                ['', u'', u'svetlosni signal za kontrolu zatvorenih vrata (kl I/II)', u'', u''],
+                ['', u'', u'uređaj za dav. i prim. znakova od putnika (kl I/II)', u'', u''],
+                ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
+                ['7', u'uređaji za odvođenje i regulisanje izduvnih gasova', u'katalizator', u'', u'*'],
+                ['', u'', u'ne u desnu stranu i u gabaritima izduva', u'', u''],
+                ['8', u'uređaji za spajanje vučnog i priključnog vozila', u'rastavljen ne sme da premaši gabarit', u'', u'*'],
+                ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
+                ['10', u'uređaji za oslanjanje', u'bez kontakta točkova i karoserije', u'', u''],
+                ['11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama', u'', u''],
+                ['12', u'elektro uređaji i instalacija', u'prekidač svih strujnih kola osim taho. i bezb. uređa', u'', u''],
+                ['13', u'pogonski uređaj', u'nije moguće povređivanje vozača i putnika', u'', u''],
+                ['14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču', u'', u''],
+                ['15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja', u'opšta konstrukcija', u'', u'*'],
+                ['', u'', u'VIN', u'', u''],
+                ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
+                ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
+                ['', u'', u'reklamne table u gabaritima', u'', u''],
+                ['', u'', u'prostor za tablicu', u'', u''],
+                ['', u'', u'slobodna površina za stajanje putnika', u'', u''],
+                ['', u'', u'pričvršćenost alata, pribora, uređaja i opreme', u'', u''],
+                ['', u'', u'izlaz u slučaju opasnosti (na krovu i vrata)', u'', u''],
+                ['', u'', u'uređaj za provetravanje', u'', u''],
+                ['', u'', u'unutrašnja rasveta', u'', u''],
+                ['', u'', u'dvostepene brave', u'', u''],
+                ['', u'', u'blatobrani iznad svih točkova u širini točka', u'', u''],
+                ['', u'', u'branik najmanje napred najistureniji', u'', u''],
+                ['', u'', u'pojasevi za sva mesta', u'', u'*'],
+                ['', u'', u'putnički prost. obezbeđen od prodora štetnih gasova', u'', u''],
+                ['', u'', u'priključak za vuču neispravnog vozila', u'', u'*'],
+                ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
+                ['', u'x = uređaj/sistem postoji na vozilu,', u'- = uređaj/sistem ne postoji na vozilu', u'', u''],
+                ['', u'&nbsp;'*15+u'N/P = nije primenljivo,', u'&nbsp;'*15+u'* = obavezna homologacija', u'', u''],
+               ]
     lll_dataf = []
     for vil_row, lcl_row in enumerate(lll_data):
-<<<<<<< HEAD
       lll_dataf.append(
                        [
                         Paragraph(lcl_row[0], (pss.acfb if vil_row==0 else pss.arfn)),
@@ -1743,19 +1386,6 @@ class zapisnik_m2m3(SimpleDocTemplateNP):
                        ]
                       )
     oxl_table = Table(lll_dataf, rowHeights=[4*mm]*len(lll_dataf), colWidths=[9*mm, 75*mm, 84*mm, 15*mm, 7*mm], hAlign='LEFT')
-=======
-      lll_dataf.append([
-          Paragraph(lcl_row[0], (pss.psbc if vil_row == 0 else pss.psnr)),
-          Paragraph(lcl_row[1], pss.psnl),
-          Paragraph(lcl_row[2], pss.psnl),
-          Paragraph(lcl_row[3], pss.psnl),
-          Paragraph(lcl_row[4], pss.psnl),
-      ])
-    oxl_table = Table(lll_dataf,
-                      rowHeights=[4 * mm] * len(lll_dataf),
-                      colWidths=[9 * mm, 75 * mm, 84 * mm, 15 * mm, 7 * mm],
-                      hAlign='LEFT')
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
     oxl_ts = tss.alng
     oxl_ts.add('ALIGN', (0, 1), (0, -3), 'RIGHT')
@@ -1786,35 +1416,35 @@ class zapisnik_m2m3(SimpleDocTemplateNP):
   def pdfprep(self):
 
     # 1. strana
-    self.DocElm.append(Spacer(0 * mm, 35 * mm))
+    self.DocElm.append(Spacer(0*mm, 35*mm))
     self.DocElm.append(tbl_ttl(self.Title))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zbr)
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zkl)
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zvd(u'M2M3'))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_vzdata())
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_hmlgo())
 
     # 2. strana
     self.DocElm.append(PageBreak())
 
-    self.DocElm.append(Spacer(0 * mm, 15 * mm))
+    self.DocElm.append(Spacer(0*mm, 15*mm))
     self.DocElm.append(self.tbl_ppv())
-    #    oxl_tbl = self.tbl_ppv()
-    #    for oxl_split in oxl_tbl.split(0*mm, 260*mm):
-    #        self.DocElm.append(oxl_split)
-    #        self.DocElm.append(Spacer(0*mm, 15*mm))
+#    oxl_tbl = self.tbl_ppv()
+#    for oxl_split in oxl_tbl.split(0*mm, 260*mm):
+#        self.DocElm.append(oxl_split)
+#        self.DocElm.append(Spacer(0*mm, 15*mm))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_text)
 
   #= METHOD ==============================
@@ -1824,7 +1454,6 @@ class zapisnik_m2m3(SimpleDocTemplateNP):
 
     self.build(self.DocElm, canvasmaker=HdFtCanvasZap)
 
-
 #= CLASS ===============================
 # zapisnik_l
 #=======================================
@@ -1833,24 +1462,28 @@ class zapisnik_l(SimpleDocTemplateNP):
   #= METHOD ==============================
   # __init__
   #=======================================
-  def __init__(self,
+  def __init__(
+               self,
                pi_PrId,
                pc_PdfFile,
                pl_PageSize=A4,
                pb_showBoundary=0,
-               pn_topMargin=10 * mm,
-               pn_bottomMargin=10 * mm,
-               pn_leftMargin=10 * mm,
-               pn_rightMargin=10 * mm):
+               pn_topMargin=10*mm,
+               pn_bottomMargin=10*mm,
+               pn_leftMargin=10*mm,
+               pn_rightMargin=10*mm
+              ):
 
-    SimpleDocTemplate.__init__(self,
+    SimpleDocTemplate.__init__(
+                               self,
                                pc_PdfFile,
                                pagesize=portrait(pl_PageSize),
                                showBoundary=pb_showBoundary,
                                topMargin=pn_topMargin,
                                bottomMargin=pn_bottomMargin,
                                leftMargin=pn_leftMargin,
-                               rightMargin=pn_rightMargin)
+                               rightMargin=pn_rightMargin
+                              )
 
     data.dget(self.__class__.__name__, dd({'pr_id': pi_PrId}))
     self.Title = u'ZAPISNIK O ISPITIVANJU VOZILA VRSTE L'
@@ -1865,87 +1498,44 @@ class zapisnik_l(SimpleDocTemplateNP):
   def tbl_ppv(self):
 
     lll_data = [
-        [
-            'KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'',
-            u''
-        ],
-        [
-            '1', u'uređaji za upravlj. - sistem za upravljanje',
-            u'komanda na levoj strani', u'', u'*'
-        ],
-        [
-            '2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna',
-            u'', u'*'
-        ],
-        ['', u'', u'pomoćna (L5 i L7 m>1t)', u'', u'*'],
-        ['', u'', u'parkirna L7', u'', u'*'],
-        [
-            '3', u'svetlosno i svetlosno signalni uređaji',
-            u'uređaji za osvetljavanje puta', u'', u'*'
-        ],
-        ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
-        ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
-        [
-            '4', u'uređaji koji omogućuju normalnu vidljivost', u'retrovizori',
-            u'', u'*'
-        ],
-        ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
-        ['', u'', u'uređaj za brisanje', u'', u''],
-        ['', u'', u'uređaj za kvašenje', u'', u''],
-        ['5', u'uređaj za davanje zvučnih znakova', u'', u'', u'*'],
-        [
-            '6', u'uređaji za kontrolu i davanje znakova',
-            u'brzinomer sa odometrom', u'', u''
-        ],
-        ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
-        ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
-        [
-            '7', u'uređaji za odvođenje i regulisanje izduvnih gasova',
-            u'katalizator', u'', u'*'
-        ],
-        [
-            '8', u'uređaji za spajanje vučnog i priključnog vozila',
-            u'rastavljen ne sme da premaši gabarit', u'', u'*'
-        ],
-        ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
-        [
-            '10', u'uređaji za oslanjanje',
-            u'bez kontakta točkova i karoserije', u'', u''
-        ],
-        [
-            '11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama',
-            u'', u''
-        ],
-        ['12', u'elektro uređaji i instalacija', u'', u'', u''],
-        ['13', u'pogonski uređaj', u'', u'', u''],
-        [
-            '14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču',
-            u'', u''
-        ],
-        [
-            '15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja',
-            u'opšta konstrukcija', u'', u'*'
-        ],
-        ['', u'', u'VIN', u'', u''],
-        ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
-        ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
-        ['', u'', u'reklamne table u gabaritima', u'', u''],
-        ['', u'', u'pričvršćenost pribora, alata i opreme', u'', u''],
-        ['', u'', u'prostor za tablicu', u'', u''],
-        ['', u'', u'blatobrani iznad svih točkova u širini točka', u'', u''],
-        ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
-        [
-            '', u'x = uređaj/sistem postoji na vozilu,',
-            u'- = uređaj/sistem ne postoji na vozilu', u'', u''
-        ],
-        [
-            '', u'&nbsp;' * 15 + u'N/P = nije primenljivo,',
-            u'&nbsp;' * 15 + u'* = obavezna homologacija', u'', u''
-        ],
-    ]
+                ['KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'', u''],
+                ['1', u'uređaji za upravlj. - sistem za upravljanje', u'komanda na levoj strani', u'', u'*'],
+                ['2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna', u'', u'*'],
+                ['', u'', u'pomoćna (L5 i L7 m>1t)', u'', u'*'],
+                ['', u'', u'parkirna L7', u'', u'*'],
+                ['3', u'svetlosno i svetlosno signalni uređaji', u'uređaji za osvetljavanje puta', u'', u'*'],
+                ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
+                ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
+                ['4', u'uređaji koji omogućuju normalnu vidljivost', u'retrovizori', u'', u'*'],
+                ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
+                ['', u'', u'uređaj za brisanje', u'', u''],
+                ['', u'', u'uređaj za kvašenje', u'', u''],
+                ['5', u'uređaj za davanje zvučnih znakova', u'', u'', u'*'],
+                ['6', u'uređaji za kontrolu i davanje znakova', u'brzinomer sa odometrom', u'', u''],
+                ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
+                ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
+                ['7', u'uređaji za odvođenje i regulisanje izduvnih gasova', u'katalizator', u'', u'*'],
+                ['8', u'uređaji za spajanje vučnog i priključnog vozila', u'rastavljen ne sme da premaši gabarit', u'', u'*'],
+                ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
+                ['10', u'uređaji za oslanjanje', u'bez kontakta točkova i karoserije', u'', u''],
+                ['11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama', u'', u''],
+                ['12', u'elektro uređaji i instalacija', u'', u'', u''],
+                ['13', u'pogonski uređaj', u'', u'', u''],
+                ['14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču', u'', u''],
+                ['15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja', u'opšta konstrukcija', u'', u'*'],
+                ['', u'', u'VIN', u'', u''],
+                ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
+                ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
+                ['', u'', u'reklamne table u gabaritima', u'', u''],
+                ['', u'', u'pričvršćenost pribora, alata i opreme', u'', u''],
+                ['', u'', u'prostor za tablicu', u'', u''],
+                ['', u'', u'blatobrani iznad svih točkova u širini točka', u'', u''],
+                ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
+                ['', u'x = uređaj/sistem postoji na vozilu,', u'- = uređaj/sistem ne postoji na vozilu', u'', u''],
+                ['', u'&nbsp;'*15+u'N/P = nije primenljivo,', u'&nbsp;'*15+u'* = obavezna homologacija', u'', u''],
+               ]
     lll_dataf = []
     for vil_row, lcl_row in enumerate(lll_data):
-<<<<<<< HEAD
       lll_dataf.append(
                        [
                         Paragraph(lcl_row[0], (pss.acfb if vil_row==0 else pss.arfn)),
@@ -1956,18 +1546,6 @@ class zapisnik_l(SimpleDocTemplateNP):
                        ]
                       )
     oxl_table = Table(lll_dataf, colWidths=[9*mm, 78*mm, 81*mm, 15*mm, 7*mm], hAlign='LEFT')
-=======
-      lll_dataf.append([
-          Paragraph(lcl_row[0], (pss.psbc if vil_row == 0 else pss.psnr)),
-          Paragraph(lcl_row[1], pss.psnl),
-          Paragraph(lcl_row[2], pss.psnl),
-          Paragraph(lcl_row[3], pss.psnl),
-          Paragraph(lcl_row[4], pss.psnl),
-      ])
-    oxl_table = Table(lll_dataf,
-                      colWidths=[9 * mm, 78 * mm, 81 * mm, 15 * mm, 7 * mm],
-                      hAlign='LEFT')
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
     oxl_ts = tss.alng
     oxl_ts.add('ALIGN', (0, 1), (0, -3), 'RIGHT')
@@ -1996,31 +1574,31 @@ class zapisnik_l(SimpleDocTemplateNP):
   def pdfprep(self):
 
     # 1. strana
-    self.DocElm.append(Spacer(0 * mm, 35 * mm))
+    self.DocElm.append(Spacer(0*mm, 35*mm))
     self.DocElm.append(tbl_ttl(self.Title))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zbr)
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zkl)
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zvd(u'L'))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_vzdata())
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_hmlgo())
 
     # 2. strana
     self.DocElm.append(PageBreak())
 
-    self.DocElm.append(Spacer(0 * mm, 15 * mm))
+    self.DocElm.append(Spacer(0*mm, 15*mm))
     self.DocElm.append(self.tbl_ppv())
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_text)
 
   #= METHOD ==============================
@@ -2030,7 +1608,6 @@ class zapisnik_l(SimpleDocTemplateNP):
 
     self.build(self.DocElm, canvasmaker=HdFtCanvasZap)
 
-
 #= CLASS ===============================
 # zapisnik_n1
 #=======================================
@@ -2039,24 +1616,28 @@ class zapisnik_n1(SimpleDocTemplateNP):
   #= METHOD ==============================
   # __init__
   #=======================================
-  def __init__(self,
+  def __init__(
+               self,
                pi_PrId,
                pc_PdfFile,
                pl_PageSize=A4,
                pb_showBoundary=0,
-               pn_topMargin=10 * mm,
-               pn_bottomMargin=10 * mm,
-               pn_leftMargin=10 * mm,
-               pn_rightMargin=10 * mm):
+               pn_topMargin=10*mm,
+               pn_bottomMargin=10*mm,
+               pn_leftMargin=10*mm,
+               pn_rightMargin=10*mm
+              ):
 
-    SimpleDocTemplate.__init__(self,
+    SimpleDocTemplate.__init__(
+                               self,
                                pc_PdfFile,
                                pagesize=portrait(pl_PageSize),
                                showBoundary=pb_showBoundary,
                                topMargin=pn_topMargin,
                                bottomMargin=pn_bottomMargin,
                                leftMargin=pn_leftMargin,
-                               rightMargin=pn_rightMargin)
+                               rightMargin=pn_rightMargin
+                              )
 
     data.dget(self.__class__.__name__, dd({'pr_id': pi_PrId}))
     self.Title = u'ZAPISNIK O ISPITIVANJU VOZILA VRSTE N1'
@@ -2071,98 +1652,51 @@ class zapisnik_n1(SimpleDocTemplateNP):
   def tbl_ppv(self):
 
     lll_data = [
-        [
-            'KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'',
-            u''
-        ],
-        [
-            '1', u'uređaji za upravlj. - sistem za upravljanje',
-            u'komanda na levoj strani', u'', u'*'
-        ],
-        [
-            '2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna',
-            u'', u'*'
-        ],
-        ['', u'', u'pomoćna', u'', u'*'],
-        ['', u'', u'parkirna', u'', u'*'],
-        ['', u'', u'ABS (ako ima)', u'', u'*'],
-        [
-            '3', u'uređaji za osvetljavanje puta',
-            u'svetlosno i svetlosno signalni uređaji', u'', u'*'
-        ],
-        ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
-        ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
-        [
-            '4', u'uređaji koji omogućuju normalnu vidljivost',
-            u'retrovizori spoljni oba i unutrašnji', u'', u'*'
-        ],
-        ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
-        ['', u'', u'uređaj za brisanje', u'', u''],
-        ['', u'', u'uređaj za kvašenje', u'', u''],
-        ['5', u'uređaj za davanje zvučnih znakova', u'', u'', u'*'],
-        [
-            '6', u'uređaji za kontrolu i davanje znakova',
-            u'brzinomer sa odometrom', u'', u''
-        ],
-        ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
-        ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
-        [
-            '7', u'uređaji za odvođenje i regulisanje izduvnih gasova',
-            u'katalizator', u'', u'*'
-        ],
-        ['', u'', u'ne u desnu stranu i u gabaritima izduva', u'', u''],
-        [
-            '8', u'uređaji za spajanje vučnog i priključnog vozila',
-            u'rastavljen ne sme da premaši gabarit', u'', u'*'
-        ],
-        ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
-        [
-            '10', u'uređaji za oslanjanje',
-            u'bez kontakta točkova i karoserije', u'', u''
-        ],
-        [
-            '11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama',
-            u'', u''
-        ],
-        ['12', u'elektro uređaji i instalacija', u'', u'', u''],
-        ['13', u'pogonski uređaj', u'', u'', u''],
-        [
-            '14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču',
-            u'', u''
-        ],
-        [
-            '15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja',
-            u'opšta konstrukcija', u'', u'*'
-        ],
-        ['', u'', u'VIN', u'', u''],
-        ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
-        ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
-        ['', u'', u'reklamne table u gabaritima', u'', u''],
-        ['', u'', u'prostor za tablicu', u'', u''],
-        ['', u'', u'unutrašnja rasveta', u'', u''],
-        ['', u'', u'dvostepene brave', u'', u''],
-        [
-            '', u'',
-            u'blatobrani iznad svih točkova u širini točka (osim kipera)', u'',
-            u''
-        ],
-        ['', u'', u'branik najmanje napred najistureniji', u'', u''],
-        ['', u'', u'pojasevi za sva mesta', u'', u'*'],
-        ['', u'', u'priključak za vuču neispravnog vozula', u'', u'*'],
-        ['', u'', u'ispunjenost standarda ISO 27956:2009 (za BB)', u'', u'*'],
-        ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
-        [
-            '', u'x = uređaj/sistem postoji na vozilu,',
-            u'- = uređaj/sistem ne postoji na vozilu', u'', u''
-        ],
-        [
-            '', u'&nbsp;' * 15 + u'N/P = nije primenljivo,',
-            u'&nbsp;' * 15 + u'* = obavezna homologacija', u'', u''
-        ],
-    ]
+                ['KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'', u''],
+                ['1', u'uređaji za upravlj. - sistem za upravljanje', u'komanda na levoj strani', u'', u'*'],
+                ['2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna', u'', u'*'],
+                ['', u'', u'pomoćna', u'', u'*'],
+                ['', u'', u'parkirna', u'', u'*'],
+                ['', u'', u'ABS (ako ima)', u'', u'*'],
+                ['3', u'uređaji za osvetljavanje puta', u'svetlosno i svetlosno signalni uređaji', u'', u'*'],
+                ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
+                ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
+                ['4', u'uređaji koji omogućuju normalnu vidljivost', u'retrovizori spoljni oba i unutrašnji', u'', u'*'],
+                ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
+                ['', u'', u'uređaj za brisanje', u'', u''],
+                ['', u'', u'uređaj za kvašenje', u'', u''],
+                ['5', u'uređaj za davanje zvučnih znakova', u'', u'', u'*'],
+                ['6', u'uređaji za kontrolu i davanje znakova', u'brzinomer sa odometrom', u'', u''],
+                ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
+                ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
+                ['7', u'uređaji za odvođenje i regulisanje izduvnih gasova', u'katalizator', u'', u'*'],
+                ['', u'', u'ne u desnu stranu i u gabaritima izduva', u'', u''],
+                ['8', u'uređaji za spajanje vučnog i priključnog vozila', u'rastavljen ne sme da premaši gabarit', u'', u'*'],
+                ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
+                ['10', u'uređaji za oslanjanje', u'bez kontakta točkova i karoserije', u'', u''],
+                ['11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama', u'', u''],
+                ['12', u'elektro uređaji i instalacija', u'', u'', u''],
+                ['13', u'pogonski uređaj', u'', u'', u''],
+                ['14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču', u'', u''],
+                ['15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja', u'opšta konstrukcija', u'', u'*'],
+                ['', u'', u'VIN', u'', u''],
+                ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
+                ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
+                ['', u'', u'reklamne table u gabaritima', u'', u''],
+                ['', u'', u'prostor za tablicu', u'', u''],
+                ['', u'', u'unutrašnja rasveta', u'', u''],
+                ['', u'', u'dvostepene brave', u'', u''],
+                ['', u'', u'blatobrani iznad svih točkova u širini točka (osim kipera)', u'', u''],
+                ['', u'', u'branik najmanje napred najistureniji', u'', u''],
+                ['', u'', u'pojasevi za sva mesta', u'', u'*'],
+                ['', u'', u'priključak za vuču neispravnog vozula', u'', u'*'],
+                ['', u'', u'ispunjenost standarda ISO 27956:2009 (za BB)', u'', u'*'],
+                ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
+                ['', u'x = uređaj/sistem postoji na vozilu,', u'- = uređaj/sistem ne postoji na vozilu', u'', u''],
+                ['', u'&nbsp;'*15+u'N/P = nije primenljivo,', u'&nbsp;'*15+u'* = obavezna homologacija', u'', u''],
+               ]
     lll_dataf = []
     for vil_row, lcl_row in enumerate(lll_data):
-<<<<<<< HEAD
       lll_dataf.append(
                        [
                         Paragraph(lcl_row[0], (pss.acfb if vil_row==0 else pss.arfn)),
@@ -2173,18 +1707,6 @@ class zapisnik_n1(SimpleDocTemplateNP):
                        ]
                       )
     oxl_table = Table(lll_dataf, colWidths=[9*mm, 78*mm, 81*mm, 15*mm, 7*mm], hAlign='LEFT')
-=======
-      lll_dataf.append([
-          Paragraph(lcl_row[0], (pss.psbc if vil_row == 0 else pss.psnr)),
-          Paragraph(lcl_row[1], pss.psnl),
-          Paragraph(lcl_row[2], pss.psnl),
-          Paragraph(lcl_row[3], pss.psnl),
-          Paragraph(lcl_row[4], pss.psnl),
-      ])
-    oxl_table = Table(lll_dataf,
-                      colWidths=[9 * mm, 78 * mm, 81 * mm, 15 * mm, 7 * mm],
-                      hAlign='LEFT')
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
     oxl_ts = tss.alng
     oxl_ts.add('ALIGN', (0, 1), (0, -3), 'RIGHT')
@@ -2215,31 +1737,31 @@ class zapisnik_n1(SimpleDocTemplateNP):
   def pdfprep(self):
 
     # 1. strana
-    self.DocElm.append(Spacer(0 * mm, 35 * mm))
+    self.DocElm.append(Spacer(0*mm, 35*mm))
     self.DocElm.append(tbl_ttl(self.Title))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zbr)
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zkl)
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zvd(u'N1'))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_vzdata())
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_hmlgo())
 
     # 2. strana
     self.DocElm.append(PageBreak())
 
-    self.DocElm.append(Spacer(0 * mm, 15 * mm))
+    self.DocElm.append(Spacer(0*mm, 15*mm))
     self.DocElm.append(self.tbl_ppv())
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_text)
 
   #= METHOD ==============================
@@ -2249,7 +1771,6 @@ class zapisnik_n1(SimpleDocTemplateNP):
 
     self.build(self.DocElm, canvasmaker=HdFtCanvasZap)
 
-
 #= CLASS ===============================
 # zapisnik_n2n3
 #=======================================
@@ -2258,24 +1779,28 @@ class zapisnik_n2n3(SimpleDocTemplateNP):
   #= METHOD ==============================
   # __init__
   #=======================================
-  def __init__(self,
+  def __init__(
+               self,
                pi_PrId,
                pc_PdfFile,
                pl_PageSize=A4,
                pb_showBoundary=0,
-               pn_topMargin=10 * mm,
-               pn_bottomMargin=10 * mm,
-               pn_leftMargin=10 * mm,
-               pn_rightMargin=10 * mm):
+               pn_topMargin=10*mm,
+               pn_bottomMargin=10*mm,
+               pn_leftMargin=10*mm,
+               pn_rightMargin=10*mm
+              ):
 
-    SimpleDocTemplate.__init__(self,
+    SimpleDocTemplate.__init__(
+                               self,
                                pc_PdfFile,
                                pagesize=portrait(pl_PageSize),
                                showBoundary=pb_showBoundary,
                                topMargin=pn_topMargin,
                                bottomMargin=pn_bottomMargin,
                                leftMargin=pn_leftMargin,
-                               rightMargin=pn_rightMargin)
+                               rightMargin=pn_rightMargin
+                              )
 
     data.dget(self.__class__.__name__, dd({'pr_id': pi_PrId}))
     self.Title = u'ZAPISNIK O ISPITIVANJU VOZILA VRSTE N2-N3'
@@ -2290,110 +1815,55 @@ class zapisnik_n2n3(SimpleDocTemplateNP):
   def tbl_ppv(self):
 
     lll_data = [
-        [
-            'KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'',
-            u''
-        ],
-        [
-            '1', u'uređaji za upravlj. - sistem za upravljanje',
-            u'komanda na levoj strani', u'', u'*'
-        ],
-        [
-            '2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna',
-            u'', u'*'
-        ],
-        ['', u'', u'pomoćna', u'', u'*'],
-        ['', u'', u'parkirna', u'', u'*'],
-        ['', u'', u'ABS (ako ima)', u'', u'*'],
-        ['', u'', u'usporač', u'', u'*'],
-        [
-            '3', u'uređaji za osvetljavanje puta',
-            u'svetlosno i svetlosno signalni uređaji', u'', u'*'
-        ],
-        ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
-        ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
-        [
-            '4', u'uređaji koji omogućuju normalnu vidljivost',
-            u'retrovizori spoljni oba i unutrašnji', u'', u'*'
-        ],
-        ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
-        ['', u'', u'uređaj za brisanje', u'', u''],
-        ['', u'', u'uređaj za kvašenje', u'', u''],
-        [
-            '5', u'uređaj za davanje zvučnih znakova',
-            u'uključujući i signal pri kretanju unazad', u'', u''
-        ],
-        [
-            '6', u'uređaji za kontrolu i davanje znakova',
-            u'brzinomer sa odometrom', u'', u''
-        ],
-        ['', u'', u'indikator pritiska u sistemu za radno kočenje', u'', u''],
-        ['', u'', u'digitalni tahograf', u'', u''],
-        ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
-        ['', u'', u'ograničavač brzine do 100 (90) km/h', u'', u'*'],
-        ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
-        [
-            '7', u'uređaji za odvođenje i regulisanje izduvnih gasova',
-            u'katalizator', u'', u'*'
-        ],
-        ['', u'', u'ne u desnu stranu i u gabaritima izduva', u'', u''],
-        [
-            '8', u'uređaji za spajanje vučnog i priključnog vozila',
-            u'rastavljen ne sme da premaši gabarit', u'', u'*'
-        ],
-        ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
-        [
-            '10', u'uređaji za oslanjanje',
-            u'bez kontakta točkova i karoserije', u'', u''
-        ],
-        [
-            '11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama',
-            u'', u''
-        ],
-        [
-            '12', u'elektro uređaji i instalacija',
-            u'prekidač svih strujnih kola osim taho. i bezb. uređa', u'', u''
-        ],
-        [
-            '13', u'pogonski uređaj',
-            u'nije moguće povređivanje vozača i putnika', u'', u''
-        ],
-        [
-            '14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču',
-            u'', u''
-        ],
-        [
-            '15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja',
-            u'opšta konstrukcija', u'', u'*'
-        ],
-        ['', u'', u'VIN', u'', u''],
-        ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
-        ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
-        ['', u'', u'reklamne table u gabaritima', u'', u''],
-        ['', u'', u'prostor za tablicu', u'', u''],
-        ['', u'', u'unutrašnja rasveta', u'', u''],
-        ['', u'', u'dvostepene brave', u'', u''],
-        [
-            '', u'', u'blatobr. iznad svih toč. u širini toč. (osim kipera)',
-            u'', u''
-        ],
-        ['', u'', u'branik najmanje napred najistureniji', u'', u''],
-        ['', u'', u'pojasevi za sva mesta', u'', u'*'],
-        ['', u'', u'ZZOP (osim tegljača)', u'', u''],
-        ['', u'', u'BZOP (osim tegljača)', u'', u'*'],
-        ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
-        [
-            '', u'x = uređaj/sistem postoji na vozilu,',
-            u'- = uređaj/sistem ne postoji na vozilu', u'', u''
-        ],
-        [
-            '', u'&nbsp;' * 15 + u'N/P = nije primenljivo,',
-            u'&nbsp;' * 15 + u'* = obavezna homologacija', u'', u''
-        ],
-    ]
+                ['KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'', u''],
+                ['1', u'uređaji za upravlj. - sistem za upravljanje', u'komanda na levoj strani', u'', u'*'],
+                ['2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna', u'', u'*'],
+                ['', u'', u'pomoćna', u'', u'*'],
+                ['', u'', u'parkirna', u'', u'*'],
+                ['', u'', u'ABS (ako ima)', u'', u'*'],
+                ['', u'', u'usporač', u'', u'*'],
+                ['3', u'uređaji za osvetljavanje puta', u'svetlosno i svetlosno signalni uređaji', u'', u'*'],
+                ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
+                ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
+                ['4', u'uređaji koji omogućuju normalnu vidljivost', u'retrovizori spoljni oba i unutrašnji', u'', u'*'],
+                ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
+                ['', u'', u'uređaj za brisanje', u'', u''],
+                ['', u'', u'uređaj za kvašenje', u'', u''],
+                ['5', u'uređaj za davanje zvučnih znakova', u'uključujući i signal pri kretanju unazad', u'', u''],
+                ['6', u'uređaji za kontrolu i davanje znakova', u'brzinomer sa odometrom', u'', u''],
+                ['', u'', u'indikator pritiska u sistemu za radno kočenje', u'', u''],
+                ['', u'', u'digitalni tahograf', u'', u''],
+                ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
+                ['', u'', u'ograničavač brzine do 100 (90) km/h', u'', u'*'],
+                ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
+                ['7', u'uređaji za odvođenje i regulisanje izduvnih gasova', u'katalizator', u'', u'*'],
+                ['', u'', u'ne u desnu stranu i u gabaritima izduva', u'', u''],
+                ['8', u'uređaji za spajanje vučnog i priključnog vozila', u'rastavljen ne sme da premaši gabarit', u'', u'*'],
+                ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
+                ['10', u'uređaji za oslanjanje', u'bez kontakta točkova i karoserije', u'', u''],
+                ['11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama', u'', u''],
+                ['12', u'elektro uređaji i instalacija', u'prekidač svih strujnih kola osim taho. i bezb. uređa', u'', u''],
+                ['13', u'pogonski uređaj', u'nije moguće povređivanje vozača i putnika', u'', u''],
+                ['14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču', u'', u''],
+                ['15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja', u'opšta konstrukcija', u'', u'*'],
+                ['', u'', u'VIN', u'', u''],
+                ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
+                ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
+                ['', u'', u'reklamne table u gabaritima', u'', u''],
+                ['', u'', u'prostor za tablicu', u'', u''],
+                ['', u'', u'unutrašnja rasveta', u'', u''],
+                ['', u'', u'dvostepene brave', u'', u''],
+                ['', u'', u'blatobr. iznad svih toč. u širini toč. (osim kipera)', u'', u''],
+                ['', u'', u'branik najmanje napred najistureniji', u'', u''],
+                ['', u'', u'pojasevi za sva mesta', u'', u'*'],
+                ['', u'', u'ZZOP (osim tegljača)', u'', u''],
+                ['', u'', u'BZOP (osim tegljača)', u'', u'*'],
+                ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
+                ['', u'x = uređaj/sistem postoji na vozilu,', u'- = uređaj/sistem ne postoji na vozilu', u'', u''],
+                ['', u'&nbsp;'*15+u'N/P = nije primenljivo,', u'&nbsp;'*15+u'* = obavezna homologacija', u'', u''],
+               ]
     lll_dataf = []
     for vil_row, lcl_row in enumerate(lll_data):
-<<<<<<< HEAD
       lll_dataf.append(
                        [
                         Paragraph(lcl_row[0], (pss.acfb if vil_row==0 else pss.arfn)),
@@ -2404,18 +1874,6 @@ class zapisnik_n2n3(SimpleDocTemplateNP):
                        ]
                       )
     oxl_table = Table(lll_dataf, colWidths=[9*mm, 75*mm, 84*mm, 15*mm, 7*mm], hAlign='LEFT')
-=======
-      lll_dataf.append([
-          Paragraph(lcl_row[0], (pss.psbc if vil_row == 0 else pss.psnr)),
-          Paragraph(lcl_row[1], pss.psnl),
-          Paragraph(lcl_row[2], pss.psnl),
-          Paragraph(lcl_row[3], pss.psnl),
-          Paragraph(lcl_row[4], pss.psnl),
-      ])
-    oxl_table = Table(lll_dataf,
-                      colWidths=[9 * mm, 75 * mm, 84 * mm, 15 * mm, 7 * mm],
-                      hAlign='LEFT')
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
     oxl_ts = tss.alng
     oxl_ts.add('ALIGN', (0, 1), (0, -3), 'RIGHT')
@@ -2446,35 +1904,35 @@ class zapisnik_n2n3(SimpleDocTemplateNP):
   def pdfprep(self):
 
     # 1. strana
-    self.DocElm.append(Spacer(0 * mm, 35 * mm))
+    self.DocElm.append(Spacer(0*mm, 35*mm))
     self.DocElm.append(tbl_ttl(self.Title))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zbr)
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zkl)
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zvd(u'N2N3'))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_vzdata())
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_hmlgo())
 
     # 2. strana
     self.DocElm.append(PageBreak())
 
-    self.DocElm.append(Spacer(0 * mm, 15 * mm))
+    self.DocElm.append(Spacer(0*mm, 15*mm))
     self.DocElm.append(self.tbl_ppv())
-    #    oxl_tbl = self.tbl_ppv()
-    #    for oxl_split in oxl_tbl.split(0*mm, 260*mm):
-    #        self.DocElm.append(oxl_split)
-    #        self.DocElm.append(Spacer(0*mm, 15*mm))
+#    oxl_tbl = self.tbl_ppv()
+#    for oxl_split in oxl_tbl.split(0*mm, 260*mm):
+#        self.DocElm.append(oxl_split)
+#        self.DocElm.append(Spacer(0*mm, 15*mm))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_text)
 
   #= METHOD ==============================
@@ -2484,7 +1942,6 @@ class zapisnik_n2n3(SimpleDocTemplateNP):
 
     self.build(self.DocElm, canvasmaker=HdFtCanvasZap)
 
-
 #= CLASS ===============================
 # zapisnik_o
 #=======================================
@@ -2493,24 +1950,28 @@ class zapisnik_o(SimpleDocTemplateNP):
   #= METHOD ==============================
   # __init__
   #=======================================
-  def __init__(self,
+  def __init__(
+               self,
                pi_PrId,
                pc_PdfFile,
                pl_PageSize=A4,
                pb_showBoundary=0,
-               pn_topMargin=10 * mm,
-               pn_bottomMargin=10 * mm,
-               pn_leftMargin=10 * mm,
-               pn_rightMargin=10 * mm):
+               pn_topMargin=10*mm,
+               pn_bottomMargin=10*mm,
+               pn_leftMargin=10*mm,
+               pn_rightMargin=10*mm
+              ):
 
-    SimpleDocTemplate.__init__(self,
+    SimpleDocTemplate.__init__(
+                               self,
                                pc_PdfFile,
                                pagesize=portrait(pl_PageSize),
                                showBoundary=pb_showBoundary,
                                topMargin=pn_topMargin,
                                bottomMargin=pn_bottomMargin,
                                leftMargin=pn_leftMargin,
-                               rightMargin=pn_rightMargin)
+                               rightMargin=pn_rightMargin
+                              )
 
     data.dget(self.__class__.__name__, dd({'pr_id': pi_PrId}))
     self.Title = u'ZAPISNIK O ISPITIVANJU VOZILA VRSTE O'
@@ -2525,7 +1986,6 @@ class zapisnik_o(SimpleDocTemplateNP):
   def tbl_ppv(self):
 
     lll_data = [
-<<<<<<< HEAD
                 ['KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'', u''],
                 ['1', u'uređaji za upravlj. - sistem za upravljanje', u'komanda na levoj strani', u'', u'*'],
                 ['2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna', u'', u'*'],
@@ -2559,69 +2019,6 @@ class zapisnik_o(SimpleDocTemplateNP):
                        ]
                       )
     oxl_table = Table(lll_dataf, colWidths=[9*mm, 75*mm, 84*mm, 15*mm, 7*mm], hAlign='LEFT')
-=======
-        [
-            'KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'',
-            u''
-        ],
-        [
-            '1', u'uređaji za upravlj. - sistem za upravljanje',
-            u'komanda na levoj strani', u'', u'*'
-        ],
-        [
-            '2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna',
-            u'', u'*'
-        ],
-        ['', u'', u'pomoćna', u'', u'*'],
-        ['', u'', u'parkirna', u'', u'*'],
-        ['', u'', u'ABS (ako ima)', u'', u'*'],
-        [
-            '3', u'uređaji za spajanje vučnog i priključnog vozila', u'', u'',
-            u'*'
-        ],
-        [
-            '4', u'uređaji za oslanjanje', u'bez kontakta točkova i karoserije',
-            u'', u''
-        ],
-        [
-            '5', u'uređaji za kretanje', u'pneumatici jednaki po osovinama',
-            u'', u''
-        ],
-        ['6', u'elektro uređaji i instalacija', u'', u'', u''],
-        [
-            '7', u'delovi vozila od posebnog značaja za bezbednost saobraćaja',
-            u'opšta konstrukcija', u'', u'*'
-        ],
-        ['', u'', u'VIN', u'', u''],
-        ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
-        ['', u'', u'reklamne table u gabaritima', u'', u''],
-        ['', u'', u'prostor za tablicu', u'', u''],
-        ['', u'', u'blatobrani iznad svih točkova u širini točka', u'', u''],
-        ['', u'', u'ZZOP', u'', u''],
-        ['', u'', u'BZOP', u'', u'*'],
-        ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
-        [
-            '', u'x = uređaj/sistem postoji na vozilu,',
-            u'- = uređaj/sistem ne postoji na vozilu', u'', u''
-        ],
-        [
-            '', u'&nbsp;' * 15 + u'N/P = nije primenljivo,',
-            u'&nbsp;' * 15 + u'* = obavezna homologacija', u'', u''
-        ],
-    ]
-    lll_dataf = []
-    for vil_row, lcl_row in enumerate(lll_data):
-      lll_dataf.append([
-          Paragraph(lcl_row[0], (pss.psbc if vil_row == 0 else pss.psnr)),
-          Paragraph(lcl_row[1], pss.psnl),
-          Paragraph(lcl_row[2], pss.psnl),
-          Paragraph(lcl_row[3], pss.psnl),
-          Paragraph(lcl_row[4], pss.psnl),
-      ])
-    oxl_table = Table(lll_dataf,
-                      colWidths=[9 * mm, 75 * mm, 84 * mm, 15 * mm, 7 * mm],
-                      hAlign='LEFT')
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
     oxl_ts = tss.alng
     oxl_ts.add('ALIGN', (0, 1), (0, -3), 'RIGHT')
@@ -2644,35 +2041,35 @@ class zapisnik_o(SimpleDocTemplateNP):
   def pdfprep(self):
 
     # 1. strana
-    self.DocElm.append(Spacer(0 * mm, 35 * mm))
+    self.DocElm.append(Spacer(0*mm, 35*mm))
     self.DocElm.append(tbl_ttl(self.Title))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zbr)
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zkl)
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_zvd(u'O'))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_vzdata(u'O'))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_hmlgo(u'O'))
 
     # 2. strana
     self.DocElm.append(PageBreak())
 
-    self.DocElm.append(Spacer(0 * mm, 15 * mm))
+    self.DocElm.append(Spacer(0*mm, 15*mm))
     self.DocElm.append(self.tbl_ppv())
-    #    oxl_tbl = self.tbl_ppv()
-    #    for oxl_split in oxl_tbl.split(0*mm, 260*mm):
-    #        self.DocElm.append(oxl_split)
-    #        self.DocElm.append(Spacer(0*mm, 15*mm))
+#    oxl_tbl = self.tbl_ppv()
+#    for oxl_split in oxl_tbl.split(0*mm, 260*mm):
+#        self.DocElm.append(oxl_split)
+#        self.DocElm.append(Spacer(0*mm, 15*mm))
 
-    self.DocElm.append(Spacer(0 * mm, 5 * mm))
+    self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_text)
 
   #= METHOD ==============================
@@ -2682,7 +2079,6 @@ class zapisnik_o(SimpleDocTemplateNP):
 
     self.build(self.DocElm, canvasmaker=HdFtCanvasZap)
 
-
 #= CLASS ===============================
 # neusaglasenost
 #=======================================
@@ -2691,24 +2087,28 @@ class neusaglasenost(SimpleDocTemplateNP):
   #= METHOD ==============================
   # __init__
   #=======================================
-  def __init__(self,
+  def __init__(
+               self,
                pi_PrId,
                pc_PdfFile,
                pl_PageSize=A4,
                pb_showBoundary=0,
-               pn_topMargin=10 * mm,
-               pn_bottomMargin=10 * mm,
-               pn_leftMargin=10 * mm,
-               pn_rightMargin=10 * mm):
+               pn_topMargin=10*mm,
+               pn_bottomMargin=10*mm,
+               pn_leftMargin=10*mm,
+               pn_rightMargin=10*mm
+              ):
 
-    SimpleDocTemplate.__init__(self,
+    SimpleDocTemplate.__init__(
+                               self,
                                pc_PdfFile,
                                pagesize=portrait(pl_PageSize),
                                showBoundary=pb_showBoundary,
                                topMargin=pn_topMargin,
                                bottomMargin=pn_bottomMargin,
                                leftMargin=pn_leftMargin,
-                               rightMargin=pn_rightMargin)
+                               rightMargin=pn_rightMargin
+                              )
 
     data.dget(self.__class__.__name__, dd({'pr_id': pi_PrId}))
     self.Title = u'<u>NALAZ O NEUSKLAĐENOSTI (NEUSAGLAŠENOSTI)</u>'
@@ -2717,7 +2117,6 @@ class neusaglasenost(SimpleDocTemplateNP):
     self.pdfprep()
     self.pdfmake()
 
-<<<<<<< HEAD
   #= METHOD ==============================
   # data_fir
   #=======================================
@@ -2725,6 +2124,24 @@ class neusaglasenost(SimpleDocTemplateNP):
 
     vcl_text = 'Na osnovu rešenja Agencije za bezbednost saobraćaja 221-22-00-507/2020-05 od 13.07.2020. kojim je pravno lice {0} {1}, ovlašćeno za poslove ispitivanje vozila, {0} {1} sačinjava'.format(data.fir.fir_naziv, data.fir.fir_opis_s)
     oxl_pr = Paragraph(vcl_text, pss.alfn)
+
+    return oxl_pr
+
+  #= METHOD ==============================
+  # data_fir1
+  #=======================================
+  def data_fir1(self):
+
+    vcl_text = '<br/>'.join(
+                            [
+                             data.fir.fir_naziv,
+                             data.fir.fir_adresa_sediste,
+                             data.fir.fir_opis,
+                             'telefon: {}'.format(data.fir.fir_tel1),
+                             'mail: {}'.format(data.fir.fir_mail)
+                            ]
+                           )
+    oxl_pr = Paragraph(vcl_text, pss.alfb)
 
     return oxl_pr
 
@@ -2784,12 +2201,14 @@ class neusaglasenost(SimpleDocTemplateNP):
   def tbl_zkl(self):
 
     lll_data = []
-    lll_data.append([Paragraph(u'Vlasnik: {}'.format(nvl(data.pr.kl_naziv)), pss.alfn)])
-    lll_data.append([Paragraph(u'Adresa: {}'.format(nvl(data.pr.kl_adresa)), pss.alfn)])
-    lll_data.append([Paragraph(u'VIN oznake: {}'.format(nvl(data.pr.vz_sasija)), pss.alfn)])
-    lll_data.append([Paragraph(u'Broj motora: {}'.format(nvl(data.pr.vz_motor)), pss.alfn)])
-    oxl_table = Table(lll_data, hAlign='LEFT')
+    lll_data.append([Paragraph(u'Vlasnik: {}'.format(nvl(data.pr.kl_naziv)), pss.alfn), self.data_fir1()])
+    lll_data.append([Paragraph(u'Adresa: {}'.format(nvl(data.pr.kl_adresa)), pss.alfn), ''])
+    lll_data.append([Paragraph(u'VIN oznake: {}'.format(nvl(data.pr.vz_sasija)), pss.alfn), ''])
+    lll_data.append([Paragraph(u'Broj motora: {}'.format(nvl(data.pr.vz_motor)), pss.alfn), ''])
+    oxl_table = Table(lll_data, colWidths=[120*mm, 70*mm], hAlign='LEFT')
     oxl_ts = tss.alng
+    oxl_ts.add('SPAN', (-1, 0), (-1, -1))
+    oxl_ts.add('BOX', (-1, 0), (-1, -1), lts.t05, colors.black)
     oxl_table.setStyle(oxl_ts)
 
     return oxl_table
@@ -2809,8 +2228,38 @@ class neusaglasenost(SimpleDocTemplateNP):
                 [Paragraph(nvl(data.pr.pr_napomena), pss.alfn)],
                 [Paragraph(vcl_text, pss.alfn)],
                ]
-    oxl_table = Table(lll_data, rowHeights=[70*mm, 20*mm], colWidths=[190*mm], hAlign='LEFT')
+    oxl_table = Table(lll_data, rowHeights=[90*mm, 18*mm], colWidths=[190*mm], hAlign='LEFT')
     oxl_ts = tss.alg
+    oxl_ts.add('VALIGN', (0, 0), (-1, -1), 'TOP')
+    oxl_table.setStyle(oxl_ts)
+
+    return oxl_table
+
+  #= METHOD ==============================
+  # tbl_sgn
+  #=======================================
+  def tbl_sgn(self):
+
+
+    lll_data = [
+                [u'Podnosilac zahteva', u'', u'{}<br/>{}, {}'.format(data.fir.fir_naziv_s, data.fir.fir_opis_s, data.fir.fir_mesto_sediste)],
+                [u'', u'', u''],
+               ]
+    lll_dataf = []
+    for vil_row, lcl_row in enumerate(lll_data):
+      lll_dataf.append(
+                       [
+                        Paragraph(lcl_row[0], pss.acfn),
+                        Paragraph(lcl_row[1], pss.acfn),
+                        Paragraph(lcl_row[2], pss.acfn),
+                       ]
+                      )
+    oxl_table = Table(lll_dataf, rowHeights=[5*mm, 10*mm], colWidths=[60*mm, 70*mm, 60*mm], hAlign='LEFT')
+
+    oxl_ts = tss.acng
+    oxl_ts.add('ALIGN', (0, 0), (0, 0), 'LEFT')
+    oxl_ts.add('LINEBELOW', (0, -1), (0, -1), lts.t05, colors.black)
+    oxl_ts.add('LINEBELOW', (-1, -1), (-1, -1), lts.t05, colors.black)
     oxl_table.setStyle(oxl_ts)
 
     return oxl_table
@@ -2840,12 +2289,17 @@ class neusaglasenost(SimpleDocTemplateNP):
     self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(tbl_txt('U toku ispitivanja ustanovljene su sledeće neusaglašenosti:'))
 
-    self.DocElm.append(Spacer(0*mm, 0*mm))
+    self.DocElm.append(Spacer(0*mm, 2*mm))
     self.DocElm.append(self.tbl_data())
 
-    self.DocElm.append(Spacer(0*mm, 5*mm))
+    self.DocElm.append(Spacer(0*mm, 2*mm))
     self.DocElm.append(tbl_txt('Zabranjeno je preštampavanje i umnožavanje.'))
 
+    self.DocElm.append(Spacer(0*mm, 40*mm))
+    self.DocElm.append(tbl_txt(u'Datum: {}'.format(data.cd)))
+
+    self.DocElm.append(Spacer(0*mm, 2*mm))
+    self.DocElm.append(self.tbl_sgn())
     """
     self.DocElm.append(Spacer(0*mm, 5*mm))
     oxl_tbl = self.tbl_data()
@@ -2970,8 +2424,6 @@ class raspored(SimpleDocTemplateNP):
   def pdfmake(self):
 
     self.build(self.DocElm, canvasmaker=HdFtCanvas)
-=======
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
 
 #= CLASS ===============================
 # report
@@ -2983,14 +2435,16 @@ class report:
   #=======================================
   def __init__(self):
 
-    pass
+    pass 
 
   #= METHOD ==============================
   # run
   #=======================================
   def run(self, pc_UserName, pc_Report, pd_RepPrms={}):
+
     """  Generate PDF report file"""
 
+#    print('{}; {}; {}'.format(pc_UserName, pc_Report, pd_RepPrms={}))
     reps = dd({})
     reps['pdfdir'] = osp.join(sysdf.reps, 'pdf', pc_UserName)
     reps['pdf'] = osp.join(reps.pdfdir, '{}.pdf'.format(pc_Report))
@@ -2998,12 +2452,11 @@ class report:
     utl.dircheck(reps.pdfdir)
     utl.filedelete(reps.pdf)
 
-<<<<<<< HEAD
     vcl_Report = pc_Report.lower()
     vil_pr_id = pd_RepPrms.get('pi_pr_id', 0)
     vcl_vzpv_oznaka = pd_RepPrms.get('pc_vzpv_oznaka', '')
     vbl_test = pd_RepPrms.get('pb_test', False)
-    vcl_kn_datum = pd_RepPrms.get('kn_datum', '')
+    vcl_kn_datum = pd_RepPrms.get('pc_kn_datum', '')
     if vil_pr_id:
       if vcl_Report==u'zapisnik':
         if vcl_vzpv_oznaka:
@@ -3031,38 +2484,10 @@ class report:
         r = neusaglasenost(vil_pr_id, reps.pdf)
     elif vcl_Report=='raspored':
       r = raspored(vcl_kn_datum, reps.pdf)
-=======
-    if pc_Report == u'zapisnik':
-      if pd_RepPrms['pc_vzpv_oznaka'] == u'M1':
-        reps.pdf = osp.join(reps.pdfdir, '{}_m1.pdf'.format(pc_Report))
-        r = zapisnik_m1(pd_RepPrms[u'pi_pr_id'], reps.pdf)
-      elif pd_RepPrms['pc_vzpv_oznaka'] in (u'M2', u'M3'):
-        reps.pdf = osp.join(reps.pdfdir, '{}_m2m3.pdf'.format(pc_Report))
-        r = zapisnik_m2m3(pd_RepPrms[u'pi_pr_id'], reps.pdf)
-      elif pd_RepPrms['pc_vzpv_oznaka'][0] == u'L':
-        reps.pdf = osp.join(reps.pdfdir, '{}_l.pdf'.format(pc_Report))
-        r = zapisnik_l(pd_RepPrms["pi_pr_id"], reps.pdf)
-      elif pd_RepPrms['pc_vzpv_oznaka'] == u'N1':
-        reps.pdf = osp.join(reps.pdfdir, '{}_n1.pdf'.format(pc_Report))
-        r = zapisnik_n1(pd_RepPrms[u'pi_pr_id'], reps.pdf)
-      elif pd_RepPrms['pc_vzpv_oznaka'] in (u'N2', u'N3'):
-        reps.pdf = osp.join(reps.pdfdir, '{}_n2n3.pdf'.format(pc_Report))
-        r = zapisnik_n2n3(pd_RepPrms[u'pi_pr_id'], reps.pdf)
-      elif pd_RepPrms['pc_vzpv_oznaka'][0] == u'O':
-        reps.pdf = osp.join(reps.pdfdir, '{}_o.pdf'.format(pc_Report))
-        r = zapisnik_o(pd_RepPrms[u'pi_pr_id'], reps.pdf)
-    elif pc_Report == u'potvrda_b':
-      r = potvrda(pd_RepPrms[u'pi_pr_id'], reps.pdf)
-    elif pc_Report == u'neusaglasenost':
-      pass
-      r = neusaglasenost(pd_RepPrms[u'pi_pr_id'], reps.pdf)
-
->>>>>>> 4657407b781ddfa414616d66c829ea15f49fac7c
     if not osp.exists(reps.pdf):
       print('Izveštaj "{}" nije generisan!'.format(reps.pdf))
 
     return reps.pdf
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code

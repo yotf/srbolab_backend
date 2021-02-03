@@ -151,6 +151,7 @@ system.db
 *.env
 *.env_develop
 .env_develop
+env_develop
 /.env_develop
 ./code/.env_develop
 *tokens.db

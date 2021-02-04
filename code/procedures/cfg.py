@@ -10,11 +10,13 @@ import sqlite3 as sqll
 
 # site-packages
 from box import SBox as dd
-from config import (DB_PASSWORD, DOCS_PATH, IMGS_PATH, OCR_PATH, REPORTS_PATH)
+from config import (DB_PASSWORD, DOCS_PATH, IMGS_PATH, OCR_PATH,
+                    REPORTS_ASSETS_PATH, REPORTS_DATA_PATH)
 
 #---------------------------------------
 # global variables
 #---------------------------------------
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
@@ -23,47 +25,48 @@ from config import (DB_PASSWORD, DOCS_PATH, IMGS_PATH, OCR_PATH, REPORTS_PATH)
 # getdirfile
 #=======================================
 def getdirfile(pi_sdf_id=0):
-
   """  Get system dirs & files"""
 
-  dcl_sdf = dd(
-               {
-                'reps': REPORTS_PATH,
-                'imgs': IMGS_PATH,
-                'docs': DOCS_PATH,
-                'ocr': OCR_PATH
-               }
-              )
+  dcl_sdf = dd({
+      'reps': REPORTS_ASSETS_PATH,
+      'imgs': IMGS_PATH,
+      'docs': DOCS_PATH,
+      'ocr': OCR_PATH,
+      'reps_save': REPORTS_DATA_PATH
+  })
 
   return dcl_sdf
+
 
 #= FUNCTION ============================
 # getpgdb
 #=======================================
-def getpgdb(pc_password=None, pc_user='postgres', pc_host='localhost', pn_port=5432, pc_dbname='srbolab'):
-
+def getpgdb(pc_password=None,
+            pc_user='postgres',
+            pc_host='localhost',
+            pn_port=5432,
+            pc_dbname='srbolab'):
   """  Get postgres database parameters"""
 
-  dxl_pgdbprms = dd(
-                    {
-                     'host': pc_host, 
-                     'port': str(pn_port), 
-                     'database': pc_dbname, 
-                     'user': pc_user, 
-                     'password': getpwd()
-                    }
-                   )
+  dxl_pgdbprms = dd({
+      'host': pc_host,
+      'port': str(pn_port),
+      'database': pc_dbname,
+      'user': pc_user,
+      'password': getpwd()
+  })
 
   return dxl_pgdbprms
+
 
 #= FUNCTION ============================
 # getpwd
 #=======================================
 def getpwd():
-
   """  Get password from file"""
 
   return DB_PASSWORD
+
 
 #= FUNCTION ============================
 # getcols
@@ -73,12 +76,23 @@ def getcols():
   dxl_tblcols = dd({})
   vcl_colsxf = osp.join(osp.dirname(__file__), 'colsx.db')
   if osp.exists(vcl_colsxf):
-    lcl_cols = ['table_name', 'column_name', 'column_order', 'column_type', 'column_length', 'column_dec', 'column_is_nn', 'column_default', 'column_check', 'column_is_pk', 'column_is_fk', 'table_name_p', 'column_name_p', 'column_comment', 'column_label', 'column_header', 'column_tooltip', 'column_show', 'column_edit', 'column_fill', 'column_pick', 'column_control']
+    lcl_cols = [
+        'table_name', 'column_name', 'column_order', 'column_type',
+        'column_length', 'column_dec', 'column_is_nn', 'column_default',
+        'column_check', 'column_is_pk', 'column_is_fk', 'table_name_p',
+        'column_name_p', 'column_comment', 'column_label', 'column_header',
+        'column_tooltip', 'column_show', 'column_edit', 'column_fill',
+        'column_pick', 'column_control'
+    ]
     vcl_sql = """SELECT c.{}
     FROM db_columns c
-    ORDER BY c.table_name, c.column_order;""".format(',\n       c.'.join(lcl_cols))
+    ORDER BY c.table_name, c.column_order;""".format(
+        ',\n       c.'.join(lcl_cols))
     try:
-      conn = sqll.connect(vcl_colsxf, detect_types=sqll.PARSE_COLNAMES|sqll.PARSE_DECLTYPES, isolation_level='IMMEDIATE')
+      conn = sqll.connect(vcl_colsxf,
+                          detect_types=sqll.PARSE_COLNAMES
+                          | sqll.PARSE_DECLTYPES,
+                          isolation_level='IMMEDIATE')
       crsr = conn.cursor()
       try:
         crsr.execute(vcl_sql)
@@ -88,15 +102,15 @@ def getcols():
             dxl_tblcols[r.table_name] = { 'columns': {} }
           if r.column_name not in dxl_tblcols[r.table_name]['columns']:
             dxl_tblcols[r.table_name]['columns'][r.column_name] = {
-                                                                   'label': r.column_label,
-                                                                   'header': r.column_header,
-                                                                   'tooltip': r.column_tooltip,
-                                                                   'show': (r.column_show == 'y'),
-                                                                   'edit': (r.column_edit == 'y'),
-                                                                   'fill': (r.column_fill == 'y'),
-                                                                   'pick': (r.column_pick == 'y'),
-                                                                   'control': r.column_control,
-                                                                  }
+                'label': r.column_label,
+                'header': r.column_header,
+                'tooltip': r.column_tooltip,
+                'show': (r.column_show == 'y'),
+                'edit': (r.column_edit == 'y'),
+                'fill': (r.column_fill == 'y'),
+                'pick': (r.column_pick == 'y'),
+                'control': r.column_control,
+            }
       except:
         raise
       finally:
@@ -108,6 +122,7 @@ def getcols():
     print('Nema fajla sa kolonama!')
 
   return dxl_tblcols
+
 
 cols = getcols()
 sysdf = getdirfile()

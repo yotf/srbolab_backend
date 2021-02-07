@@ -2777,8 +2777,9 @@ class raspored(SimpleDocTemplateNP):
         Paragraph('Име', pss.alfb)
     ]]
     for vil_row, row in enumerate(data.rsp):
+      print(row, vil_row)
       lll_data.append([
-          Paragraph(row.lk_naziv_d, pss.alfn),
+          Paragraph(row.lk_naziv, pss.alfn),
           Paragraph(row.kr_prezime, pss.alfn),
           Paragraph(row.kr_ime, pss.alfn),
       ])

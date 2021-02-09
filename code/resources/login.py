@@ -96,8 +96,6 @@ def userLog(username, action, ipAddress):
 
 @jwt.token_in_blacklist_loader
 def check_token(token):
-  print(token)
   jti = token['jti']
   tokens = get_tokens(jti)
   return not tokens or not len(tokens)
-  # return jti not in [token.get("token", "") for token in tokens]

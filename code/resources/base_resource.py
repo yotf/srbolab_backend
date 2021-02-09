@@ -1,6 +1,6 @@
 import json
-import types
 import traceback
+import types
 
 from flask import request
 from flask_jwt_extended import get_jwt_claims, get_jwt_identity, jwt_required
@@ -110,6 +110,9 @@ class BaseResource(Resource):
             for key in self.primary_keys
         }
         new_item = self.service.tbl_get(get_args)[0]
+        if self.item_name == "v_korisnik" and new_item["kr_password"]:
+          new_item["kr_password"] = ""
+
         return new_item, 200
       else:
         return new_item, 400
@@ -140,6 +143,9 @@ class BaseResource(Resource):
           and update_result["rcod"] > 0) or update_result["rcod"] == 0:
         get_args = { key: item[key] for key in self.primary_keys }
         new_item = self.service.tbl_get(get_args)[0]
+        if self.item_name == "v_korisnik" and new_item["kr_password"]:
+          new_item["kr_password"] = ""
+
         return new_item, 200
       else:
         return update_result, 400

@@ -9,8 +9,10 @@ import locale as lc
 import os
 import os.path as osp
 from datetime import datetime as dtdt
-
 from box import SBox as dd
+
+# site-packages
+from reportlab.platypus import SimpleDocTemplate, PageBreak, Spacer, Paragraph, Image, Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_RIGHT
 from reportlab.lib.pagesizes import A4, portrait
@@ -86,7 +88,7 @@ lts = dd({
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#= METHOD ==============================
+#= FUNCTION ============================
 # nvl
 #=======================================
 def nvl(px_cval, px_nval=u''):
@@ -119,14 +121,11 @@ def regfonts():
       'Consolas Bold Italic': 'consolaz.ttf',
   }
   for vcl_FntNme, vcl_FntFle in dcl_Fonts.items():
-    pdfmetrics.registerFont(
-        TTFont(vcl_FntNme, osp.join(sysdf.reps, 'fonts', vcl_FntFle)))
-
+    pdfmetrics.registerFont(TTFont(vcl_FntNme, osp.join(sysdf.assets, 'reports', 'fonts', vcl_FntFle)))
 
 regfonts()
 
-
-#= METHOD ==============================
+#= FUNCTION ============================
 # tbl_ttl
 #=======================================
 def tbl_ttl(pc_text):
@@ -136,8 +135,7 @@ def tbl_ttl(pc_text):
 
   return oxl_table
 
-
-#= METHOD ==============================
+#= FUNCTION ============================
 # tbl_txt
 #=======================================
 def tbl_txt(pc_text):
@@ -466,6 +464,25 @@ class TblStyles():
 
   @property
   #= PROPERTY ============================
+  #  arg
+  #=======================================
+  def arg(self):
+
+    return TableStyle(
+                      [
+                       ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                       ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
+                       ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
+                       ('TOPPADDING', (0, 0), (-1, -1), 1),
+                       ('LEFTPADDING', (0, 0), (-1, -1), 3),
+                       ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+                       ('INNERGRID', (0, 0), (-1, -1), lts.t05, colors.black),
+                       ('BOX', (0, 0), (-1, -1), lts.t05, colors.black),
+                      ]
+                     )
+
+  @property
+  #= PROPERTY ============================
   #  alng
   #=======================================
   def alng(self):
@@ -494,6 +511,23 @@ class TblStyles():
         ('RIGHTPADDING', (0, 0), (-1, -1), 3),
     ])
 
+
+  @property
+  #= PROPERTY ============================
+  #  arng
+  #=======================================
+  def arng(self):
+
+    return TableStyle(
+                      [
+                       ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                       ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
+                       ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
+                       ('TOPPADDING', (0, 0), (-1, -1), 1),
+                       ('LEFTPADDING', (0, 0), (-1, -1), 3),
+                       ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+                      ]
+                     )
 
 tss = TblStyles()
 
@@ -596,7 +630,8 @@ class HdFtCanvasZap(canvas.Canvas):
 
     canvas.Canvas.__init__(self, *args, **kwargs)
     self.pages = []
-    self.width, self.height = A4
+#    self.width, self.height = A4
+    self.width, self.height = self._pagesize
 
   #= METHOD ==============================
   #  showPage
@@ -637,19 +672,29 @@ class HdFtCanvasZap(canvas.Canvas):
     ])
     oxl_pr = Paragraph(vcl_text, pss.acfn)
 
-    lll_data = [[oxl_img, oxl_pr]]
-    oxl_table = Table(lll_data, colWidths=[40 * mm, 150 * mm], hAlign='LEFT')
-    oxl_table.setStyle(tss.acg)
-    oxl_table.wrapOn(self, 0, 0)
-    oxl_table.drawOn(self, 10 * mm, A4[1] - 20 * mm + 1)
+    lll_datah = [[oxl_img, oxl_pr]]
+    oxl_tableh = Table(lll_datah, colWidths=[40*mm, 150*mm], hAlign='LEFT')
+    oxl_tableh.setStyle(tss.acg)
+    oxl_tableh.wrapOn(self, 0, 0)
+    oxl_tableh.drawOn(self, 10*mm, A4[1]-20*mm+1)
 
-    if self._pageNumber == pi_pg_cnt:
-      oxl_table = zap.tbl_sgn
-      oxl_table.wrapOn(self, 0, 0)
-      oxl_table.drawOn(self, 10 * mm, A4[1] - 280 * mm)
-    vcl_page = 'Strana {} od {}'.format(self._pageNumber, pi_pg_cnt)
-    self.setFont('Tahoma', 10)
-    self.drawString(175 * mm, 5 * mm, vcl_page)
+    if self._pageNumber==pi_pg_cnt:
+      oxl_tables = zap.tbl_sgn
+      oxl_tables.wrapOn(self, 0, 0)
+      oxl_tables.drawOn(self, 10*mm, A4[1]-280*mm)
+
+    lll_dataf = [[Paragraph('Strana {} od {}'.format(self._pageNumber, pi_pg_cnt), pss.arfn)]]
+    oxl_tablef = Table(lll_dataf, colWidths=[190*mm], hAlign='LEFT')
+    oxl_ts = tss.arng
+    oxl_ts.add('LINEABOVE', (0, 0), (-1, -1), lts.t05, colors.black)
+    oxl_tablef.setStyle(oxl_ts)
+    oxl_tablef.wrapOn(self, 0, 0)
+    oxl_tablef.drawOn(self, 10*mm, 4*mm)
+
+#    vcl_page = 'Strana {} od {}'.format(self._pageNumber, pi_pg_cnt)
+#    self.setFont('Tahoma', 10)
+#    self.drawString(178*mm-0.5, 5*mm, vcl_page)
+
     self.restoreState()
 
 
@@ -1244,6 +1289,55 @@ class zapisnici():
 
     return oxl_table
 
+  @property
+  #= METHOD ==============================
+  # zap_tbl_ppv_data_ftr
+  #=======================================
+  def zap_tbl_ppv_data_ftr(self):
+
+    return [
+            ['', u'x = uređaj/sistem postoji na vozilu,', u'- = uređaj/sistem ne postoji na vozilu', u'', u''],
+            ['', u'&nbsp;'*15+u'N/P = nije primenljivo,', u'&nbsp;'*15+u'* = obavezna homologacija', u'', u''],
+           ]
+
+  #= METHOD ==============================
+  # zap_tbl_ppv_data_bdy
+  #=======================================
+  def zap_tbl_ppv_data_bdy(self, pl_data):
+
+    lll_dataf = []
+    for vil_row, lcl_row in enumerate(pl_data):
+      lll_dataf.append(
+                       [
+                        Paragraph(lcl_row[0], (pss.acfb if vil_row==0 else pss.arfn)),
+                        Paragraph(lcl_row[1], pss.alfn),
+                        Paragraph(lcl_row[2], pss.alfn),
+                        Paragraph(lcl_row[3], pss.alfn),
+                        Paragraph(lcl_row[4], pss.acfn),
+                       ]
+                      )
+
+    return lll_dataf
+
+  #= METHOD ==============================
+  # zap_tbl_ppv_ts
+  #=======================================
+  def zap_tbl_ppv_ts(self, pl_data):
+
+    oxl_ts = tss.alng
+    oxl_ts.add('ALIGN', (0, 1), (0, -3), 'RIGHT')
+    oxl_ts.add('ALIGN', (1, 1), (-1, -1), 'LEFT')
+    oxl_ts.add('BOX', (0, 1), (-1, -3), lts.t05, colors.black)
+    oxl_ts.add('BOX', (0, -2), (-1, -1), lts.t05, colors.black)
+    oxl_ts.add('INNERGRID', (0, 1), (-1, -3), lts.t05, colors.black)
+    oxl_ts.add('SPAN', (0, 0), (-1, 0))
+    lil_l1 = [i for i, l in enumerate(pl_data[:-2]+['99']) if l[0] and l[0].isdigit()]
+    lil_l2 = [i-1 for i in lil_l1][1:]
+    for til_rows in [e for e in zip(lil_l1[:-1], lil_l2) if e[0]!=e[1]]:
+      for vil_col in range(2):
+        oxl_ts.add('SPAN', (vil_col, til_rows[0]), (vil_col, til_rows[1]))
+
+    return oxl_ts
 
 zap = zapisnici()
 
@@ -1288,122 +1382,50 @@ class zapisnik_m1(SimpleDocTemplateNP):
   def tbl_ppv(self):
 
     lll_data = [
-        [
-            'KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'',
-            u''
-        ],
-        [
-            '1', u'uređaji za upravlj. - sistem za upravljanje',
-            u'komanda na levoj strani', u'', u'*'
-        ],
-        [
-            '2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna',
-            u'', u'*'
-        ],
-        ['', u'', u'pomoćna', u'', u'*'],
-        ['', u'', u'parkirna', u'', u'*'],
-        ['', u'', u'ABS (ako ima)', u'', u'*'],
-        [
-            '3', u'uređaji za osvetljavanje puta',
-            u'svetlosno i svetlosno signalni uređaji', u'', u'*'
-        ],
-        ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
-        ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
-        [
-            '4', u'uređaji koji omogućuju normalnu vidljivost',
-            u'retrovizori spoljni oba i unutrašnji', u'', u'*'
-        ],
-        ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
-        ['', u'', u'uređaj za brisanje', u'', u''],
-        ['', u'', u'uređaj za kvašenje', u'', u''],
-        ['5', u'uređaj za davanje zvučnih znakova', u'', u'', u'*'],
-        [
-            '6', u'uređaji za kontrolu i davanje znakova',
-            u'brzinomer sa odometrom', u'', u''
-        ],
-        ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
-        ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
-        [
-            '7', u'uređaji za odvođenje i regulisanje izduvnih gasova',
-            u'katalizator', u'', u'*'
-        ],
-        ['', u'', u'ne u desnu stranu i u gabaritima izduva', u'', u''],
-        [
-            '8', u'uređaji za spajanje vučnog i priključnog vozila',
-            u'rastavljen ne sme da premaši gabarit', u'', u'*'
-        ],
-        ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
-        [
-            '10', u'uređaji za oslanjanje',
-            u'bez kontakta točkova i karoserije', u'', u''
-        ],
-        [
-            '11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama',
-            u'', u''
-        ],
-        ['12', u'elektro uređaji i instalacija', u'', u'', u''],
-        ['13', u'pogonski uređaj', u'', u'', u''],
-        [
-            '14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču',
-            u'', u''
-        ],
-        [
-            '15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja',
-            u'opšta konstrukcija', u'', u'*'
-        ],
-        ['', u'', u'VIN', u'', u''],
-        ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
-        ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
-        ['', u'', u'reklamne table u gabaritima', u'', u''],
-        ['', u'', u'prostor za tablicu', u'', u''],
-        ['', u'', u'unutrašnja rasveta', u'', u''],
-        ['', u'', u'dvostepene brave', u'', u''],
-        ['', u'', u'blatobrani iznad svih točkova u širini točka', u'', u''],
-        ['', u'', u'branik najmanje napred najistureniji', u'', u''],
-        ['', u'', u'pojasevi za sva mesta', u'', u'*'],
-        ['', u'', u'priključak za vuču neispravnog vozula', u'', u'*'],
-        ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
-        [
-            '', u'x = uređaj/sistem postoji na vozilu,',
-            u'- = uređaj/sistem ne postoji na vozilu', u'', u''
-        ],
-        [
-            '', u'&nbsp;' * 15 + u'N/P = nije primenljivo,',
-            u'&nbsp;' * 15 + u'* = obavezna homologacija', u'', u''
-        ],
-    ]
-    lll_dataf = []
-    for vil_row, lcl_row in enumerate(lll_data):
-      lll_dataf.append([
-          Paragraph(lcl_row[0], (pss.acfb if vil_row == 0 else pss.arfn)),
-          Paragraph(lcl_row[1], pss.alfn),
-          Paragraph(lcl_row[2], pss.alfn),
-          Paragraph(lcl_row[3], pss.alfn),
-          Paragraph(lcl_row[4], pss.alfn),
-      ])
-    oxl_table = Table(lll_dataf,
-                      colWidths=[9 * mm, 78 * mm, 81 * mm, 15 * mm, 7 * mm],
-                      hAlign='LEFT')
-
-    oxl_ts = tss.alng
-    oxl_ts.add('ALIGN', (0, 1), (0, -3), 'RIGHT')
-    oxl_ts.add('ALIGN', (1, 1), (-1, -1), 'LEFT')
-    oxl_ts.add('BOX', (0, 1), (-1, -3), lts.t05, colors.black)
-    oxl_ts.add('BOX', (0, -2), (-1, -1), lts.t05, colors.black)
-    oxl_ts.add('INNERGRID', (0, 1), (-1, -3), lts.t05, colors.black)
-    oxl_ts.add('SPAN', (0, 0), (-1, 0))
-    oxl_ts.add('SPAN', (0, 2), (0, 5))
-    oxl_ts.add('SPAN', (1, 2), (1, 5))
-    oxl_ts.add('SPAN', (0, 6), (0, 8))
-    oxl_ts.add('SPAN', (1, 6), (1, 8))
-    oxl_ts.add('SPAN', (0, 9), (0, 12))
-    oxl_ts.add('SPAN', (1, 9), (1, 12))
-    oxl_ts.add('SPAN', (0, 14), (0, 16))
-    oxl_ts.add('SPAN', (1, 14), (1, 16))
-    oxl_ts.add('SPAN', (0, 17), (0, 18))
-    oxl_ts.add('SPAN', (1, 17), (1, 18))
-    oxl_ts.add('SPAN', (0, 26), (0, 37))
-    oxl_ts.add('SPAN', (1, 26), (1, 37))
+                ['KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'', u''],
+                ['1', u'uređaji za upravlj. - sistem za upravljanje', u'komanda na levoj strani', u'', u'*'],
+                ['2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna', u'', u'*'],
+                ['', u'', u'pomoćna', u'', u'*'],
+                ['', u'', u'parkirna', u'', u'*'],
+                ['', u'', u'ABS (ako ima)', u'', u'*'],
+                ['3', u'uređaji za osvetljavanje puta', u'svetlosno i svetlosno signalni uređaji', u'', u'*'],
+                ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
+                ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
+                ['4', u'uređaji koji omogućuju normalnu vidljivost', u'retrovizori spoljni oba i unutrašnji', u'', u'*'],
+                ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
+                ['', u'', u'uređaj za brisanje', u'', u''],
+                ['', u'', u'uređaj za kvašenje', u'', u''],
+                ['5', u'uređaj za davanje zvučnih znakova', u'', u'', u'*'],
+                ['6', u'uređaji za kontrolu i davanje znakova', u'brzinomer sa odometrom', u'', u''],
+                ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
+                ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
+                ['7', u'uređaji za odvođenje i regulisanje izduvnih gasova', u'katalizator', u'', u'*'],
+                ['', u'', u'ne u desnu stranu i u gabaritima izduva', u'', u''],
+                ['8', u'uređaji za spajanje vučnog i priključnog vozila', u'rastavljen ne sme da premaši gabarit', u'', u'*'],
+                ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
+                ['10', u'uređaji za oslanjanje', u'bez kontakta točkova i karoserije', u'', u''],
+                ['11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama', u'', u''],
+                ['12', u'elektro uređaji i instalacija', u'', u'', u''],
+                ['13', u'pogonski uređaj', u'', u'', u''],
+                ['14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču', u'', u''],
+                ['15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja', u'opšta konstrukcija', u'', u'*'],
+                ['', u'', u'VIN', u'', u''],
+                ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
+                ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
+                ['', u'', u'reklamne table u gabaritima', u'', u''],
+                ['', u'', u'prostor za tablicu', u'', u''],
+                ['', u'', u'unutrašnja rasveta', u'', u''],
+                ['', u'', u'dvostepene brave', u'', u''],
+                ['', u'', u'blatobrani iznad svih točkova u širini točka', u'', u''],
+                ['', u'', u'branik najmanje napred najistureniji', u'', u''],
+                ['', u'', u'pojasevi za sva mesta', u'', u'*'],
+                ['', u'', u'priključak za vuču neispravnog vozula', u'', u'*'],
+                ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
+               ]
+    lll_data.extend(zap.zap_tbl_ppv_data_ftr)
+    lll_dataf = zap.zap_tbl_ppv_data_bdy(lll_data)
+    oxl_table = Table(lll_dataf, colWidths=[9*mm, 78*mm, 81*mm, 15*mm, 7*mm], hAlign='LEFT')
+    oxl_ts = zap.zap_tbl_ppv_ts(lll_data)
     oxl_table.setStyle(oxl_ts)
 
     return oxl_table
@@ -1489,152 +1511,71 @@ class zapisnik_m2m3(SimpleDocTemplateNP):
   def tbl_ppv(self):
 
     lll_data = [
-        [
-            'KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'',
-            u''
-        ],
-        [
-            '1', u'uređaji za upravlj. - sistem za upravljanje',
-            u'komanda na levoj strani', u'', u'*'
-        ],
-        [
-            '2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna',
-            u'', u'*'
-        ],
-        ['', u'', u'pomoćna', u'', u'*'],
-        ['', u'', u'parkirna', u'', u'*'],
-        ['', u'', u'ABS (ako ima)', u'', u'*'],
-        ['', u'', u'usporač', u'', u'*'],
-        [
-            '3', u'uređaji za osvetljavanje puta',
-            u'svetlosno i svetlosno signalni uređaji', u'', u'*'
-        ],
-        ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
-        ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
-        [
-            '4', u'uređaji koji omogućuju normalnu vidljivost',
-            u'retrovizori spoljni oba i unutrašnji', u'', u'*'
-        ],
-        ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
-        ['', u'', u'uređaj za brisanje', u'', u''],
-        ['', u'', u'uređaj za kvašenje', u'', u''],
-        [
-            '5', u'uređaj za davanje zvučnih znakova',
-            u'uključujući i signal pri kretanju unazad', u'', u''
-        ],
-        [
-            '6', u'uređaji za kontrolu i davanje znakova',
-            u'brzinomer sa odometrom', u'', u''
-        ],
-        ['', u'', u'indikator pritiska u sistemu za radno kočenje', u'', u''],
-        ['', u'', u'digitalni tahograf', u'', u''],
-        ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
-        ['', u'', u'ograničavač brzine do 100 km/H', u'', u'*'],
-        [
-            '', u'', u'svetlosni signal za kontrolu zatvorenih vrata (kl I/II)',
-            u'', u''
-        ],
-        [
-            '', u'', u'uređaj za dav. i prim. znakova od putnika (kl I/II)',
-            u'', u''
-        ],
-        ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
-        [
-            '7', u'uređaji za odvođenje i regulisanje izduvnih gasova',
-            u'katalizator', u'', u'*'
-        ],
-        ['', u'', u'ne u desnu stranu i u gabaritima izduva', u'', u''],
-        [
-            '8', u'uređaji za spajanje vučnog i priključnog vozila',
-            u'rastavljen ne sme da premaši gabarit', u'', u'*'
-        ],
-        ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
-        [
-            '10', u'uređaji za oslanjanje',
-            u'bez kontakta točkova i karoserije', u'', u''
-        ],
-        [
-            '11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama',
-            u'', u''
-        ],
-        [
-            '12', u'elektro uređaji i instalacija',
-            u'prekidač svih strujnih kola osim taho. i bezb. uređa', u'', u''
-        ],
-        [
-            '13', u'pogonski uređaj',
-            u'nije moguće povređivanje vozača i putnika', u'', u''
-        ],
-        [
-            '14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču',
-            u'', u''
-        ],
-        [
-            '15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja',
-            u'opšta konstrukcija', u'', u'*'
-        ],
-        ['', u'', u'VIN', u'', u''],
-        ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
-        ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
-        ['', u'', u'reklamne table u gabaritima', u'', u''],
-        ['', u'', u'prostor za tablicu', u'', u''],
-        ['', u'', u'slobodna površina za stajanje putnika', u'', u''],
-        ['', u'', u'pričvršćenost alata, pribora, uređaja i opreme', u'', u''],
-        ['', u'', u'izlaz u slučaju opasnosti (na krovu i vrata)', u'', u''],
-        ['', u'', u'uređaj za provetravanje', u'', u''],
-        ['', u'', u'unutrašnja rasveta', u'', u''],
-        ['', u'', u'dvostepene brave', u'', u''],
-        ['', u'', u'blatobrani iznad svih točkova u širini točka', u'', u''],
-        ['', u'', u'branik najmanje napred najistureniji', u'', u''],
-        ['', u'', u'pojasevi za sva mesta', u'', u'*'],
-        [
-            '', u'', u'putnički prost. obezbeđen od prodora štetnih gasova',
-            u'', u''
-        ],
-        ['', u'', u'priključak za vuču neispravnog vozila', u'', u'*'],
-        ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
-        [
-            '', u'x = uređaj/sistem postoji na vozilu,',
-            u'- = uređaj/sistem ne postoji na vozilu', u'', u''
-        ],
-        [
-            '', u'&nbsp;' * 15 + u'N/P = nije primenljivo,',
-            u'&nbsp;' * 15 + u'* = obavezna homologacija', u'', u''
-        ],
-    ]
+                ['KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'', u''],
+                ['1', u'uređaji za upravlj. - sistem za upravljanje', u'komanda na levoj strani', u'', u'*'],
+                ['2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna', u'', u'*'],
+                ['', u'', u'pomoćna', u'', u'*'],
+                ['', u'', u'parkirna', u'', u'*'],
+                ['', u'', u'ABS (ako ima)', u'', u'*'],
+                ['', u'', u'usporač', u'', u'*'],
+                ['3', u'uređaji za osvetljavanje puta', u'svetlosno i svetlosno signalni uređaji', u'', u'*'],
+                ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
+                ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
+                ['4', u'uređaji koji omogućuju normalnu vidljivost', u'retrovizori spoljni oba i unutrašnji', u'', u'*'],
+                ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
+                ['', u'', u'uređaj za brisanje', u'', u''],
+                ['', u'', u'uređaj za kvašenje', u'', u''],
+                ['5', u'uređaj za davanje zvučnih znakova', u'uključujući i signal pri kretanju unazad', u'', u''],
+                ['6', u'uređaji za kontrolu i davanje znakova', u'brzinomer sa odometrom', u'', u''],
+                ['', u'', u'indikator pritiska u sistemu za radno kočenje', u'', u''],
+                ['', u'', u'digitalni tahograf', u'', u''],
+                ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
+                ['', u'', u'ograničavač brzine do 100 km/H', u'', u'*'],
+                ['', u'', u'svetlosni signal za kontrolu zatvorenih vrata (kl I/II)', u'', u''],
+                ['', u'', u'uređaj za dav. i prim. znakova od putnika (kl I/II)', u'', u''],
+                ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
+                ['7', u'uređaji za odvođenje i regulisanje izduvnih gasova', u'katalizator', u'', u'*'],
+                ['', u'', u'ne u desnu stranu i u gabaritima izduva', u'', u''],
+                ['8', u'uređaji za spajanje vučnog i priključnog vozila', u'rastavljen ne sme da premaši gabarit', u'', u'*'],
+                ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
+                ['10', u'uređaji za oslanjanje', u'bez kontakta točkova i karoserije', u'', u''],
+                ['11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama', u'', u''],
+                ['12', u'elektro uređaji i instalacija', u'prekidač svih strujnih kola osim taho. i bezb. uređa', u'', u''],
+                ['13', u'pogonski uređaj', u'nije moguće povređivanje vozača i putnika', u'', u''],
+                ['14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču', u'', u''],
+                ['15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja', u'opšta konstrukcija', u'', u'*'],
+                ['', u'', u'VIN', u'', u''],
+                ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
+                ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
+                ['', u'', u'reklamne table u gabaritima', u'', u''],
+                ['', u'', u'prostor za tablicu', u'', u''],
+                ['', u'', u'slobodna površina za stajanje putnika', u'', u''],
+                ['', u'', u'pričvršćenost alata, pribora, uređaja i opreme', u'', u''],
+                ['', u'', u'izlaz u slučaju opasnosti (na krovu i vrata)', u'', u''],
+                ['', u'', u'uređaj za provetravanje', u'', u''],
+                ['', u'', u'unutrašnja rasveta', u'', u''],
+                ['', u'', u'dvostepene brave', u'', u''],
+                ['', u'', u'blatobrani iznad svih točkova u širini točka', u'', u''],
+                ['', u'', u'branik najmanje napred najistureniji', u'', u''],
+                ['', u'', u'pojasevi za sva mesta', u'', u'*'],
+                ['', u'', u'putnički prost. obezbeđen od prodora štetnih gasova', u'', u''],
+                ['', u'', u'priključak za vuču neispravnog vozila', u'', u'*'],
+                ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
+               ]
+    lll_data.extend(zap.zap_tbl_ppv_data_ftr)
     lll_dataf = []
     for vil_row, lcl_row in enumerate(lll_data):
-      lll_dataf.append([
-          Paragraph(lcl_row[0], (pss.acfb if vil_row == 0 else pss.arfn)),
-          Paragraph(lcl_row[1], pss.alfn),
-          Paragraph(lcl_row[2], pss.alfn),
-          Paragraph(lcl_row[3], pss.alfn),
-          Paragraph(lcl_row[4], pss.alfn),
-      ])
-    oxl_table = Table(lll_dataf,
-                      rowHeights=[4 * mm] * len(lll_dataf),
-                      colWidths=[9 * mm, 75 * mm, 84 * mm, 15 * mm, 7 * mm],
-                      hAlign='LEFT')
-
-    oxl_ts = tss.alng
-    oxl_ts.add('ALIGN', (0, 1), (0, -3), 'RIGHT')
-    oxl_ts.add('ALIGN', (1, 1), (-1, -1), 'LEFT')
-    oxl_ts.add('BOX', (0, 1), (-1, -3), lts.t05, colors.black)
-    oxl_ts.add('BOX', (0, -2), (-1, -1), lts.t05, colors.black)
-    oxl_ts.add('INNERGRID', (0, 1), (-1, -3), lts.t05, colors.black)
-    oxl_ts.add('SPAN', (0, 0), (-1, 0))
-    oxl_ts.add('SPAN', (0, 2), (0, 6))
-    oxl_ts.add('SPAN', (1, 2), (1, 6))
-    oxl_ts.add('SPAN', (0, 7), (0, 9))
-    oxl_ts.add('SPAN', (1, 7), (1, 9))
-    oxl_ts.add('SPAN', (0, 10), (0, 13))
-    oxl_ts.add('SPAN', (1, 10), (1, 13))
-    oxl_ts.add('SPAN', (0, 15), (0, 22))
-    oxl_ts.add('SPAN', (1, 15), (1, 22))
-    oxl_ts.add('SPAN', (0, 23), (0, 24))
-    oxl_ts.add('SPAN', (1, 23), (1, 24))
-    oxl_ts.add('SPAN', (0, 32), (0, 48))
-    oxl_ts.add('SPAN', (1, 32), (1, 48))
+      lll_dataf.append(
+                       [
+                        Paragraph(lcl_row[0], (pss.acfb if vil_row==0 else pss.arfn)),
+                        Paragraph(lcl_row[1], pss.alfn),
+                        Paragraph(lcl_row[2], pss.alfn),
+                        Paragraph(lcl_row[3], pss.alfn),
+                        Paragraph(lcl_row[4], pss.alfn),
+                       ]
+                      )
+    oxl_table = Table(lll_dataf, rowHeights=[4*mm]*len(lll_dataf), colWidths=[9*mm, 75*mm, 84*mm, 15*mm, 7*mm], hAlign='LEFT')
+    oxl_ts = zap.zap_tbl_ppv_ts(lll_data)
     oxl_table.setStyle(oxl_ts)
 
     return oxl_table
@@ -1724,114 +1665,44 @@ class zapisnik_l(SimpleDocTemplateNP):
   def tbl_ppv(self):
 
     lll_data = [
-        [
-            'KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'',
-            u''
-        ],
-        [
-            '1', u'uređaji za upravlj. - sistem za upravljanje',
-            u'komanda na levoj strani', u'', u'*'
-        ],
-        [
-            '2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna',
-            u'', u'*'
-        ],
-        ['', u'', u'pomoćna (L5 i L7 m>1t)', u'', u'*'],
-        ['', u'', u'parkirna L7', u'', u'*'],
-        [
-            '3', u'svetlosno i svetlosno signalni uređaji',
-            u'uređaji za osvetljavanje puta', u'', u'*'
-        ],
-        ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
-        ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
-        [
-            '4', u'uređaji koji omogućuju normalnu vidljivost', u'retrovizori',
-            u'', u'*'
-        ],
-        ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
-        ['', u'', u'uređaj za brisanje', u'', u''],
-        ['', u'', u'uređaj za kvašenje', u'', u''],
-        ['5', u'uređaj za davanje zvučnih znakova', u'', u'', u'*'],
-        [
-            '6', u'uređaji za kontrolu i davanje znakova',
-            u'brzinomer sa odometrom', u'', u''
-        ],
-        ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
-        ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
-        [
-            '7', u'uređaji za odvođenje i regulisanje izduvnih gasova',
-            u'katalizator', u'', u'*'
-        ],
-        [
-            '8', u'uređaji za spajanje vučnog i priključnog vozila',
-            u'rastavljen ne sme da premaši gabarit', u'', u'*'
-        ],
-        ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
-        [
-            '10', u'uređaji za oslanjanje',
-            u'bez kontakta točkova i karoserije', u'', u''
-        ],
-        [
-            '11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama',
-            u'', u''
-        ],
-        ['12', u'elektro uređaji i instalacija', u'', u'', u''],
-        ['13', u'pogonski uređaj', u'', u'', u''],
-        [
-            '14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču',
-            u'', u''
-        ],
-        [
-            '15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja',
-            u'opšta konstrukcija', u'', u'*'
-        ],
-        ['', u'', u'VIN', u'', u''],
-        ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
-        ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
-        ['', u'', u'reklamne table u gabaritima', u'', u''],
-        ['', u'', u'pričvršćenost pribora, alata i opreme', u'', u''],
-        ['', u'', u'prostor za tablicu', u'', u''],
-        ['', u'', u'blatobrani iznad svih točkova u širini točka', u'', u''],
-        ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
-        [
-            '', u'x = uređaj/sistem postoji na vozilu,',
-            u'- = uređaj/sistem ne postoji na vozilu', u'', u''
-        ],
-        [
-            '', u'&nbsp;' * 15 + u'N/P = nije primenljivo,',
-            u'&nbsp;' * 15 + u'* = obavezna homologacija', u'', u''
-        ],
-    ]
-    lll_dataf = []
-    for vil_row, lcl_row in enumerate(lll_data):
-      lll_dataf.append([
-          Paragraph(lcl_row[0], (pss.acfb if vil_row == 0 else pss.arfn)),
-          Paragraph(lcl_row[1], pss.alfn),
-          Paragraph(lcl_row[2], pss.alfn),
-          Paragraph(lcl_row[3], pss.alfn),
-          Paragraph(lcl_row[4], pss.alfn),
-      ])
-    oxl_table = Table(lll_dataf,
-                      colWidths=[9 * mm, 78 * mm, 81 * mm, 15 * mm, 7 * mm],
-                      hAlign='LEFT')
-
-    oxl_ts = tss.alng
-    oxl_ts.add('ALIGN', (0, 1), (0, -3), 'RIGHT')
-    oxl_ts.add('ALIGN', (1, 1), (-1, -1), 'LEFT')
-    oxl_ts.add('BOX', (0, 1), (-1, -3), lts.t05, colors.black)
-    oxl_ts.add('BOX', (0, -2), (-1, -1), lts.t05, colors.black)
-    oxl_ts.add('INNERGRID', (0, 1), (-1, -3), lts.t05, colors.black)
-    oxl_ts.add('SPAN', (0, 0), (-1, 0))
-    oxl_ts.add('SPAN', (0, 2), (0, 4))
-    oxl_ts.add('SPAN', (1, 2), (1, 4))
-    oxl_ts.add('SPAN', (0, 5), (0, 7))
-    oxl_ts.add('SPAN', (1, 5), (1, 7))
-    oxl_ts.add('SPAN', (0, 8), (0, 11))
-    oxl_ts.add('SPAN', (1, 8), (1, 11))
-    oxl_ts.add('SPAN', (0, 13), (0, 15))
-    oxl_ts.add('SPAN', (1, 13), (1, 15))
-    oxl_ts.add('SPAN', (0, 24), (0, 31))
-    oxl_ts.add('SPAN', (1, 24), (1, 31))
+                ['KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'', u''],
+                ['1', u'uređaji za upravlj. - sistem za upravljanje', u'komanda na levoj strani', u'', u'*'],
+                ['2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna', u'', u'*'],
+                ['', u'', u'pomoćna (L5 i L7 m>1t)', u'', u'*'],
+                ['', u'', u'parkirna L7', u'', u'*'],
+                ['3', u'svetlosno i svetlosno signalni uređaji', u'uređaji za osvetljavanje puta', u'', u'*'],
+                ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
+                ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
+                ['4', u'uređaji koji omogućuju normalnu vidljivost', u'retrovizori', u'', u'*'],
+                ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
+                ['', u'', u'uređaj za brisanje', u'', u''],
+                ['', u'', u'uređaj za kvašenje', u'', u''],
+                ['5', u'uređaj za davanje zvučnih znakova', u'', u'', u'*'],
+                ['6', u'uređaji za kontrolu i davanje znakova', u'brzinomer sa odometrom', u'', u''],
+                ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
+                ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
+                ['7', u'uređaji za odvođenje i regulisanje izduvnih gasova', u'katalizator', u'', u'*'],
+                ['8', u'uređaji za spajanje vučnog i priključnog vozila', u'rastavljen ne sme da premaši gabarit', u'', u'*'],
+                ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
+                ['10', u'uređaji za oslanjanje', u'bez kontakta točkova i karoserije', u'', u''],
+                ['11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama', u'', u''],
+                ['12', u'elektro uređaji i instalacija', u'', u'', u''],
+                ['13', u'pogonski uređaj', u'', u'', u''],
+                ['14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču', u'', u''],
+                ['15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja', u'opšta konstrukcija', u'', u'*'],
+                ['', u'', u'VIN', u'', u''],
+                ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
+                ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
+                ['', u'', u'reklamne table u gabaritima', u'', u''],
+                ['', u'', u'pričvršćenost pribora, alata i opreme', u'', u''],
+                ['', u'', u'prostor za tablicu', u'', u''],
+                ['', u'', u'blatobrani iznad svih točkova u širini točka', u'', u''],
+                ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
+               ]
+    lll_data.extend(zap.zap_tbl_ppv_data_ftr)
+    lll_dataf = zap.zap_tbl_ppv_data_bdy(lll_data)
+    oxl_table = Table(lll_dataf, colWidths=[9*mm, 78*mm, 81*mm, 15*mm, 7*mm], hAlign='LEFT')
+    oxl_ts = zap.zap_tbl_ppv_ts(lll_data)
     oxl_table.setStyle(oxl_ts)
 
     return oxl_table
@@ -1917,127 +1788,51 @@ class zapisnik_n1(SimpleDocTemplateNP):
   def tbl_ppv(self):
 
     lll_data = [
-        [
-            'KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'',
-            u''
-        ],
-        [
-            '1', u'uređaji za upravlj. - sistem za upravljanje',
-            u'komanda na levoj strani', u'', u'*'
-        ],
-        [
-            '2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna',
-            u'', u'*'
-        ],
-        ['', u'', u'pomoćna', u'', u'*'],
-        ['', u'', u'parkirna', u'', u'*'],
-        ['', u'', u'ABS (ako ima)', u'', u'*'],
-        [
-            '3', u'uređaji za osvetljavanje puta',
-            u'svetlosno i svetlosno signalni uređaji', u'', u'*'
-        ],
-        ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
-        ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
-        [
-            '4', u'uređaji koji omogućuju normalnu vidljivost',
-            u'retrovizori spoljni oba i unutrašnji', u'', u'*'
-        ],
-        ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
-        ['', u'', u'uređaj za brisanje', u'', u''],
-        ['', u'', u'uređaj za kvašenje', u'', u''],
-        ['5', u'uređaj za davanje zvučnih znakova', u'', u'', u'*'],
-        [
-            '6', u'uređaji za kontrolu i davanje znakova',
-            u'brzinomer sa odometrom', u'', u''
-        ],
-        ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
-        ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
-        [
-            '7', u'uređaji za odvođenje i regulisanje izduvnih gasova',
-            u'katalizator', u'', u'*'
-        ],
-        ['', u'', u'ne u desnu stranu i u gabaritima izduva', u'', u''],
-        [
-            '8', u'uređaji za spajanje vučnog i priključnog vozila',
-            u'rastavljen ne sme da premaši gabarit', u'', u'*'
-        ],
-        ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
-        [
-            '10', u'uređaji za oslanjanje',
-            u'bez kontakta točkova i karoserije', u'', u''
-        ],
-        [
-            '11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama',
-            u'', u''
-        ],
-        ['12', u'elektro uređaji i instalacija', u'', u'', u''],
-        ['13', u'pogonski uređaj', u'', u'', u''],
-        [
-            '14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču',
-            u'', u''
-        ],
-        [
-            '15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja',
-            u'opšta konstrukcija', u'', u'*'
-        ],
-        ['', u'', u'VIN', u'', u''],
-        ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
-        ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
-        ['', u'', u'reklamne table u gabaritima', u'', u''],
-        ['', u'', u'prostor za tablicu', u'', u''],
-        ['', u'', u'unutrašnja rasveta', u'', u''],
-        ['', u'', u'dvostepene brave', u'', u''],
-        [
-            '', u'',
-            u'blatobrani iznad svih točkova u širini točka (osim kipera)', u'',
-            u''
-        ],
-        ['', u'', u'branik najmanje napred najistureniji', u'', u''],
-        ['', u'', u'pojasevi za sva mesta', u'', u'*'],
-        ['', u'', u'priključak za vuču neispravnog vozula', u'', u'*'],
-        ['', u'', u'ispunjenost standarda ISO 27956:2009 (za BB)', u'', u'*'],
-        ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
-        [
-            '', u'x = uređaj/sistem postoji na vozilu,',
-            u'- = uređaj/sistem ne postoji na vozilu', u'', u''
-        ],
-        [
-            '', u'&nbsp;' * 15 + u'N/P = nije primenljivo,',
-            u'&nbsp;' * 15 + u'* = obavezna homologacija', u'', u''
-        ],
-    ]
-    lll_dataf = []
-    for vil_row, lcl_row in enumerate(lll_data):
-      lll_dataf.append([
-          Paragraph(lcl_row[0], (pss.acfb if vil_row == 0 else pss.arfn)),
-          Paragraph(lcl_row[1], pss.alfn),
-          Paragraph(lcl_row[2], pss.alfn),
-          Paragraph(lcl_row[3], pss.alfn),
-          Paragraph(lcl_row[4], pss.alfn),
-      ])
-    oxl_table = Table(lll_dataf,
-                      colWidths=[9 * mm, 78 * mm, 81 * mm, 15 * mm, 7 * mm],
-                      hAlign='LEFT')
-
-    oxl_ts = tss.alng
-    oxl_ts.add('ALIGN', (0, 1), (0, -3), 'RIGHT')
-    oxl_ts.add('ALIGN', (1, 1), (-1, -1), 'LEFT')
-    oxl_ts.add('BOX', (0, 1), (-1, -3), lts.t05, colors.black)
-    oxl_ts.add('BOX', (0, -2), (-1, -1), lts.t05, colors.black)
-    oxl_ts.add('INNERGRID', (0, 1), (-1, -3), lts.t05, colors.black)
-    oxl_ts.add('SPAN', (0, 0), (-1, 0))
-    oxl_ts.add('SPAN', (0, 2), (0, 5))
-    oxl_ts.add('SPAN', (1, 2), (1, 5))
-    oxl_ts.add('SPAN', (0, 6), (0, 8))
-    oxl_ts.add('SPAN', (1, 6), (1, 8))
-    oxl_ts.add('SPAN', (0, 9), (0, 12))
-    oxl_ts.add('SPAN', (1, 9), (1, 12))
-    oxl_ts.add('SPAN', (0, 14), (0, 16))
-    oxl_ts.add('SPAN', (1, 14), (1, 16))
-    oxl_ts.add('SPAN', (0, 17), (0, 18))
-    oxl_ts.add('SPAN', (1, 17), (1, 18))
-    oxl_ts.add('SPAN', (0, 26), (0, 38))
-    oxl_ts.add('SPAN', (1, 26), (1, 38))
+                ['KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'', u''],
+                ['1', u'uređaji za upravlj. - sistem za upravljanje', u'komanda na levoj strani', u'', u'*'],
+                ['2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna', u'', u'*'],
+                ['', u'', u'pomoćna', u'', u'*'],
+                ['', u'', u'parkirna', u'', u'*'],
+                ['', u'', u'ABS (ako ima)', u'', u'*'],
+                ['3', u'uređaji za osvetljavanje puta', u'svetlosno i svetlosno signalni uređaji', u'', u'*'],
+                ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
+                ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
+                ['4', u'uređaji koji omogućuju normalnu vidljivost', u'retrovizori spoljni oba i unutrašnji', u'', u'*'],
+                ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
+                ['', u'', u'uređaj za brisanje', u'', u''],
+                ['', u'', u'uređaj za kvašenje', u'', u''],
+                ['5', u'uređaj za davanje zvučnih znakova', u'', u'', u'*'],
+                ['6', u'uređaji za kontrolu i davanje znakova', u'brzinomer sa odometrom', u'', u''],
+                ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
+                ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
+                ['7', u'uređaji za odvođenje i regulisanje izduvnih gasova', u'katalizator', u'', u'*'],
+                ['', u'', u'ne u desnu stranu i u gabaritima izduva', u'', u''],
+                ['8', u'uređaji za spajanje vučnog i priključnog vozila', u'rastavljen ne sme da premaši gabarit', u'', u'*'],
+                ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
+                ['10', u'uređaji za oslanjanje', u'bez kontakta točkova i karoserije', u'', u''],
+                ['11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama', u'', u''],
+                ['12', u'elektro uređaji i instalacija', u'', u'', u''],
+                ['13', u'pogonski uređaj', u'', u'', u''],
+                ['14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču', u'', u''],
+                ['15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja', u'opšta konstrukcija', u'', u'*'],
+                ['', u'', u'VIN', u'', u''],
+                ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
+                ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
+                ['', u'', u'reklamne table u gabaritima', u'', u''],
+                ['', u'', u'prostor za tablicu', u'', u''],
+                ['', u'', u'unutrašnja rasveta', u'', u''],
+                ['', u'', u'dvostepene brave', u'', u''],
+                ['', u'', u'blatobrani iznad svih točkova u širini točka (osim kipera)', u'', u''],
+                ['', u'', u'branik najmanje napred najistureniji', u'', u''],
+                ['', u'', u'pojasevi za sva mesta', u'', u'*'],
+                ['', u'', u'priključak za vuču neispravnog vozula', u'', u'*'],
+                ['', u'', u'ispunjenost standarda ISO 27956:2009 (za BB)', u'', u'*'],
+                ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
+               ]
+    lll_data.extend(zap.zap_tbl_ppv_data_ftr)
+    lll_dataf = zap.zap_tbl_ppv_data_bdy(lll_data)
+    oxl_table = Table(lll_dataf, colWidths=[9*mm, 78*mm, 81*mm, 15*mm, 7*mm], hAlign='LEFT')
+    oxl_ts = zap.zap_tbl_ppv_ts(lll_data)
     oxl_table.setStyle(oxl_ts)
 
     return oxl_table
@@ -2123,139 +1918,55 @@ class zapisnik_n2n3(SimpleDocTemplateNP):
   def tbl_ppv(self):
 
     lll_data = [
-        [
-            'KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'',
-            u''
-        ],
-        [
-            '1', u'uređaji za upravlj. - sistem za upravljanje',
-            u'komanda na levoj strani', u'', u'*'
-        ],
-        [
-            '2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna',
-            u'', u'*'
-        ],
-        ['', u'', u'pomoćna', u'', u'*'],
-        ['', u'', u'parkirna', u'', u'*'],
-        ['', u'', u'ABS (ako ima)', u'', u'*'],
-        ['', u'', u'usporač', u'', u'*'],
-        [
-            '3', u'uređaji za osvetljavanje puta',
-            u'svetlosno i svetlosno signalni uređaji', u'', u'*'
-        ],
-        ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
-        ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
-        [
-            '4', u'uređaji koji omogućuju normalnu vidljivost',
-            u'retrovizori spoljni oba i unutrašnji', u'', u'*'
-        ],
-        ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
-        ['', u'', u'uređaj za brisanje', u'', u''],
-        ['', u'', u'uređaj za kvašenje', u'', u''],
-        [
-            '5', u'uređaj za davanje zvučnih znakova',
-            u'uključujući i signal pri kretanju unazad', u'', u''
-        ],
-        [
-            '6', u'uređaji za kontrolu i davanje znakova',
-            u'brzinomer sa odometrom', u'', u''
-        ],
-        ['', u'', u'indikator pritiska u sistemu za radno kočenje', u'', u''],
-        ['', u'', u'digitalni tahograf', u'', u''],
-        ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
-        ['', u'', u'ograničavač brzine do 100 (90) km/h', u'', u'*'],
-        ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
-        [
-            '7', u'uređaji za odvođenje i regulisanje izduvnih gasova',
-            u'katalizator', u'', u'*'
-        ],
-        ['', u'', u'ne u desnu stranu i u gabaritima izduva', u'', u''],
-        [
-            '8', u'uređaji za spajanje vučnog i priključnog vozila',
-            u'rastavljen ne sme da premaši gabarit', u'', u'*'
-        ],
-        ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
-        [
-            '10', u'uređaji za oslanjanje',
-            u'bez kontakta točkova i karoserije', u'', u''
-        ],
-        [
-            '11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama',
-            u'', u''
-        ],
-        [
-            '12', u'elektro uređaji i instalacija',
-            u'prekidač svih strujnih kola osim taho. i bezb. uređa', u'', u''
-        ],
-        [
-            '13', u'pogonski uređaj',
-            u'nije moguće povređivanje vozača i putnika', u'', u''
-        ],
-        [
-            '14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču',
-            u'', u''
-        ],
-        [
-            '15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja',
-            u'opšta konstrukcija', u'', u'*'
-        ],
-        ['', u'', u'VIN', u'', u''],
-        ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
-        ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
-        ['', u'', u'reklamne table u gabaritima', u'', u''],
-        ['', u'', u'prostor za tablicu', u'', u''],
-        ['', u'', u'unutrašnja rasveta', u'', u''],
-        ['', u'', u'dvostepene brave', u'', u''],
-        [
-            '', u'', u'blatobr. iznad svih toč. u širini toč. (osim kipera)',
-            u'', u''
-        ],
-        ['', u'', u'branik najmanje napred najistureniji', u'', u''],
-        ['', u'', u'pojasevi za sva mesta', u'', u'*'],
-        ['', u'', u'ZZOP (osim tegljača)', u'', u''],
-        ['', u'', u'BZOP (osim tegljača)', u'', u'*'],
-        ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
-        [
-            '', u'x = uređaj/sistem postoji na vozilu,',
-            u'- = uređaj/sistem ne postoji na vozilu', u'', u''
-        ],
-        [
-            '', u'&nbsp;' * 15 + u'N/P = nije primenljivo,',
-            u'&nbsp;' * 15 + u'* = obavezna homologacija', u'', u''
-        ],
-    ]
-    lll_dataf = []
-    for vil_row, lcl_row in enumerate(lll_data):
-      lll_dataf.append([
-          Paragraph(lcl_row[0], (pss.acfb if vil_row == 0 else pss.arfn)),
-          Paragraph(lcl_row[1], pss.alfn),
-          Paragraph(lcl_row[2], pss.alfn),
-          Paragraph(lcl_row[3], pss.alfn),
-          Paragraph(lcl_row[4], pss.alfn),
-      ])
-    oxl_table = Table(lll_dataf,
-                      colWidths=[9 * mm, 75 * mm, 84 * mm, 15 * mm, 7 * mm],
-                      hAlign='LEFT')
-
-    oxl_ts = tss.alng
-    oxl_ts.add('ALIGN', (0, 1), (0, -3), 'RIGHT')
-    oxl_ts.add('ALIGN', (1, 1), (-1, -1), 'LEFT')
-    oxl_ts.add('BOX', (0, 1), (-1, -3), lts.t05, colors.black)
-    oxl_ts.add('BOX', (0, -2), (-1, -1), lts.t05, colors.black)
-    oxl_ts.add('INNERGRID', (0, 1), (-1, -3), lts.t05, colors.black)
-    oxl_ts.add('SPAN', (0, 0), (-1, 0))
-    oxl_ts.add('SPAN', (0, 2), (0, 6))
-    oxl_ts.add('SPAN', (1, 2), (1, 6))
-    oxl_ts.add('SPAN', (0, 7), (0, 9))
-    oxl_ts.add('SPAN', (1, 7), (1, 9))
-    oxl_ts.add('SPAN', (0, 10), (0, 13))
-    oxl_ts.add('SPAN', (1, 10), (1, 13))
-    oxl_ts.add('SPAN', (0, 15), (0, 20))
-    oxl_ts.add('SPAN', (1, 15), (1, 20))
-    oxl_ts.add('SPAN', (0, 21), (0, 22))
-    oxl_ts.add('SPAN', (1, 21), (1, 22))
-    oxl_ts.add('SPAN', (0, 30), (0, 42))
-    oxl_ts.add('SPAN', (1, 30), (1, 42))
+                ['KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'', u''],
+                ['1', u'uređaji za upravlj. - sistem za upravljanje', u'komanda na levoj strani', u'', u'*'],
+                ['2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna', u'', u'*'],
+                ['', u'', u'pomoćna', u'', u'*'],
+                ['', u'', u'parkirna', u'', u'*'],
+                ['', u'', u'ABS (ako ima)', u'', u'*'],
+                ['', u'', u'usporač', u'', u'*'],
+                ['3', u'uređaji za osvetljavanje puta', u'svetlosno i svetlosno signalni uređaji', u'', u'*'],
+                ['', u'', u'uređaji za označavanje vozila', u'', u'*'],
+                ['', u'', u'uređaji za davanje svetlosnih znakova', u'', u'*'],
+                ['4', u'uređaji koji omogućuju normalnu vidljivost', u'retrovizori spoljni oba i unutrašnji', u'', u'*'],
+                ['', u'', u'stakla i zatamnjena stakla', u'', u'*'],
+                ['', u'', u'uređaj za brisanje', u'', u''],
+                ['', u'', u'uređaj za kvašenje', u'', u''],
+                ['5', u'uređaj za davanje zvučnih znakova', u'uključujući i signal pri kretanju unazad', u'', u''],
+                ['6', u'uređaji za kontrolu i davanje znakova', u'brzinomer sa odometrom', u'', u''],
+                ['', u'', u'indikator pritiska u sistemu za radno kočenje', u'', u''],
+                ['', u'', u'digitalni tahograf', u'', u''],
+                ['', u'', u'plavo kontrolno svetlo za dugo svetlo', u'', u''],
+                ['', u'', u'ograničavač brzine do 100 (90) km/h', u'', u'*'],
+                ['', u'', u'svetlosni ili zvučni znak za pokazivanje pravca', u'', u''],
+                ['7', u'uređaji za odvođenje i regulisanje izduvnih gasova', u'katalizator', u'', u'*'],
+                ['', u'', u'ne u desnu stranu i u gabaritima izduva', u'', u''],
+                ['8', u'uređaji za spajanje vučnog i priključnog vozila', u'rastavljen ne sme da premaši gabarit', u'', u'*'],
+                ['9', u'uređaj za kretanje vozila u nazad', u'', u'', u''],
+                ['10', u'uređaji za oslanjanje', u'bez kontakta točkova i karoserije', u'', u''],
+                ['11', u'uređaji za kretanje', u'pneumatici jednaki po osovinama', u'', u''],
+                ['12', u'elektro uređaji i instalacija', u'prekidač svih strujnih kola osim taho. i bezb. uređa', u'', u''],
+                ['13', u'pogonski uređaj', u'nije moguće povređivanje vozača i putnika', u'', u''],
+                ['14', u'uređaj za prenos snage', u'bar jedna ruka na upravljaču', u'', u''],
+                ['15', u'delovi vozila od posebnog značaja za bezbednost saobraćaja', u'opšta konstrukcija', u'', u'*'],
+                ['', u'', u'VIN', u'', u''],
+                ['', u'', u'otvor goriva ne u kabini i prostoru za putnike', u'', u''],
+                ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
+                ['', u'', u'reklamne table u gabaritima', u'', u''],
+                ['', u'', u'prostor za tablicu', u'', u''],
+                ['', u'', u'unutrašnja rasveta', u'', u''],
+                ['', u'', u'dvostepene brave', u'', u''],
+                ['', u'', u'blatobr. iznad svih toč. u širini toč. (osim kipera)', u'', u''],
+                ['', u'', u'branik najmanje napred najistureniji', u'', u''],
+                ['', u'', u'pojasevi za sva mesta', u'', u'*'],
+                ['', u'', u'ZZOP (osim tegljača)', u'', u''],
+                ['', u'', u'BZOP (osim tegljača)', u'', u'*'],
+                ['16', u'Uređaj i opr. za pogon na alternativ. goriva', u'', u'', u'*'],
+               ]
+    lll_data.extend(zap.zap_tbl_ppv_data_ftr)
+    lll_dataf = zap.zap_tbl_ppv_data_bdy(lll_data)
+    oxl_table = Table(lll_dataf, colWidths=[9*mm, 75*mm, 84*mm, 15*mm, 7*mm], hAlign='LEFT')
+    oxl_ts = zap.zap_tbl_ppv_ts(lll_data)
     oxl_table.setStyle(oxl_ts)
 
     return oxl_table
@@ -2345,78 +2056,29 @@ class zapisnik_o(SimpleDocTemplateNP):
   def tbl_ppv(self):
 
     lll_data = [
-        [
-            'KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'',
-            u''
-        ],
-        [
-            '1', u'uređaji za upravlj. - sistem za upravljanje',
-            u'komanda na levoj strani', u'', u'*'
-        ],
-        [
-            '2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna',
-            u'', u'*'
-        ],
-        ['', u'', u'pomoćna', u'', u'*'],
-        ['', u'', u'parkirna', u'', u'*'],
-        ['', u'', u'ABS (ako ima)', u'', u'*'],
-        [
-            '3', u'uređaji za spajanje vučnog i priključnog vozila', u'', u'',
-            u'*'
-        ],
-        [
-            '4', u'uređaji za oslanjanje', u'bez kontakta točkova i karoserije',
-            u'', u''
-        ],
-        [
-            '5', u'uređaji za kretanje', u'pneumatici jednaki po osovinama',
-            u'', u''
-        ],
-        ['6', u'elektro uređaji i instalacija', u'', u'', u''],
-        [
-            '7', u'delovi vozila od posebnog značaja za bezbednost saobraćaja',
-            u'opšta konstrukcija', u'', u'*'
-        ],
-        ['', u'', u'VIN', u'', u''],
-        ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
-        ['', u'', u'reklamne table u gabaritima', u'', u''],
-        ['', u'', u'prostor za tablicu', u'', u''],
-        ['', u'', u'blatobrani iznad svih točkova u širini točka', u'', u''],
-        ['', u'', u'ZZOP', u'', u''],
-        ['', u'', u'BZOP', u'', u'*'],
-        [
-            '', u'x = uređaj/sistem postoji na vozilu,',
-            u'- = uređaj/sistem ne postoji na vozilu', u'', u''
-        ],
-        [
-            '', u'&nbsp;' * 15 + u'N/P = nije primenljivo,',
-            u'&nbsp;' * 15 + u'* = obavezna homologacija', u'', u''
-        ],
-    ]
-    lll_dataf = []
-    for vil_row, lcl_row in enumerate(lll_data):
-      lll_dataf.append([
-          Paragraph(lcl_row[0], (pss.acfb if vil_row == 0 else pss.arfn)),
-          Paragraph(lcl_row[1], pss.alfn),
-          Paragraph(lcl_row[2], pss.alfn),
-          Paragraph(lcl_row[3], pss.alfn),
-          Paragraph(lcl_row[4], pss.alfn),
-      ])
-    oxl_table = Table(lll_dataf,
-                      colWidths=[9 * mm, 75 * mm, 84 * mm, 15 * mm, 7 * mm],
-                      hAlign='LEFT')
-
-    oxl_ts = tss.alng
-    oxl_ts.add('ALIGN', (0, 1), (0, -3), 'RIGHT')
-    oxl_ts.add('ALIGN', (1, 1), (-1, -1), 'LEFT')
-    oxl_ts.add('BOX', (0, 1), (-1, -3), lts.t05, colors.black)
-    oxl_ts.add('BOX', (0, -2), (-1, -1), lts.t05, colors.black)
-    oxl_ts.add('INNERGRID', (0, 1), (-1, -3), lts.t05, colors.black)
-    oxl_ts.add('SPAN', (0, 0), (-1, 0))
-    oxl_ts.add('SPAN', (0, 2), (0, 5))
-    oxl_ts.add('SPAN', (1, 2), (1, 5))
-    oxl_ts.add('SPAN', (0, 10), (0, 17))
-    oxl_ts.add('SPAN', (1, 10), (1, 17))
+                ['KONTROLISANJE ISPUNJENOSTI PROPISANIH USLOVA (PPV)', u'', u'', u'', u''],
+                ['1', u'uređaji za upravlj. - sistem za upravljanje', u'komanda na levoj strani', u'', u'*'],
+                ['2', u'uređaji za zaustavljanje vozila - kočni sistem', u'radna', u'', u'*'],
+                ['', u'', u'pomoćna', u'', u'*'],
+                ['', u'', u'parkirna', u'', u'*'],
+                ['', u'', u'ABS (ako ima)', u'', u'*'],
+                ['3', u'uređaji za spajanje vučnog i priključnog vozila', u'', u'', u'*'],
+                ['4', u'uređaji za oslanjanje', u'bez kontakta točkova i karoserije', u'', u''],
+                ['5', u'uređaji za kretanje', u'pneumatici jednaki po osovinama', u'', u''],
+                ['6', u'elektro uređaji i instalacija', u'', u'', u''],
+                ['7', u'delovi vozila od posebnog značaja za bezbednost saobraćaja', u'opšta konstrukcija', u'', u'*'],
+                ['', u'', u'VIN', u'', u''],
+                ['', u'', u'istureni delovi, ukrasi bez oštrih ivica', u'', u''],
+                ['', u'', u'reklamne table u gabaritima', u'', u''],
+                ['', u'', u'prostor za tablicu', u'', u''],
+                ['', u'', u'blatobrani iznad svih točkova u širini točka', u'', u''],
+                ['', u'', u'ZZOP', u'', u''],
+                ['', u'', u'BZOP', u'', u'*'],
+               ]
+    lll_data.extend(zap.zap_tbl_ppv_data_ftr)
+    lll_dataf = zap.zap_tbl_ppv_data_bdy(lll_data)
+    oxl_table = Table(lll_dataf, colWidths=[9*mm, 75*mm, 84*mm, 15*mm, 7*mm], hAlign='LEFT')
+    oxl_ts = zap.zap_tbl_ppv_ts(lll_data)
     oxl_table.setStyle(oxl_ts)
 
     return oxl_table
@@ -2851,7 +2513,7 @@ class report:
 
     #    print('{}; {}; {}'.format(pc_UserName, pc_Report, pd_RepPrms={}))
     reps = dd({})
-    reps['pdfdir'] = osp.join(sysdf.reps_save, 'pdf', pc_UserName)
+    reps['pdfdir'] = osp.join(sysdf.pdf, pc_UserName)
     reps['pdf'] = osp.join(reps.pdfdir, '{}.pdf'.format(pc_Report))
 
     utl.dircheck(reps.pdfdir)

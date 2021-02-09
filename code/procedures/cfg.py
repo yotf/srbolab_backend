@@ -10,8 +10,8 @@ import sqlite3 as sqll
 
 # site-packages
 from box import SBox as dd
-from config import (DB_PASSWORD, DOCS_PATH, IMGS_PATH, OCR_PATH,
-                    REPORTS_ASSETS_PATH, REPORTS_DATA_PATH)
+from config import (ASSETS_PATH, DATA_PATH, DB_PASSWORD, DOCS_PATH, IMGS_PATH,
+                    OCR_PATH, REPORTS_PATH)
 
 #---------------------------------------
 # global variables
@@ -28,11 +28,13 @@ def getdirfile(pi_sdf_id=0):
   """  Get system dirs & files"""
 
   dcl_sdf = dd({
-      'reps': REPORTS_ASSETS_PATH,
+      'data': DATA_PATH,
+      'assets': ASSETS_PATH,
+      'reps': REPORTS_PATH,
       'imgs': IMGS_PATH,
       'docs': DOCS_PATH,
       'ocr': OCR_PATH,
-      'reps_save': REPORTS_DATA_PATH
+      'pdf': osp.join(DATA_PATH, 'reports', 'pdf'),
   })
 
   return dcl_sdf

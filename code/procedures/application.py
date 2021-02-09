@@ -17,7 +17,6 @@ from .table import table
 # global variables
 #---------------------------------------
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  classes & functions
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -116,7 +115,7 @@ class application:
                                                 'title': row.afo_naziv,
                                                 'tables': (js.loads(row.afo_tabele) if row.afo_tabele else {}),
                                                 'reports': (js.loads(row.afo_izvestaji) if row.afo_izvestaji else {}),
-                                                'enabled': row.afo_dostupna == 'y',
+                                                'enabled': (row.afo_dostupna=='y'),
                                                }
           if apps[row.aap_id].forms[row.afo_id].tables:
             apps[row.aap_id].forms[row.afo_id].tables = form_tables(apps[row.aap_id].forms[row.afo_id].tables)

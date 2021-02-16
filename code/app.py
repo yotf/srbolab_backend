@@ -1,8 +1,9 @@
 import json
 import os
 
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
+from flask_jwt_extended import get_jwt_identity
 from flask_restful import Api
 
 from jwt_init import jwt

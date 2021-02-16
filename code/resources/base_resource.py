@@ -5,6 +5,7 @@ import types
 from flask import request
 from flask_jwt_extended import get_jwt_claims, get_jwt_identity, jwt_required
 from flask_restful import Resource, reqparse
+from middleware.auth import auth
 from procedures.table_wrapper import TableWrapper
 
 
@@ -48,6 +49,7 @@ class BaseResource(Resource):
     self.primary_keys = self.service.primarykey
 
   @jwt_required
+  @auth
   def get(self):
     jwt_identity = get_jwt_identity()
     request_args = [
@@ -69,9 +71,9 @@ class BaseResource(Resource):
     }
     try:
       if len(query_params.items()):
-        items = self.service.tbl_get(query_params)
+        items = self.service.tbl_get(query_params, { "kr_id": jwt_identity })
       else:
-        items = self.service.tbl_get()
+        items = self.service.tbl_get({}, { "kr_id": jwt_identity })
 
       if self.item_name == "v_korisnik":
         for item in items:
@@ -84,7 +86,9 @@ class BaseResource(Resource):
       return { 'message': f"failed to fetch {self.item_name}s"}, 500
 
   @jwt_required
+  @auth
   def post(self):
+    jwt_identity = get_jwt_identity()
     request_args = [
         col_name for col_name in [col['name'] for col in [*self.service.cols]]
     ]
@@ -102,14 +106,14 @@ class BaseResource(Resource):
     item = parser.parse_args()
 
     try:
-      new_item = self.service.tbl_insert(item)
+      new_item = self.service.tbl_insert(item, { "kr_id": jwt_identity })
       if (new_item["rcod"] and new_item["rcod"] > 0) or new_item["rcod"] == 0:
         get_args = {
             key:
             item.get(key, None) if item.get(key, None) else new_item["rcod"]
             for key in self.primary_keys
         }
-        new_item = self.service.tbl_get(get_args)[0]
+        new_item = self.service.tbl_get(get_args, { "kr_id": jwt_identity })[0]
         if self.item_name == "v_korisnik" and new_item["kr_password"]:
           new_item["kr_password"] = ""
 
@@ -122,7 +126,9 @@ class BaseResource(Resource):
       return { 'message': f"failed to create {self.item_name}"}, 500
 
   @jwt_required
+  @auth
   def put(self):
+    jwt_identity = get_jwt_identity()
     request_args = [
         col_name for col_name in [col['name'] for col in [*self.service.cols]]
     ]
@@ -137,12 +143,12 @@ class BaseResource(Resource):
         for col in self.service.cols
     ]
     item = parser.parse_args()
-    update_result = self.service.tbl_update(item)
+    update_result = self.service.tbl_update(item, { "kr_id": jwt_identity })
     try:
       if (update_result["rcod"]
           and update_result["rcod"] > 0) or update_result["rcod"] == 0:
         get_args = { key: item[key] for key in self.primary_keys }
-        new_item = self.service.tbl_get(get_args)[0]
+        new_item = self.service.tbl_get(get_args, { "kr_id": jwt_identity })[0]
         if self.item_name == "v_korisnik" and new_item["kr_password"]:
           new_item["kr_password"] = ""
 
@@ -156,10 +162,12 @@ class BaseResource(Resource):
       return { 'message': f"failed to update {self.item_name}"}, 500
 
   @jwt_required
+  @auth
   def delete(self):
+    jwt_identity = get_jwt_identity()
     item_id = { key: request.args.get(key) for key in self.primary_keys }
     try:
-      res = self.service.tbl_delete(item_id)
+      res = self.service.tbl_delete(item_id, { "kr_id": jwt_identity })
       if res["rcod"] >= 0:
         return { 'message': f"{self.item_name.capitalize()} deleted"}, 200
       else:
@@ -191,7 +199,10 @@ class Copy(Resource):
     self.item_name = table
     self.primary_keys = self.service.primarykey
 
+  @jwt_required
+  @auth
   def post(self):
+    jwt_identity = get_jwt_identity()
     request_args = [
         *self.primary_keys, *[key + "_to" for key in self.primary_keys]
     ]
@@ -200,7 +211,7 @@ class Copy(Resource):
     item = parser.parse_args()
 
     try:
-      new_item = self.service.tbl_copy(item)
+      new_item = self.service.tbl_copy(item, { "kr_id": jwt_identity })
       item[self.primary_keys[0]] = new_item[
           "rcod"]  #TODO fix primary key return
       return item, 200

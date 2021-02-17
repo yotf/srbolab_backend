@@ -5,7 +5,6 @@ import types
 from flask import request
 from flask_jwt_extended import get_jwt_claims, get_jwt_identity, jwt_required
 from flask_restful import Resource, reqparse
-from middleware.auth import auth
 from procedures.table_wrapper import TableWrapper
 
 
@@ -49,7 +48,6 @@ class BaseResource(Resource):
     self.primary_keys = self.service.primarykey
 
   @jwt_required
-  @auth
   def get(self):
     jwt_identity = get_jwt_identity()
     request_args = [
@@ -86,7 +84,6 @@ class BaseResource(Resource):
       return { 'message': f"failed to fetch {self.item_name}s"}, 500
 
   @jwt_required
-  @auth
   def post(self):
     jwt_identity = get_jwt_identity()
     request_args = [
@@ -126,7 +123,6 @@ class BaseResource(Resource):
       return { 'message': f"failed to create {self.item_name}"}, 500
 
   @jwt_required
-  @auth
   def put(self):
     jwt_identity = get_jwt_identity()
     request_args = [
@@ -162,7 +158,6 @@ class BaseResource(Resource):
       return { 'message': f"failed to update {self.item_name}"}, 500
 
   @jwt_required
-  @auth
   def delete(self):
     jwt_identity = get_jwt_identity()
     item_id = { key: request.args.get(key) for key in self.primary_keys }
@@ -200,7 +195,6 @@ class Copy(Resource):
     self.primary_keys = self.service.primarykey
 
   @jwt_required
-  @auth
   def post(self):
     jwt_identity = get_jwt_identity()
     request_args = [

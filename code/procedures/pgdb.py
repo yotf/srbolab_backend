@@ -284,6 +284,7 @@ class pgdb:
          -200 -- user is not active
          -900 -- unknown error
       """
+      conn.commit()
     except:
       raise
     finally:

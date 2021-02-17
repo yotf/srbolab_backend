@@ -402,7 +402,7 @@ pss = ParagStyles(fnts.s10)
 #= CLASS ===============================
 #  TblStyles
 #=======================================
-class TblStyles():
+class TblStyles:
 
   #= METHOD ==============================
   #  __init__
@@ -413,60 +413,30 @@ class TblStyles():
 
   @property
   #= PROPERTY ============================
-  #  alg
+  #  dflt
   #=======================================
-  def alg(self):
+  def dflt(self):
 
     return TableStyle(
                       [
                        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                       ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
                        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
                        ('TOPPADDING', (0, 0), (-1, -1), 1),
                        ('LEFTPADDING', (0, 0), (-1, -1), 3),
                        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
-                       ('INNERGRID', (0, 0), (-1, -1), lts.t05, colors.black),
-                       ('BOX', (0, 0), (-1, -1), lts.t05, colors.black),
                       ]
                      )
 
-  @property
-  #= PROPERTY ============================
-  #  acg
+  #= METHOD ==============================
+  #  addgrid
   #=======================================
-  def acg(self):
+  def addgrid(self, po_ts):
 
-    return TableStyle(
-                      [
-                       ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                       ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                       ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-                       ('TOPPADDING', (0, 0), (-1, -1), 1),
-                       ('LEFTPADDING', (0, 0), (-1, -1), 3),
-                       ('RIGHTPADDING', (0, 0), (-1, -1), 3),
-                       ('INNERGRID', (0, 0), (-1, -1), lts.t05, colors.black),
-                       ('BOX', (0, 0), (-1, -1), lts.t05, colors.black),
-                      ]
-                     )
+    oxl_ts = po_ts
+    oxl_ts.add('INNERGRID', (0, 0), (-1, -1), lts.t05, colors.black),
+    oxl_ts.add('BOX', (0, 0), (-1, -1), lts.t05, colors.black),
 
-  @property
-  #= PROPERTY ============================
-  #  arg
-  #=======================================
-  def arg(self):
-
-    return TableStyle(
-                      [
-                       ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                       ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
-                       ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-                       ('TOPPADDING', (0, 0), (-1, -1), 1),
-                       ('LEFTPADDING', (0, 0), (-1, -1), 3),
-                       ('RIGHTPADDING', (0, 0), (-1, -1), 3),
-                       ('INNERGRID', (0, 0), (-1, -1), lts.t05, colors.black),
-                       ('BOX', (0, 0), (-1, -1), lts.t05, colors.black),
-                      ]
-                     )
+    return oxl_ts
 
   @property
   #= PROPERTY ============================
@@ -474,32 +444,21 @@ class TblStyles():
   #=======================================
   def alng(self):
 
-    return TableStyle(
-                      [
-                       ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                       ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                       ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-                       ('TOPPADDING', (0, 0), (-1, -1), 1),
-                       ('LEFTPADDING', (0, 0), (-1, -1), 3),
-                       ('RIGHTPADDING', (0, 0), (-1, -1), 3),
-                      ]
-                     )
+    oxl_ts = self.dflt
+    oxl_ts.add('ALIGN', (0, 0), (-1, -1), 'LEFT')
+
+    return oxl_ts
+
   @property
   #= PROPERTY ============================
   #  acng
   #=======================================
   def acng(self):
 
-    return TableStyle(
-                      [
-                       ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                       ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                       ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-                       ('TOPPADDING', (0, 0), (-1, -1), 1),
-                       ('LEFTPADDING', (0, 0), (-1, -1), 3),
-                       ('RIGHTPADDING', (0, 0), (-1, -1), 3),
-                      ]
-                     )
+    oxl_ts = self.dflt
+    oxl_ts.add('ALIGN', (0, 0), (-1, -1), 'CENTER')
+
+    return oxl_ts
 
   @property
   #= PROPERTY ============================
@@ -507,16 +466,34 @@ class TblStyles():
   #=======================================
   def arng(self):
 
-    return TableStyle(
-                      [
-                       ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                       ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
-                       ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-                       ('TOPPADDING', (0, 0), (-1, -1), 1),
-                       ('LEFTPADDING', (0, 0), (-1, -1), 3),
-                       ('RIGHTPADDING', (0, 0), (-1, -1), 3),
-                      ]
-                     )
+    oxl_ts = self.dflt
+    oxl_ts.add('ALIGN', (0, 0), (-1, -1), 'RIGHT')
+
+    return oxl_ts
+
+  @property
+  #= PROPERTY ============================
+  #  alg
+  #=======================================
+  def alg(self):
+
+    return self.addgrid(self.alng)
+
+  @property
+  #= PROPERTY ============================
+  #  acg
+  #=======================================
+  def acg(self):
+
+    return self.addgrid(self.acng)
+
+  @property
+  #= PROPERTY ============================
+  #  arg
+  #=======================================
+  def arg(self):
+
+    return self.addgrid(self.arng)
 
 tss = TblStyles()
 
@@ -553,7 +530,7 @@ class HdFtCanvas(canvas.Canvas):
 
     canvas.Canvas.__init__(self, *args, **kwargs)
     self.pages = []
-    self.width, self.height = A4
+    self.width, self.height = self._pagesize
 
   #= METHOD ==============================
   #  showPage
@@ -628,7 +605,6 @@ class HdFtCanvasZap(canvas.Canvas):
 
     canvas.Canvas.__init__(self, *args, **kwargs)
     self.pages = []
-#    self.width, self.height = A4
     self.width, self.height = self._pagesize
 
   #= METHOD ==============================
@@ -710,7 +686,7 @@ class HdFtCanvasPot(canvas.Canvas):
 
     canvas.Canvas.__init__(self, *args, **kwargs)
     self.pages = []
-    self.width, self.height = A4
+    self.width, self.height = self._pagesize
 
   #= METHOD ==============================
   #  showPage
@@ -739,9 +715,6 @@ class HdFtCanvasPot(canvas.Canvas):
 
     self.saveState()
 
-#    vcl_WMText = 'SRBOLAB'
-#    self.setFont('Tahoma', 160)
-#    vcl_WMText = 'NEZVANIČNO'
     vcl_WMText1 = 'NEZVANIČNA'
     vcl_WMText2 = 'VERZIJA'
     self.setFont('Tahoma', 100)
@@ -779,7 +752,7 @@ class potvrda(SimpleDocTemplateNP):
                self,
                pi_PrId,
                pc_PdfFile,
-               pb_Test=False,
+               pb_Test=True,
                pl_PageSize=A4,
                pb_showBoundary=0,
                pn_topMargin=10*mm,
@@ -2411,7 +2384,7 @@ class report:
     vcl_Report = pc_Report.lower()
     vil_pr_id = pd_RepPrms.get('pi_pr_id', 0)
     vcl_vzpv_oznaka = pd_RepPrms.get('pc_vzpv_oznaka', '')
-    vbl_test = pd_RepPrms.get('pb_test', False)
+    vbl_test = pd_RepPrms.get('pb_test', True)
     vcl_kn_datum = pd_RepPrms.get('pc_kn_datum', '')
     if vil_pr_id:
       if vcl_Report==u'zapisnik':

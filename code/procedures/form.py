@@ -357,7 +357,7 @@ class vozila_sert(forma):
                                  'cols': ['em_naziv'],
                                  'chars': 1,
                                 },
-                }
+                   }
     for vcl_col, dcl_col in self.col_fnc.items():
       vcl_table = dcl_col.get('table', None)
       if vcl_table:

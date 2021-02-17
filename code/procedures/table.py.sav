@@ -46,7 +46,7 @@ class table:
     self.type = dxl_tbl['table_type']
     self.cols, self.primarykey = self.db.tbl_cols(self.name)
     self.fnc = dd({})
-    for vcl_act in ('d', 'g', 'iu', 'c'):  # d - DELETE; g - SELECT ... (get); iu - INSERT/UPDATE; c - COUNT(*)
+    for vcl_act in ('d', 'g', 'iu', 'c', 'dml'):  # d - DELETE; g - SELECT ... (get); iu - INSERT/UPDATE; c - COUNT(*)
       self.fnc[vcl_act] = {
                            'name': 'f_{}_{}'.format(self.name, vcl_act),
                            'fullname': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
@@ -67,7 +67,7 @@ class table:
   def tbl_get(self, px_rec={}, pb_count=False):
 
     """  Get data; Returns list of all records fetched"""
-
+    print('>{}<'.format(px_rec))
     conn = self.db.connget()
     crsr = conn.cursor()
     vxl_res = None
@@ -91,13 +91,41 @@ class table:
     return vxl_res
 
   #= METHOD ==============================
-  # tbl_iu
+  # tbl_dml
   #=======================================
-  def tbl_iu(self, px_rec):
+  def tbl_iu(self, px_rec, px_pars={}):
 
     """  Insert/Update data; Returns new table ID/number of records updated & message"""
 
-#    print('>{}<'.format(px_rec))
+    conn = self.db.connget()
+    crsr = conn.cursor()
+    vnl_res = -1
+    vcl_res = None
+    try:
+      crsr.callproc(self.fnc.iu.fullname, [utl.py2json(px_rec)])
+      vnl_res = crsr.fetchone()[self.fnc.iu.name]
+      if vnl_res is None:
+        vnl_res = 1
+      if vnl_res:
+        vcl_res = self.db.connnotices(conn)
+        conn.commit()
+    except (psycopg2.errors.UniqueViolation, psycopg2.errors.CheckViolation, psycopg2.errors.NotNullViolation, psycopg2.errors.StringDataRightTruncation) as err:
+      vcl_res = err.pgerror.splitlines()[0].split(':', 1)[1].strip()
+    except:
+      raise
+    finally:
+      crsr.close()
+      self.db.connret(conn)
+
+    return self.res2dct(vnl_res, vcl_res)
+
+  #= METHOD ==============================
+  # tbl_iu
+  #=======================================
+  def tbl_iu(self, px_rec, px_pars={}):
+
+    """  Insert/Update data; Returns new table ID/number of records updated & message"""
+
     conn = self.db.connget()
     crsr = conn.cursor()
     vnl_res = -1
@@ -123,34 +151,34 @@ class table:
   #= METHOD ==============================
   # tbl_insert
   #=======================================
-  def tbl_insert(self, px_rec):
+  def tbl_insert(self, px_rec, px_pars={}):
 
     """  Insert data; Returns new tbl_id & message"""
 
-    return self.tbl_iu(px_rec)
+    return self.tbl_iu(px_rec, px_pars)
 
   #= METHOD ==============================
   # tbl_update
   #=======================================
-  def tbl_update(self, px_rec):
+  def tbl_update(self, px_rec, px_pars={}):
 
     """  Update data; Returns number of records updated & message"""
 
-    return self.tbl_iu(px_rec)
+    return self.tbl_iu(px_rec, px_pars)
 
   #= METHOD ==============================
   # tbl_copy
   #=======================================
-  def tbl_copy(self, px_rec):
+  def tbl_copy(self, px_rec, px_pars={}):
 
     """  Insert data; Returns new tbl_id & message"""
 
-    return self.tbl_iu(px_rec)
+    return self.tbl_iu(px_rec, px_pars)
 
   #= METHOD ==============================
   # tbl_delete
   #=======================================
-  def tbl_delete(self, px_rec):
+  def tbl_delete(self, px_rec, px_pars={}):
 
     """  Delete data; Returns number of records deleted & message"""
 

@@ -162,7 +162,6 @@ class Data():
   def __init__(self):
 
     self.fir = dd(self.fir())
-#    self.dget(pi_PrId, pb_Potvrda)
     self.cd = dtdt.date(dtdt.today()).strftime('%d.%m.%Y')
 
   #= METHOD ==============================
@@ -190,10 +189,8 @@ class Data():
 
     conn = db.connget()
     crsr = conn.cursor()
-    vcl_sql = """SELECT fir.*
-  FROM public.f_firma(%(pr_id)s) fir;"""
     try:
-      crsr.execute(vcl_sql, {'pr_id': pi_fir_id})
+      crsr.callproc('public.f_firma', [pi_fir_id])
       vxl_res = crsr.fetchall()[0]
     except:
       raise
@@ -210,10 +207,8 @@ class Data():
 
     conn = db.connget()
     crsr = conn.cursor()
-    vcl_sql = """SELECT t.*
-  FROM sys.f_r_raspored(%(kn_datum)s) t;"""
     try:
-      crsr.execute(vcl_sql, {'kn_datum': pc_kn_datum})
+      crsr.callproc('sys.f_r_raspored', [pc_kn_datum])
       vxl_res = crsr.fetchall()
     except:
       raise
@@ -230,10 +225,8 @@ class Data():
 
     conn = db.connget()
     crsr = conn.cursor()
-    vcl_sql = """SELECT t.*
-  FROM hmlg.f_r_predmet(%(pr_id)s) t;"""
     try:
-      crsr.execute(vcl_sql, {'pr_id': pi_pr_id})
+      crsr.callproc('hmlg.f_r_predmet', [pi_pr_id])
       vxl_res = crsr.fetchall()[0]
     except:
       raise
@@ -250,26 +243,10 @@ class Data():
 
     conn = db.connget()
     crsr = conn.cursor()
-    vcl_sql = """WITH
-  h AS
-   (
-    SELECT t.*
-      FROM hmlg.f_r_potvrda_h(%(pr_id)s) t
-  )
-SELECT h.pr_broj_lbl AS h_lbl,
-       h.pr_broj AS h_val
-  FROM h
-UNION ALL
-SELECT h.pr_datum_lbl AS h_lbl,
-       h.pr_datum AS h_val
-  FROM h
-UNION ALL
-SELECT h.pr_sasija_lbl AS h_lbl,
-       h.vz_sasija AS h_val
-  FROM h;"""
     try:
-      crsr.execute(vcl_sql, {'pr_id': pi_pr_id})
+      crsr.callproc('hmlg.f_r_potvrda_h', [pi_pr_id])
       vxl_res = crsr.fetchall()
+      print('{}'.format(vxl_res))
     except:
       raise
     finally:
@@ -285,10 +262,8 @@ SELECT h.pr_sasija_lbl AS h_lbl,
 
     conn = db.connget()
     crsr = conn.cursor()
-    vcl_sql = """SELECT t.*
-  FROM hmlg.f_r_potvrda_b(%(pr_id)s) t;"""
     try:
-      crsr.execute(vcl_sql, {'pr_id': pi_pr_id})
+      crsr.callproc('hmlg.f_r_potvrda_b', [pi_pr_id])
       vxl_res = crsr.fetchall()
     except:
       raise
@@ -305,25 +280,8 @@ SELECT h.pr_sasija_lbl AS h_lbl,
 
     conn = db.connget()
     crsr = conn.cursor()
-    vcl_sql = """WITH
-  s AS
-   (
-    SELECT t.*
-      FROM hmlg.f_r_potvrda_f(%(pr_id)s) t
-   )
-SELECT s.vz_sert_hmlg_tip_lbl AS vz_sert_lbl,
-       s.vz_sert_hmlg_tip AS vz_sert
-  FROM s
-UNION ALL
-SELECT s.vz_sert_emisija_lbl AS vz_sert_lbl,
-       s.vz_sert_emisija AS vz_sert
-  FROM s
-UNION ALL
-SELECT s.vz_sert_buka_lbl AS vz_sert_lbl,
-       s.vz_sert_buka AS vz_sert
-  FROM s;"""
     try:
-      crsr.execute(vcl_sql, {'pr_id': pi_pr_id})
+      crsr.callproc('hmlg.f_r_potvrda_f', [pi_pr_id])
       vxl_res = crsr.fetchall()
     except:
       raise
@@ -588,11 +546,6 @@ class HdFtCanvas(canvas.Canvas):
     oxl_tablef.wrapOn(self, 0, 0)
     oxl_tablef.drawOn(self, 10*mm, 4*mm)
 
-#    vcl_page = 'Strana {} od {}'.format(self._pageNumber, pi_pg_cnt)
-#    self.setFont('Tahoma', 10)
-#    self.drawString(175*mm, 5*mm, vcl_page)
-#    self.restoreState()
-
 #= CLASS ===============================
 #  HdFtCanvasZap
 #=======================================
@@ -668,10 +621,6 @@ class HdFtCanvasZap(canvas.Canvas):
     oxl_tablef.wrapOn(self, 0, 0)
     oxl_tablef.drawOn(self, 10*mm, 4*mm)
 
-#    vcl_page = 'Strana {} od {}'.format(self._pageNumber, pi_pg_cnt)
-#    self.setFont('Tahoma', 10)
-#    self.drawString(178*mm-0.5, 5*mm, vcl_page)
-
     self.restoreState()
 
 #= CLASS ===============================
@@ -732,12 +681,6 @@ class HdFtCanvasPot(canvas.Canvas):
     self._code.append(oxl_txt.getCode())
     self.drawCentredString(180*mm, -10*mm, vcl_WMText2)
 
-#    oxl_txt = self.beginText()
-#    oxl_txt.setTextRenderMode(2)
-#    self._code.append(oxl_txt.getCode())
-#    self.rotate(-90)
-#    self.drawCentredString(-20*mm, 180*mm, vcl_WMText)
-
     self.restoreState()
 
 #= CLASS ===============================
@@ -752,7 +695,7 @@ class potvrda(SimpleDocTemplateNP):
                self,
                pi_PrId,
                pc_PdfFile,
-               pb_Test=True,
+               pb_Test=False,
                pl_PageSize=A4,
                pb_showBoundary=0,
                pn_topMargin=10*mm,
@@ -1479,10 +1422,6 @@ class zapisnik_m2m3(SimpleDocTemplateNP):
 
     self.DocElm.append(Spacer(0*mm, 15*mm))
     self.DocElm.append(self.tbl_ppv())
-#    oxl_tbl = self.tbl_ppv()
-#    for oxl_split in oxl_tbl.split(0*mm, 260*mm):
-#        self.DocElm.append(oxl_split)
-#        self.DocElm.append(Spacer(0*mm, 15*mm))
 
     self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_text)
@@ -1879,10 +1818,6 @@ class zapisnik_n2n3(SimpleDocTemplateNP):
 
     self.DocElm.append(Spacer(0*mm, 15*mm))
     self.DocElm.append(self.tbl_ppv())
-#    oxl_tbl = self.tbl_ppv()
-#    for oxl_split in oxl_tbl.split(0*mm, 260*mm):
-#        self.DocElm.append(oxl_split)
-#        self.DocElm.append(Spacer(0*mm, 15*mm))
 
     self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_text)
@@ -1994,10 +1929,6 @@ class zapisnik_o(SimpleDocTemplateNP):
 
     self.DocElm.append(Spacer(0*mm, 15*mm))
     self.DocElm.append(self.tbl_ppv())
-#    oxl_tbl = self.tbl_ppv()
-#    for oxl_split in oxl_tbl.split(0*mm, 260*mm):
-#        self.DocElm.append(oxl_split)
-#        self.DocElm.append(Spacer(0*mm, 15*mm))
 
     self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(zap.tbl_text)
@@ -2205,7 +2136,6 @@ class neusaglasenost(SimpleDocTemplateNP):
 
     self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(tbl_ttl(self.Title))
-#    self.DocElm.append(tbl_ttl(self.Title1))
 
     self.DocElm.append(Spacer(0*mm, 5*mm))
     self.DocElm.append(self.tbl_h1())
@@ -2230,27 +2160,7 @@ class neusaglasenost(SimpleDocTemplateNP):
 
     self.DocElm.append(Spacer(0*mm, 2*mm))
     self.DocElm.append(self.tbl_sgn())
-    """
-    self.DocElm.append(Spacer(0*mm, 5*mm))
-    oxl_tbl = self.tbl_data()
 
-    lol_tss = oxl_tbl.split(0*mm, 230*mm)
-    if len(lol_tss)<2:
-      self.DocElm.append(oxl_tbl)
-    else:
-      # ostale strane
-      lol_tbls = []
-      while len(lol_tss)==2:
-        lol_tbls.append(lol_tss[0])
-        lol_tss = lol_tss[1].split(0*mm, 250*mm)
-
-      for vil_ti, oxl_tblp in enumerate(lol_tbls, 1):
-        self.DocElm.append(oxl_tblp)
-        if vil_ti==1:
-          self.DocElm.append(Spacer(0*mm, 15*mm))
-        elif vil_ti<len(lol_tbls):
-          self.DocElm.append(Spacer(0*mm, 17*mm))
-"""
   #= METHOD ==============================
   # pdfmake
   #=======================================
@@ -2384,7 +2294,7 @@ class report:
     vcl_Report = pc_Report.lower()
     vil_pr_id = pd_RepPrms.get('pi_pr_id', 0)
     vcl_vzpv_oznaka = pd_RepPrms.get('pc_vzpv_oznaka', '')
-    vbl_test = pd_RepPrms.get('pb_test', True)
+    vbl_test = pd_RepPrms.get('pb_test', False)
     vcl_kn_datum = pd_RepPrms.get('pc_kn_datum', '')
     if vil_pr_id:
       if vcl_Report==u'zapisnik':

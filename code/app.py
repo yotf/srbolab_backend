@@ -37,7 +37,7 @@ def after_request(response):
     except Exception as e:
       print(e)
     print(
-        f"{time} - [{request.method}] {response.status} {request.url} {request.data} {username_ip}"
+        f"{time} - [{request.method}] {response.status} {request.url} {username_ip}"
     )
   return response
 

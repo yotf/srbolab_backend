@@ -1,13 +1,11 @@
-import json
-import os
+import datetime
 
 from flask import Flask, request
 from flask_cors import CORS
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import get_raw_jwt
 from flask_restful import Api
 
 from jwt_init import jwt
-from procedures.application import application
 from procedures.table_wrapper import db
 from resources.azs import Azs
 from resources.base_resource import (generate_copy, generate_description,
@@ -19,8 +17,6 @@ from resources.reports import Reports
 from resources.tables import Tables
 from resources.upload import Images, Upload
 
-# from resources.user import UserLogin, UserRegister, Users
-
 app = Flask(__name__)
 # app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 15 //in seconds
 api = Api(app, "/api")
@@ -28,6 +24,23 @@ cors = CORS(app, supports_credentials=True)
 
 jwt.init_app(app)
 app.config.from_pyfile('config.py')
+
+
+@app.after_request
+def after_request(response):
+  jwt = get_raw_jwt()
+  username_ip = ""
+  if request.method != "OPTIONS" and not request.url.endswith("login"):
+    time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    try:
+      username_ip = f"{jwt['user_claims']['username']} {jwt['user_claims']['ip_address']}"
+    except Exception as e:
+      print(e)
+    print(
+        f"{time} - [{request.method}] {response.status} {request.url} {request.data} {username_ip}"
+    )
+  return response
+
 
 api.add_resource(Forms, "/forms")
 api.add_resource(Login, "/login")

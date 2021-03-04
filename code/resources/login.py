@@ -42,8 +42,16 @@ class Login(Resource):
       return { "msg": "Došlo je do greške"}, 401
 
     userLog(username, "login", ipAddress)
-    access_token = create_access_token(identity=loginStatus)
-    refresh_token = create_refresh_token(identity=loginStatus)
+    access_token = create_access_token(identity=loginStatus,
+                                       user_claims={
+                                           "username": username,
+                                           "ip_address": ipAddress
+                                       })
+    refresh_token = create_refresh_token(identity=loginStatus,
+                                         user_claims={
+                                             "username": username,
+                                             "ip_address": ipAddress
+                                         })
     for token in [access_token, refresh_token]:
       new_jti = get_jti(token)
       raw_token = decode_token(token)

@@ -64,7 +64,7 @@ class table:
   #= METHOD ==============================
   # tbl_get
   #=======================================
-  def tbl_get(self, px_rec={}, pb_count=False):
+  def tbl_get(self, px_rec={}, px_x=None, pb_count=False):
 
     """  Get data; Returns list of all records fetched"""
 
@@ -93,7 +93,7 @@ class table:
   #= METHOD ==============================
   # tbl_iu
   #=======================================
-  def tbl_iu(self, px_rec):
+  def tbl_iu(self, px_rec, px_x=None):
 
     """  Insert/Update data; Returns new table ID/number of records updated & message"""
 
@@ -123,7 +123,7 @@ class table:
   #= METHOD ==============================
   # tbl_insert
   #=======================================
-  def tbl_insert(self, px_rec):
+  def tbl_insert(self, px_rec, px_x=None):
 
     """  Insert data; Returns new tbl_id & message"""
 
@@ -132,7 +132,7 @@ class table:
   #= METHOD ==============================
   # tbl_update
   #=======================================
-  def tbl_update(self, px_rec):
+  def tbl_update(self, px_rec, px_x=None):
 
     """  Update data; Returns number of records updated & message"""
 
@@ -141,7 +141,7 @@ class table:
   #= METHOD ==============================
   # tbl_copy
   #=======================================
-  def tbl_copy(self, px_rec):
+  def tbl_copy(self, px_rec, px_x=None):
 
     """  Insert data; Returns new tbl_id & message"""
 
@@ -150,7 +150,7 @@ class table:
   #= METHOD ==============================
   # tbl_delete
   #=======================================
-  def tbl_delete(self, px_rec):
+  def tbl_delete(self, px_rec, px_x=None):
 
     """  Delete data; Returns number of records deleted & message"""
 

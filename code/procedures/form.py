@@ -60,7 +60,7 @@ class forma:
   #= METHOD ==============================
   # data_get
   #=======================================
-  def data_get(self, pc_fnc, px_rec):
+  def data_get(self, pc_fnc, px_rec, px_x=None):
 
     """  Get data; Returns list of all records fetched"""
 
@@ -82,7 +82,7 @@ class forma:
   #= METHOD ==============================
   # data_ins
   #=======================================
-  def data_ins(self, pc_fnc, px_rec):
+  def data_ins(self, pc_fnc, px_rec, px_x=None):
 
     """  Insert data; Returns new tbl_id & message"""
 

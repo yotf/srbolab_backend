@@ -64,7 +64,7 @@ class table:
   #= METHOD ==============================
   # tbl_get
   #=======================================
-  def tbl_get(self, px_rec={}, px_x=None, pb_count=False):
+  def tbl_get(self, px_rec={}, px_x=None):
 
     """  Get data; Returns list of all records fetched"""
 
@@ -72,15 +72,9 @@ class table:
     crsr = conn.cursor()
     vxl_res = None
     try:
-#      print('!!! {} - {}'.format(self.fnc.g.fullname, utl.py2json(px_rec)))
+      print('!!! {} - {}'.format(self.fnc.g.fullname, utl.py2json(px_rec)))
       crsr.callproc(self.fnc.g.fullname, [utl.py2json(px_rec)])
       vxl_res = crsr.fetchall()
-      if pb_count:
-        pass
-      try:
-        pass
-      except:
-        pass
     except:
       raise
     finally:
@@ -97,7 +91,9 @@ class table:
 
     """  Insert/Update data; Returns new table ID/number of records updated & message"""
 
+    print('>{} - {}<'.format(self.fnc.iu.fullname, utl.py2json(px_rec)))
 #    print('>{}<'.format(px_rec))
+#    print('>{}<'.format(px_x))
     conn = self.db.connget()
     crsr = conn.cursor()
     vnl_res = -1

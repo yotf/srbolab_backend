@@ -205,10 +205,11 @@ class Copy(Resource):
     item = parser.parse_args()
 
     try:
-      new_item = self.service.tbl_copy(item, { "kr_id": jwt_identity })
-      item[self.primary_keys[0]] = new_item[
-          "rcod"]  #TODO fix primary key return
-      return item, 200
+      db_response = self.service.tbl_copy(item, { "kr_id": jwt_identity })
+      new_item = self.service.tbl_get(
+          { key: item[key + "_to"]
+            for key in self.primary_keys })
+      return new_item[0], 200
     except Exception as e:
       traceback.print_exc()
       print(e.__class__, e)

@@ -31,7 +31,8 @@ class Login(Resource):
       return { "msg": "Missing password parameter"}, 400
     loginStatus = db.user_login({
         "kr_username": username,
-        "kr_password": password
+        "kr_password": password,
+        "alg_ip": ipAddress
     })
     if loginStatus == -100:
       userLog(username, "login_failed", ipAddress)

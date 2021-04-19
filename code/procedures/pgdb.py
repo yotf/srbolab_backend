@@ -271,6 +271,8 @@ class pgdb:
 
     """  Get application forms for user"""
 
+    print('{}'.format(px_rec))
+
     vil_kr_id = -900
     conn = self.connget()
     crsr = conn.cursor()

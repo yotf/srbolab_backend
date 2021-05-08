@@ -134,11 +134,6 @@ class predmeti(forma):
                                            'cols': [],
                                           },
                                 },
-                    'vz_sasija': {
-                                  'fnc': 'sif.f_c_marka_oznaka',
-                                  'cols': ['text'],
-                                  'chars': 3,
-                                 },
                     'mr_naziv': {
                                  'fnc': 'sif.f_marka_g',
                                  'cols': ['mr_naziv'],

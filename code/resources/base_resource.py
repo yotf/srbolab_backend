@@ -101,6 +101,8 @@ class BaseResource(Resource):
     ]
 
     item = parser.parse_args()
+    # print(item)
+    print(f'brajan 3 {item}')
 
     try:
       new_item = self.service.tbl_insert(item, { "kr_id": jwt_identity })
@@ -113,8 +115,9 @@ class BaseResource(Resource):
         new_item = self.service.tbl_get(get_args, { "kr_id": jwt_identity })[0]
         if self.item_name == "v_korisnik" and new_item["kr_password"]:
           new_item["kr_password"] = ""
+        print(f'brajan 4 {new_item}')
 
-        return new_item, 200
+        return item, 200
       else:
         return new_item, 400
     except Exception as e:

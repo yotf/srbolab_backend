@@ -1,0 +1,234 @@
+#!/bin/bash
+
+
+#=======================================
+# main
+#=======================================
+function main()
+{
+
+  local sel_opts_main=("Generate scripts" "Execute PUBLIC schema scripts" "Execute OTHER schemas scripts" "Execute _T schemas scripts" "View log files")
+  local opt
+  ok2go_main="1"
+  while [[ $ok2go_main -eq 1 ]] ; do
+    COLUMNS=15
+    PS3='Choose option [x=Quit;q=Quit]: '
+    echo ""
+    select opt in "${sel_opts_main[@]}" ; do
+      if [[ -n "$opt" ]] ; then
+        if [[ "$opt" == "Generate scripts" ]] ; then
+          run_ddlfix
+        elif [[ "${opt,,}" =~ (_t|public|other) ]] ; then
+          execute_schema_scripts ${BASH_REMATCH[0]}
+        elif [[ "$opt" == "View log files" ]] ; then
+          view_log_files
+        fi
+      else
+        if [[ ${REPLY,,} =~ ^[xq]$ ]] ; then
+          ok2go_main="0"
+        else
+          invalid_option
+        fi
+      fi
+      break
+    done
+  done
+
+}
+
+#=======================================
+# run_ddlfix
+#=======================================
+function run_ddlfix()
+{
+
+  PS3='Choose option [x=Exit;q=Quit]: '
+  local opt
+  local scr
+  local idx
+  local sel_lbls=("Write fixed script" "Generate TABLE DDL-s" "Generate TABLE DML-s" "Generate CREATE VIEW-s script" "Generate CREATE TYPE-s script" "Generate CREATE FUNCTION-s script" "All")
+  local sel_acts=("s" "tc" "ti" "v" "t" "f" "a")
+  local sel_opts
+  declare -a sel_opts
+  for idx in "${sel_lbls[@]}"; do
+    sel_opts+=("$idx")
+  done
+  local ok2go="1"
+  while [[ $ok2go_main -eq 1 ]] && [[ $ok2go -eq 1 ]] ; do
+    COLUMNS=15
+    echo ""
+    echo "  .:: DDLFix ::."
+    select opt in "${sel_opts[@]}" ; do
+      if [[ -n "$opt" ]] ; then
+        idx=$(expr $REPLY - 1)
+        scr=${sel_acts[idx]}
+        echo ""
+        python3 ../ddlfix.py $scr
+      else
+        if [[ ${REPLY,,} =~ ^[xq]$ ]] ; then
+          ok2go="0"
+          if [[ ${REPLY,,} =~ ^q$ ]] ; then
+            ok2go_main="0"
+          fi
+        else
+          invalid_option
+        fi
+      fi
+      break
+    done
+  done
+
+}
+
+#=======================================
+# execute_schema_scripts
+#=======================================
+function execute_schema_scripts()
+{
+
+  PS3='Choose option [x=Exit;q=Quit]: '
+  local sdir="$1"
+  local opt
+  local scr
+  local idx
+  local sel_lbls=("DROP TABLE-s" "CREATE TABLE-s" "TRUNCATE TABLE-s" "INSERET INTO table-s" "DROP VIEW-s" "CREATE VIEW-s" "DROP TYPE-s" "CREATE TYPE-s" "DROP FUNCTION-s" "CREATE FUNCTION-s")
+  local sel_acts=("./$sdir/tbl/ddl/tbls_drop.sql" "./$sdir/tbl/ddl/tbls_create.scr" "./$sdir/tbl/dml/tbls_trunc.sql" "./$sdir/tbl/dml/tbls_ins.scr" "./$sdir/obj/view/views_drop.sql" "./$sdir/obj/view/views_create.scr" "./$sdir/obj/typ/typs_drop.sql" "./$sdir/obj/typ/typs_create.scr" "./$sdir/obj/fnc/fncs_drop.sql" "./$sdir/obj/fnc/fncs_create.scr")
+  local sel_opts
+  declare -a sel_opts
+  for idx in "${sel_lbls[@]}"; do
+    sel_opts+=("$idx")
+  done
+  sel_opts+=("All" "View log files")
+  local ok2go="1"
+  while [[ $ok2go_main -eq 1 ]] && [[ $ok2go -eq 1 ]] ; do
+    COLUMNS=15
+    echo ""
+    echo -e "  .:: ${sdir^^} ::."
+    select opt in "${sel_opts[@]}" ; do
+      if [[ -n "$opt" ]] ; then
+        if [[ "$opt" == "All" ]] ; then
+          echo ""
+          for idx in "${!sel_lbls[@]}"; do
+            scr=${sel_acts[idx]}
+            execute_script $scr $sdir $idx
+          done
+        elif [[ "$opt" == "View log files" ]] ; then
+          echo ""
+          view_log_files $sdir
+        else
+          idx=$(expr $REPLY - 1)
+          scr=${sel_acts[idx]}
+          echo ""
+          execute_script $scr $sdir $idx
+        fi
+      else
+        if [[ ${REPLY,,} =~ ^[xq]$ ]] ; then
+          ok2go="0"
+          if [[ ${REPLY,,} =~ ^q$ ]] ; then
+            ok2go_main="0"
+          fi
+        else
+          invalid_option
+        fi
+      fi
+      break
+    done
+  done
+
+}
+
+#=======================================
+# view_log_files
+#=======================================
+function view_log_files()
+{
+
+  PS3='Choose option [x=Exit;q=Quit]: '
+  local sdir="$1"
+  local opt
+  local ok2go="1"
+  local log_fls
+  declare -a log_fls
+  log_fls=($(find ./$sdir -type f | sort -f -r | grep -P -e "\.log$"))
+  if [[ ${#log_fls[@]} -gt 0 ]] ; then
+    while [[ $ok2go_main -eq 1 ]] && [[ $ok2go -eq 1 ]] ; do
+      COLUMNS=15
+      echo ""
+      echo "  .:: .log files ${1^^} ::."
+      select opt in "${log_fls[@]}" ; do
+        if [[ -n "$opt" ]] ; then
+          less -pERROR "$opt"
+        else
+          if [[ ${REPLY,,} =~ ^[xq]$ ]] ; then
+            ok2go="0"
+            if [[ ${REPLY,,} =~ ^q$ ]] ; then
+              ok2go_main="0"
+            fi
+          else
+            invalid_option
+          fi
+        fi
+        break
+      done
+    done
+  else
+    echo ""
+    echo "There are no .log files."
+  fi
+
+}
+
+#=======================================
+# invalid_option
+#=======================================
+function invalid_option()
+{
+
+  echo ""
+  echo "Invalid option: $REPLY"
+
+}
+
+#=======================================
+# log_file_check
+#=======================================
+function log_file_check()
+{
+
+  local log="$1"
+  if [[ ! -s "$log" ]] || [[ "$(grep -c "ERROR" $log)" -eq 0 ]] ; then
+    rm "$log"
+    echo " Done. (Ok.)"
+  else
+    echo " Done. (With ERROR-s. View log file '$log'.)"
+  fi
+
+}
+
+#=======================================
+# execute_script
+#=======================================
+function execute_script()
+{
+
+  local scr="$1"
+  local sdir="$2"
+  local idx="$3"
+  local log
+  if [[ -f "$scr" ]] ; then
+    log="${scr%.*}.log"
+    echo -n "# Executing script $scr ..."
+    psql --dbname=srbolab --host=localhost --port=5432 --username=postgres --file="$scr" 1>/dev/null 2>"$log"
+    log_file_check "$log"
+  else
+    if [[ "$sdir" == "_t" ]] && [[ $idx -eq 3 ]]; then
+      echo "# Executing script sl_data.py ..."
+      python3 ../sl_data.py
+      echo "  Done."
+    fi
+  fi
+
+}
+
+main
+echo ""

@@ -1,0 +1,24 @@
+/* Table sif.vzk_vzpv */
+TRUNCATE TABLE sif.vzk_vzpv CASCADE;
+COMMIT;
+INSERT INTO sif.vzk_vzpv (vzk_id, vzpv_id)
+WITH
+  s AS
+   (
+    SELECT vzk.vzk_id, vzpv.vzpv_id FROM sif.vozilo_karoserija vzk CROSS JOIN sif.vozilo_podvrsta vzpv WHERE vzk.vzk_oznaka IN ('AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG') AND vzpv.vzpv_oznaka IN ('M1') UNION ALL
+    SELECT vzk.vzk_id, vzpv.vzpv_id FROM sif.vozilo_karoserija vzk CROSS JOIN sif.vozilo_podvrsta vzpv WHERE vzk.vzk_oznaka IN ('BA', 'BB', 'BC', 'BD', 'BE', 'BX') AND vzpv.vzpv_oznaka IN ('N1', 'N2', 'N3') UNION ALL
+    SELECT vzk.vzk_id, vzpv.vzpv_id FROM sif.vozilo_karoserija vzk CROSS JOIN sif.vozilo_podvrsta vzpv WHERE vzk.vzk_oznaka IN ('CA', 'CB', 'CC', 'CD', 'CE', 'CF', 'CG', 'CH', 'CI', 'CJ', 'CX') AND vzpv.vzpv_oznaka IN ('M2', 'M3') UNION ALL
+    SELECT vzk.vzk_id, vzpv.vzpv_id FROM sif.vozilo_karoserija vzk CROSS JOIN sif.vozilo_podvrsta vzpv WHERE vzk.vzk_oznaka IN ('DA', 'DB', 'DC', 'DE') AND vzpv.vzpv_oznaka IN ('O1', 'O2', 'O3', 'O4') UNION ALL
+    SELECT vzk.vzk_id, vzpv.vzpv_id FROM sif.vozilo_karoserija vzk CROSS JOIN sif.vozilo_podvrsta vzpv WHERE vzk.vzk_oznaka IN ('SA', 'SC', 'SD') AND vzpv.vzpv_oznaka IN ('M1', 'M2', 'M3') UNION ALL
+    SELECT vzk.vzk_id, vzpv.vzpv_id FROM sif.vozilo_karoserija vzk CROSS JOIN sif.vozilo_podvrsta vzpv WHERE vzk.vzk_oznaka in ('SB', 'SG') AND vzpv.vzpv_oznaka IN ('M1', 'M2', 'M3', 'N1', 'N2', 'N3', 'O1', 'O2', 'O3', 'O4') UNION ALL
+    SELECT vzk.vzk_id, vzpv.vzpv_id FROM sif.vozilo_karoserija vzk CROSS JOIN sif.vozilo_podvrsta vzpv WHERE vzk.vzk_oznaka='SE' AND vzpv.vzpv_oznaka IN ('O1', 'O2', 'O3', 'O4') UNION ALL
+    SELECT vzk.vzk_id, vzpv.vzpv_id FROM sif.vozilo_karoserija vzk CROSS JOIN sif.vozilo_podvrsta vzpv WHERE vzk.vzk_oznaka='SJ' AND vzpv.vzpv_oznaka IN ('O1', 'O2', 'O3') UNION ALL
+    SELECT vzk.vzk_id, vzpv.vzpv_id FROM sif.vozilo_karoserija vzk CROSS JOIN sif.vozilo_podvrsta vzpv WHERE vzk.vzk_oznaka='SM' AND vzpv.vzpv_oznaka IN ('N1', 'N2', 'N3') UNION ALL
+    SELECT vzk.vzk_id, vzpv.vzpv_id FROM sif.vozilo_karoserija vzk CROSS JOIN sif.vozilo_podvrsta vzpv WHERE vzk.vzk_oznaka='SH' AND vzpv.vzpv_oznaka IN ('M1') UNION ALL
+    SELECT vzk.vzk_id, vzpv.vzpv_id FROM sif.vozilo_karoserija vzk CROSS JOIN sif.vozilo_podvrsta vzpv WHERE vzk.vzk_oznaka='SK' AND vzpv.vzpv_oznaka IN ('O4')
+   )
+SELECT s.vzk_id,
+       s.vzpv_id
+  FROM s
+  ORDER BY s.vzk_id, s.vzpv_id;
+COMMIT;

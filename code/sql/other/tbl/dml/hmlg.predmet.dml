@@ -1,0 +1,23 @@
+/* Table hmlg.predmet */
+TRUNCATE TABLE hmlg.predmet CASCADE;
+COMMIT;
+INSERT INTO hmlg.predmet (pr_id, pr_broj, pr_datum, pr_datum_zak, pr_napomena, pr_primedbe, pr_zakljucak, pr_vreme, prs_id, kl_id, vz_id, kr_id)
+SELECT row_number() OVER (ORDER BY i.pr_datum, i.pr_broj) AS pr_id,
+       to_char(row_number() OVER (ORDER BY i.pr_datum, i.pr_broj), 'FM000000') AS pr_broj,
+       coalesce(i.pr_datum::date, '2020-09-01'::date) AS pr_datum,
+       coalesce(i.pr_datum::date, '2020-09-01'::date) AS pr_datum_zak,
+       i.vz_napomena AS pr_napomena,
+       replace(i.vz_primedbe, '_x000D_', ' ') AS  pr_primedbe,
+       i.vz_zakljucak AS pr_zakljucak,
+       now()+((row_number() OVER (ORDER BY i.pr_datum, i.pr_broj))::varchar||' milliseconds')::interval AS pr_vreme,
+       88 AS prs_id,
+       kl.kl_id,
+       vz.vz_id,
+       0 AS kr_id
+  FROM _t.v_vozilo_imp i
+    JOIN hmlg.vozilo vz ON (vz.vz_sasija=i.vz_sasija)
+    JOIN hmlg.klijent kl ON (kl.kl_naziv=i.kl_naziv)
+  WHERE i.vz_sasija_rb=1
+    AND i.vzi_br IN (1, 2, 3)
+  ORDER BY 1;
+COMMIT;

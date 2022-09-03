@@ -1,0 +1,14 @@
+/* Table sif.ag_uredjaj */
+TRUNCATE TABLE sif.ag_uredjaj CASCADE;
+COMMIT;
+INSERT INTO sif.ag_uredjaj (agu_id, agu_oznaka, agu_naziv)
+SELECT t.agu_id::INTEGER,
+       t.agu_oznaka::VARCHAR,
+       t.agu_naziv::VARCHAR
+  FROM (
+        VALUES (10, 'MV', 'Multiventil'),
+               (20, 'RD', 'Reduktor'),
+               (30, 'RZ', 'Rezervoar')
+       ) t (agu_id, agu_oznaka, agu_naziv)
+  ORDER BY t.agu_id;
+COMMIT;

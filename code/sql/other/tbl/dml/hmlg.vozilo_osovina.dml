@@ -1,0 +1,197 @@
+/* Table hmlg.vozilo_osovina */
+TRUNCATE TABLE hmlg.vozilo_osovina CASCADE;
+COMMIT;
+INSERT INTO hmlg.vozilo_osovina (vz_id, vzo_rb, vzo_nosivost, vzo_tockova, vzo_pneumatik)
+WITH
+  vi AS
+   (
+    SELECT vz.vz_id,
+           i.vzpv_naziv,
+           i.vz_br_osovina,
+           i.vz_br_tockova,
+           coalesce(i.vzo_nosivost1, 0) AS vzo_nosivost1,
+           coalesce(i.vzo_nosivost2, 0) AS vzo_nosivost2,
+           coalesce(i.vzo_nosivost3, 0) AS vzo_nosivost3,
+           coalesce(i.vzo_nosivost4, 0) AS vzo_nosivost4,
+           coalesce(i.vzo_pneumatik1, '-') AS vzo_pneumatik1,
+           coalesce(i.vzo_pneumatik2, '-') AS vzo_pneumatik2,
+           coalesce(i.vzo_pneumatik3, '-') AS vzo_pneumatik3,
+           coalesce(i.vzo_pneumatik4, '-') AS vzo_pneumatik4
+      FROM _t.v_vozilo_imp i
+        JOIN hmlg.vozilo vz ON (vz.vz_sasija=i.vz_sasija)
+      WHERE i.vz_sasija_rb=1
+        AND i.vzi_br IN (1, 2, 3)
+   ),
+  o1 AS -- jedna osovina
+   (
+    SELECT vi.vz_id,
+           1 AS vzo_rb,
+           vi.vzo_nosivost1 AS vzo_nosivost,
+           vi.vz_br_tockova/vi.vz_br_osovina AS vzo_tockova,
+           vi.vzo_pneumatik1 AS vzo_pneumatik
+      FROM vi
+      WHERE vi.vz_br_osovina=1
+        AND vi.vz_br_tockova=2
+   ),
+  o2 AS -- dve osovine motocikli
+   (
+    SELECT vi.vz_id,
+           1 AS vzo_rb,
+           vi.vzo_nosivost1 AS vzo_nosivost,
+           vi.vz_br_tockova/vi.vz_br_osovina AS vzo_tockova,
+           vi.vzo_pneumatik1 AS vzo_pneumatik
+      FROM vi
+      WHERE vi.vz_br_osovina=2
+        AND vi.vz_br_tockova=2
+    UNION ALL
+    SELECT vi.vz_id,
+           2 AS vzo_rb,
+           vi.vzo_nosivost2 AS vzo_nosivost,
+           vi.vz_br_tockova/vi.vz_br_osovina AS vzo_tockova,
+           vi.vzo_pneumatik2 AS vzo_pneumatik
+      FROM  vi
+      WHERE vi.vz_br_osovina=2
+        AND vi.vz_br_tockova=2
+   ),
+  o3 AS -- dve osovine motocikli
+   (
+    SELECT vi.vz_id,
+           1 AS vzo_rb,
+           vi.vzo_nosivost1 AS vzo_nosivost,
+           vi.vz_br_tockova/vi.vz_br_osovina AS vzo_tockova,
+           vi.vzo_pneumatik1 AS vzo_pneumatik
+      FROM vi
+      WHERE vi.vzpv_naziv ~* '^L(1|3|4)'
+        AND vi.vz_br_tockova<>2
+    UNION ALL
+    SELECT vi.vz_id,
+           2 AS vzo_rb,
+           vi.vzo_nosivost2 AS vzo_nosivost,
+           vi.vz_br_tockova/vi.vz_br_osovina AS vzo_tockova,
+           vi.vzo_pneumatik2 AS vzo_pneumatik
+      FROM  vi
+      WHERE vi.vzpv_naziv ~* '^L(1|3|4)'
+        AND vi.vz_br_tockova<>2
+   ),
+  o4 AS -- dve osovine kola i ostalo
+   (
+    SELECT vi.vz_id,
+           1 AS vzo_rb,
+           vi.vzo_nosivost1 AS vzo_nosivost,
+           vi.vz_br_tockova/vi.vz_br_osovina AS vzo_tockova,
+           vi.vzo_pneumatik1 AS vzo_pneumatik
+      FROM vi
+      WHERE vi.vz_br_osovina=2
+        AND vi.vz_br_tockova=4
+    UNION ALL
+    SELECT vi.vz_id,
+           2 AS vzo_rb,
+           vi.vzo_nosivost2 AS vzo_nosivost,
+           vi.vz_br_tockova/vi.vz_br_osovina AS vzo_tockova,
+           vi.vzo_pneumatik2 AS vzo_pneumatik
+      FROM  vi
+      WHERE vi.vz_br_osovina=2
+        AND vi.vz_br_tockova=4
+   ),
+  o5 AS -- dve osovine više točkova
+   (
+    SELECT vi.vz_id,
+           1 AS vzo_rb,
+           vi.vzo_nosivost1 AS vzo_nosivost,
+           2 AS vzo_tockova,
+           vi.vzo_pneumatik1 AS vzo_pneumatik
+      FROM vi
+      WHERE vi.vz_br_osovina=2
+        AND vi.vz_br_tockova=6
+    UNION ALL
+    SELECT vi.vz_id,
+           2 AS vzo_rb,
+           vi.vzo_nosivost2 AS vzo_nosivost,
+           4 AS vzo_tockova,
+           vi.vzo_pneumatik2 AS vzo_pneumatik
+      FROM  vi
+      WHERE vi.vz_br_osovina=2
+        AND vi.vz_br_tockova=6
+   ),
+  o6 AS -- tri osovine
+   (
+    SELECT vi.vz_id,
+           1 AS vzo_rb,
+           vi.vzo_nosivost1 AS vzo_nosivost,
+           vi.vz_br_tockova/vi.vz_br_osovina AS vzo_tockova,
+           vi.vzo_pneumatik1 AS vzo_pneumatik
+      FROM  vi
+      WHERE vi.vz_br_osovina=3
+        AND vi.vz_br_tockova=6
+    UNION ALL
+    SELECT vi.vz_id,
+           2 AS vzo_rb,
+           vi.vzo_nosivost2 AS vzo_nosivost,
+           vi.vz_br_tockova/vi.vz_br_osovina AS vzo_tockova,
+           vi.vzo_pneumatik2 AS vzo_pneumatik
+      FROM  vi
+      WHERE vi.vz_br_osovina=3
+        AND vi.vz_br_tockova=6
+    UNION ALL
+    SELECT vi.vz_id,
+           3 AS vzo_rb,
+           vi.vzo_nosivost3 AS vzo_nosivost,
+           vi.vz_br_tockova/vi.vz_br_osovina AS vzo_tockova,
+           vi.vzo_pneumatik3 AS vzo_pneumatik
+      FROM  vi
+      WHERE vi.vz_br_osovina=3
+        AND vi.vz_br_tockova=6
+   ),
+  oa AS -- sve
+   (
+    SELECT o1.vz_id,
+           o1.vzo_rb,
+           o1.vzo_nosivost,
+           o1.vzo_tockova,
+           o1.vzo_pneumatik
+      FROM o1
+    UNION ALL
+    SELECT o2.vz_id,
+           o2.vzo_rb,
+           o2.vzo_nosivost,
+           o2.vzo_tockova,
+           o2.vzo_pneumatik
+      FROM o2
+    UNION ALL
+    SELECT o3.vz_id,
+           o3.vzo_rb,
+           o3.vzo_nosivost,
+           o3.vzo_tockova,
+           o3.vzo_pneumatik
+      FROM o3
+    UNION ALL
+    SELECT o4.vz_id,
+           o4.vzo_rb,
+           o4.vzo_nosivost,
+           o4.vzo_tockova,
+           o4.vzo_pneumatik
+      FROM o4
+    UNION ALL
+    SELECT o5.vz_id,
+           o5.vzo_rb,
+           o5.vzo_nosivost,
+           o5.vzo_tockova,
+           o5.vzo_pneumatik
+      FROM o5
+    UNION ALL
+    SELECT o6.vz_id,
+           o6.vzo_rb,
+           o6.vzo_nosivost,
+           o6.vzo_tockova,
+           o6.vzo_pneumatik
+      FROM o6
+   )
+SELECT DISTINCT
+       oa.vz_id,
+       oa.vzo_rb,
+       oa.vzo_nosivost,
+       oa.vzo_tockova,
+       oa.vzo_pneumatik
+  FROM oa
+  ORDER BY 1, 2;
+COMMIT;

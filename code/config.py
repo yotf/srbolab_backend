@@ -6,6 +6,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # system
 from os import environ, path, urandom
+from pathlib import Path
 
 # site-packages
 from dotenv import load_dotenv
@@ -22,6 +23,8 @@ JWT_SECRET_KEY = environ.get('FEV_KLJUC_TKN') or urandom(32)
 JWT_BLACKLIST_ENABLED = True
 JWT_ACCESS_TOKEN_EXPIRES = 2*60*60
 
+environ["FEV_ENV"]="develop"
+
 if environ.get('FEV_ENV')=='develop':
   load_dotenv(path.join(basedir, '.env_develop'))
 else:
@@ -29,6 +32,7 @@ else:
 
 DATA_PATH = environ.get('FEV_DATA_PATH')
 ASSETS_PATH = environ.get('FEV_ASSETS_PATH')
+
 FRONTEND_IMGS_PATH = environ.get('FEV_FRONTEND_IMGS_PATH')
 DB_PASSWORD = environ.get('FEV_DB_PASSWORD')
 

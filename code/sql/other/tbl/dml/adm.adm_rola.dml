@@ -1,0 +1,19 @@
+/* Table adm.adm_rola */
+TRUNCATE TABLE adm.adm_rola CASCADE;
+COMMIT;
+INSERT INTO adm.adm_rola (arl_id, arl_naziv)
+SELECT t.arl_id::INTEGER,
+       t.arl_naziv::VARCHAR
+  FROM (
+        VALUES (-1, 'Import'),
+               (0, 'Administrator'),
+               (10, 'Direktor'),
+               (20, 'Ispitivač'),
+               (30, 'Tehničar'),
+               (40, 'Kontrolor'),
+               (50, 'Operater 1'),
+               (60, 'Operater 2'),
+               (61, 'test')
+       ) t (arl_id, arl_naziv)
+  ORDER BY t.arl_id;
+COMMIT;

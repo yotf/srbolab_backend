@@ -1,0 +1,38 @@
+/* Table sif.md_mdvtt */
+TRUNCATE TABLE sif.md_mdvtt CASCADE;
+COMMIT;
+INSERT INTO sif.md_mdvtt (mr_id, md_id, mdt_id, mdvr_id, mdvz_id, mt_id)
+SELECT DISTINCT
+       mr.mr_id,
+       md.md_id,
+       mdt.mdt_id,
+       mdvr.mdvr_id,
+       mdvz.mdvz_id,
+       mt.mt_id
+  FROM (
+        SELECT vi.vz_sasija,
+               _t.mr_naziv(coalesce(vi.mr_naziv, '~')) AS mr_naziv,
+               _t.md_naziv_k(coalesce(vi.md_naziv_k, '~')) AS md_naziv_k,
+               _t.mdt_oznaka(coalesce(vi.mdt_oznaka, '~')) AS mdt_oznaka,
+               upper(coalesce(vi.mdvr_oznaka, '~')) AS mdvr_oznaka,
+               upper(coalesce(vi.mdvz_oznaka, '~')) AS mdvz_oznaka,
+               coalesce(vi.mt_oznaka, '~') AS mt_oznaka,
+               coalesce(vi.mt_cm3, 0) AS mt_cm3,
+               coalesce(vi.mt_kw, 0) AS mt_kw
+          FROM _t.vozilo_imp vi
+          WHERE 1=1
+            AND vi.vz_sasija IS NOT NULL
+            AND vi.mr_naziv IS NOT NULL
+            AND vi.md_naziv_k IS NOT NULL
+       ) i1
+    JOIN sif.marka mr ON (mr.mr_naziv=i1.mr_naziv)
+    JOIN sif.model md ON (md.mr_id=mr.mr_id AND md.md_naziv_k=i1.md_naziv_k)
+    JOIN sif.model_tip mdt ON (mdt.mdt_oznaka=i1.mdt_oznaka)
+    JOIN sif.mdt_mdvr mdtvr ON (mdtvr.mdt_id=mdt.mdt_id)
+    JOIN sif.model_varijanta mdvr ON (mdvr.mdvr_oznaka=i1.mdvr_oznaka AND mdvr.mdvr_id=mdtvr.mdvr_id)
+    JOIN sif.mdvr_mdvz mdvrz ON (mdvrz.mdvr_id=mdvr.mdvr_id)
+    JOIN sif.model_verzija mdvz ON (mdvz.mdvz_oznaka=i1.mdvz_oznaka AND mdvz.mdvz_id=mdvrz.mdvz_id)
+    JOIN sif.mr_mt mrmt ON (mrmt.mr_id=mr.mr_id)
+    JOIN sif.motor mt ON (mt.mt_id=mrmt.mt_id AND mt.mt_oznaka=i1.mt_oznaka AND coalesce(mt.mt_cm3, 0)=i1.mt_cm3 AND coalesce(mt.mt_kw, 0)=i1.mt_kw)
+  ORDER BY mr.mr_id, md.md_id, mdt.mdt_id, mdvr.mdvr_id, mdvz.mdvz_id, mt.mt_id;
+COMMIT;

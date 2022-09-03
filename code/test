@@ -1,0 +1,59 @@
+#!/bin/bash
+
+#x="ASDSDSD"
+#echo $x
+#declare -p x
+#x=${x,,}
+#echo $x
+#read -p "Continue? (Y/N): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
+#read -p "Continue? (Y/N): " confirm
+#if [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] ; then
+#  echo "$confirm => Ok"
+#else
+#  echo "$confirm => NOk"
+#fi
+
+#read -p "Action? (Compile/Process): " jsact
+#if [[ $jsact == [cC] ]] ; then
+#  echo "$jsact => Compile"
+#elif [[ $jsact == [pP] ]] ; then
+#  echo "$jsact => Process"
+#else
+#  echo "$jsact => NOk"
+#fi
+
+#function idx()
+#{
+
+#  local vi_idx=0
+#  for vi_idx in ${!$1[@]}; do
+#    if [[ "${$1[vi_idx]}" -eq "$2" ]] ; then
+#      echo "${$1[vi_idx]}"
+#      echo "$vi_idx"
+#      break
+#    fi
+#  done
+
+#}
+
+#sel_opts_d=("Write fixed script" "Generate table DDL-s" "Generate table DML-s" "Generate CREATE VIEW-s script" "Generate CREATE TYPE-s script" "Generate CREATE FUNCTION-s script" "Generate All" "Exit" "Quit")
+#for idx in ${!sel_opts_d[@]}; do
+#  echo "${sel_opts_d[idx]}"
+#done
+
+#res=$(idx "$sel_opts_d" "Generate table DDL-s")
+#echo "$res"
+#command less /home/zeljko/Work/srbolab/db_init/sql/other/obj/fnc/fncs_create.scr
+#fls=($(find ./ -type f | grep "\.scr$"))
+#for fl in ${fls[@]} ; do
+#  echo "$fl"
+#done
+
+#shopt -s nocasematch
+#shopt -u nocasematch
+#echo ${BASH_REMATCH[0]}
+x="$(head test-cm1.txt)"
+echo "$x"
+let x++
+echo "$x"
+echo "$x">test-cm1.txt

@@ -1,0 +1,17 @@
+/* Table adm.adm_akcija */
+TRUNCATE TABLE adm.adm_akcija CASCADE;
+COMMIT;
+INSERT INTO adm.adm_akcija (aac_id, aac_oznaka, aac_naziv, aac_tip)
+SELECT t.aac_id::INTEGER,
+       t.aac_oznaka::VARCHAR,
+       t.aac_naziv::VARCHAR,
+       t.aac_tip::VARCHAR
+  FROM (
+        VALUES (10, 'v', 'Pregled', 'V'),
+               (11, 'i', 'Kreiraj novi', 'I'),
+               (12, 'u', 'Izmeni', 'U'),
+               (13, 'd', 'Izbriši', 'D'),
+               (14, 'c', 'Kopiraj', 'C')
+       ) t (aac_id, aac_oznaka, aac_naziv, aac_tip)
+  ORDER BY t.aac_id;
+COMMIT;

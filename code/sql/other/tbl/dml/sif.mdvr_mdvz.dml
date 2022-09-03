@@ -1,0 +1,13 @@
+/* Table sif.mdvr_mdvz */
+TRUNCATE TABLE sif.mdvr_mdvz CASCADE;
+COMMIT;
+INSERT INTO sif.mdvr_mdvz (mdvr_id, mdvz_id)
+SELECT mdvr.mdvr_id,
+       mdvz.mdvz_id
+  FROM sif.model_varijanta mdvr
+    JOIN _t.v_vozilo_imp v ON (_t.fix_mdvr_oznaka(v.mdvr_oznaka)=mdvr.mdvr_oznaka)
+    JOIN sif.model_verzija mdvz ON (mdvz.mdvz_oznaka=_t.fix_mdvz_oznaka(v.mdvz_oznaka))
+  WHERE v.vz_sasija_rb=1
+    AND v.vzi_br IN (1, 2)
+  GROUP BY mdvr.mdvr_id, mdvz.mdvz_id;
+COMMIT;

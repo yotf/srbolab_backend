@@ -1,0 +1,6 @@
+\i ./public/obj/typ/public.t_app.sql
+\i ./public/obj/typ/public.t_fncs.sql
+\i ./public/obj/typ/public.t_tbl_cols.sql
+\i ./public/obj/typ/public.t_tbls.sql
+\i ./public/obj/typ/public.t_typs.sql
+COMMIT;

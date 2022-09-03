@@ -1,0 +1,43 @@
+/* Table sif.vzdo_vzv */
+TRUNCATE TABLE sif.vzdo_vzv CASCADE;
+COMMIT;
+INSERT INTO sif.vzdo_vzv (vzdo_id, vzv_id)
+WITH
+  s AS
+   (
+    SELECT vzdo.vzdo_id,
+           vzv.vzv_id
+      FROM sif.vozilo_dod_oznaka vzdo
+        CROSS JOIN sif.vozilo_vrsta vzv
+      WHERE vzdo.vzdo_oznaka ~ '^[0-9]{2}$'
+        AND vzv.vzv_oznaka IN ('N', 'O')
+    UNION ALL
+    SELECT vzdo.vzdo_id,
+           vzv.vzv_id
+      FROM sif.vozilo_dod_oznaka vzdo
+        CROSS JOIN sif.vozilo_vrsta vzv
+      WHERE vzdo.vzdo_oznaka ~ '^[ab]$'
+        AND vzdo.vzdo_oznaka1='a'
+        AND vzv.vzv_oznaka='T'
+    UNION ALL
+    SELECT vzdo.vzdo_id,
+           vzv.vzv_id
+      FROM sif.vozilo_dod_oznaka vzdo
+        CROSS JOIN sif.vozilo_vrsta vzv
+      WHERE vzdo.vzdo_oznaka ~ '^[ab]$'
+        AND vzdo.vzdo_oznaka1='b'
+        AND vzv.vzv_oznaka='R'
+    UNION ALL
+    SELECT vzdo.vzdo_id,
+           vzv.vzv_id
+      FROM sif.vozilo_dod_oznaka vzdo
+        CROSS JOIN sif.vozilo_vrsta vzv
+      WHERE vzdo.vzdo_oznaka ~ '^[ab]$'
+        AND vzdo.vzdo_oznaka1='c'
+        AND vzv.vzv_oznaka='S'
+   )
+SELECT s.vzdo_id,
+       s.vzv_id
+  FROM s
+  ORDER BY s.vzdo_id, s.vzv_id;
+COMMIT;

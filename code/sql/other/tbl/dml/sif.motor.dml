@@ -1,0 +1,46 @@
+/* Table sif.motor */
+TRUNCATE TABLE sif.motor CASCADE;
+COMMIT;
+INSERT INTO sif.motor (mt_id, mt_cm3, mt_kw, mto_id, mtt_id)
+WITH
+  s AS
+   (
+    SELECT mto.mto_id,
+           t.mt_cm3,
+           t.mt_kw,
+           max(
+               CASE
+                 WHEN t.gr_naziv ~* 'бензин' THEN 1
+                 WHEN t.gr_naziv ~* 'дизел' THEN 2
+                 ELSE null::integer
+               END
+              ) AS mtt_id
+      FROM _t.v_vozilo_imp t
+        JOIN sif.motor_oznaka mto ON (mto.mto_oznaka=coalesce(t.mt_oznaka, '-'))
+      WHERE t.vz_sasija_rb=1
+        AND t.vzi_br IN (1, 2, 3)
+        AND coalesce(t.mt_cm3, 0)>0
+        AND coalesce(t.mt_kw, 0)>0
+        AND NOT EXISTS
+             (
+              SELECT 1
+                FROM sif.motor mt
+                WHERE mt.mto_id=mto.mto_id
+                  AND mt.mt_cm3=t.mt_cm3
+                  AND mt.mt_kw=t.mt_kw
+             )
+      GROUP BY mto.mto_id, t.mt_cm3, t.mt_kw
+   ),
+  r AS
+   (
+    SELECT coalesce(max(mt.mt_id), 100) AS mt_id
+      FROM sif.motor mt
+   )
+SELECT r.mt_id+row_number() OVER (ORDER BY s.mto_id, s.mt_cm3, s.mt_kw) AS mt_id,
+       s.mt_cm3,
+       s.mt_kw,
+       s.mto_id,
+       s.mtt_id
+  FROM s
+    CROSS JOIN r;
+COMMIT;

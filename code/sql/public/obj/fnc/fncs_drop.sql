@@ -1,0 +1,18 @@
+DROP FUNCTION IF EXISTS public.f_app(int4) CASCADE;
+DROP FUNCTION IF EXISTS public.f_compc(text, text) CASCADE;
+DROP FUNCTION IF EXISTS public.f_compd(text, text, text) CASCADE;
+DROP FUNCTION IF EXISTS public.f_compn(numeric, numeric) CASCADE;
+DROP FUNCTION IF EXISTS public.f_firma(int4) CASCADE;
+DROP FUNCTION IF EXISTS public.f_fncs(varchar) CASCADE;
+DROP FUNCTION IF EXISTS public.f_json_keys_check(varchar, varchar) CASCADE;
+DROP FUNCTION IF EXISTS public.f_json_keys_check(varchar, json) CASCADE;
+DROP FUNCTION IF EXISTS public.f_lat2cir(text, int4) CASCADE;
+DROP FUNCTION IF EXISTS public.f_lat2cir_rn(text, int4) CASCADE;
+DROP FUNCTION IF EXISTS public.f_sr_dow(date, int4) CASCADE;
+DROP FUNCTION IF EXISTS public.f_sr_month(date, int4) CASCADE;
+DROP FUNCTION IF EXISTS public.f_str4re(varchar) CASCADE;
+DROP FUNCTION IF EXISTS public.f_str_encode(varchar) CASCADE;
+DROP FUNCTION IF EXISTS public.f_tbl_cols(varchar) CASCADE;
+DROP FUNCTION IF EXISTS public.f_tbls(varchar) CASCADE;
+DROP FUNCTION IF EXISTS public.f_typs(varchar, varchar) CASCADE;
+COMMIT;

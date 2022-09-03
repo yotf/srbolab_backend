@@ -1,0 +1,30 @@
+/* Table sif.model_verzija */
+TRUNCATE TABLE sif.model_verzija CASCADE;
+COMMIT;
+INSERT INTO sif.model_verzija (mdvz_id, mdvz_oznaka)
+WITH
+  s AS
+   (
+    SELECT t.mdvz_oznaka
+      FROM _t.v_vozilo_imp t
+      WHERE t.vz_sasija_rb=1
+        AND t.vzi_br IN (1, 2, 3)
+        AND t.mdvz_oznaka IS NOT NULL
+        AND NOT EXISTS
+             (
+              SELECT 1
+                FROM sif.model_verzija mdvz
+                WHERE mdvz.mdvz_oznaka=t.mdvz_oznaka
+             )
+      GROUP BY t.mdvz_oznaka
+   ),
+  r AS
+   (
+    SELECT coalesce(max(mdvz.mdvz_id), 100) AS mdvz_id
+      FROM sif.model_verzija mdvz
+   )
+SELECT r.mdvz_id+row_number() OVER (ORDER BY s.mdvz_oznaka) AS mdvz_id,
+       s.mdvz_oznaka
+  FROM s
+    CROSS JOIN r;
+COMMIT;

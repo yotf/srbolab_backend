@@ -1,0 +1,20 @@
+/* Table sif.vozilo_vrsta */
+TRUNCATE TABLE sif.vozilo_vrsta CASCADE;
+COMMIT;
+INSERT INTO sif.vozilo_vrsta (vzv_id, vzv_oznaka, vzv_naziv)
+SELECT t.vzv_id::INTEGER,
+       t.vzv_oznaka::VARCHAR,
+       t.vzv_naziv::VARCHAR
+  FROM (
+        VALUES (10, 'L', 'Мопеди, трицикли, мотоцикли, четвороцикли'),
+               (11, 'M', 'Путничка возила и аутобуси'),
+               (12, 'N', 'Теретна возила'),
+               (13, 'O', 'Прикључна возила'),
+               (14, 'T', 'Трактори, радне машине'),
+               (15, 'C', 'Трактор са гусеницама'),
+               (16, 'R', 'Прикључна возила за тракторе'),
+               (17, 'S', 'Прикључна возила за тракторе'),
+               (18, 'K', 'Остала возила')
+       ) t (vzv_id, vzv_oznaka, vzv_naziv)
+  ORDER BY t.vzv_id;
+COMMIT;

@@ -1,0 +1,18 @@
+\i ./public/obj/fnc/public.f_app.sql
+\i ./public/obj/fnc/public.f_compc.sql
+\i ./public/obj/fnc/public.f_compd.sql
+\i ./public/obj/fnc/public.f_compn.sql
+\i ./public/obj/fnc/public.f_firma.sql
+\i ./public/obj/fnc/public.f_fncs.sql
+\i ./public/obj/fnc/public.f_json_keys_check.sql
+\i ./public/obj/fnc/public.f_json_keys_check_json.sql
+\i ./public/obj/fnc/public.f_lat2cir.sql
+\i ./public/obj/fnc/public.f_lat2cir_nr.sql
+\i ./public/obj/fnc/public.f_sr_dow.sql
+\i ./public/obj/fnc/public.f_sr_month.sql
+\i ./public/obj/fnc/public.f_str4re.sql
+\i ./public/obj/fnc/public.f_str_encode.sql
+\i ./public/obj/fnc/public.f_tbl_cols.sql
+\i ./public/obj/fnc/public.f_tbls.sql
+\i ./public/obj/fnc/public.f_typs.sql
+COMMIT;

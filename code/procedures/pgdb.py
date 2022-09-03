@@ -106,8 +106,10 @@ class pgdb:
     crsr = conn.cursor()
     try:
       crsr.callproc('public.f_tbls', [pc_table])
+      print('nije error', crsr)
       ldl_tbls = crsr.fetchall()
-    except:
+    except Exception as e:
+      print('error je', e)
       raise
     finally:
       crsr.close()

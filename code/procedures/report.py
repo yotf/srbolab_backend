@@ -127,7 +127,10 @@ def regfonts():
                'Consolas Bold Italic': 'consolaz.ttf',
               }
   for vcl_FntNme, vcl_FntFle in dcl_Fonts.items():
-    pdfmetrics.registerFont(TTFont(vcl_FntNme, osp.join(sysdf.assets, 'reports', 'fonts', vcl_FntFle)))
+    print(sysdf)
+    print(sysdf.assets)
+    print("ASSETS")
+    pdfmetrics.registerFont(TTFont(vcl_FntNme, osp.join( sysdf.assets, 'reports', 'fonts', vcl_FntFle)))
 
 regfonts()
 

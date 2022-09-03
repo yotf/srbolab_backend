@@ -17,13 +17,18 @@ from resources.reports import Reports
 from resources.tables import Tables
 from resources.upload import Images, Upload
 
+
+
 app = Flask(__name__)
+
 # app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 15 //in seconds
 api = Api(app, "/api")
 cors = CORS(app, supports_credentials=True)
-
 jwt.init_app(app)
+
 app.config.from_pyfile('config.py')
+
+
 
 
 @app.after_request
@@ -71,4 +76,4 @@ for table in db.tbls():
     print(e.__class__, url, e)
 
 if __name__ == '__main__':
-  app.run(port=5000, debug=True)
+  app.run(host='0.0.0.0', port=5000, debug=True)

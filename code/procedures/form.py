@@ -84,7 +84,7 @@ class forma:
   def data_ins(self, pc_fnc, px_rec, px_x=None):
 
     """  Insert data; Returns new tbl_id & message"""
-
+    print('FINS {}, {}'.format(pc_fnc, px_rec))
     conn = self.db.connget()
     crsr = conn.cursor()
     vnl_res = -1

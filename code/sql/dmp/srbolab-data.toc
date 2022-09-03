@@ -1,0 +1,90 @@
+;
+; Archive created at 2022-05-26 10:14:54 CEST
+;     dbname: srbolab
+;     TOC Entries: 80
+;     Compression: -1
+;     Dump Version: 1.13-0
+;     Format: CUSTOM
+;     Integer: 4 bytes
+;     Offset: 8 bytes
+;     Dumped from database version: 11.8 (Ubuntu 11.8-1.pgdg19.10+1)
+;     Dumped by pg_dump version: 11.8 (Ubuntu 11.8-1.pgdg19.10+1)
+;
+;
+; Selected TOC Entries:
+;
+4200; 0 213661 TABLE DATA _t model_year postgres
+4205; 0 245916 TABLE DATA _t vozilo_imp postgres
+4206; 0 245947 TABLE DATA _t vozilo_imp_gas postgres
+4207; 0 245963 TABLE DATA _t vozilo_imp_gu postgres
+4201; 0 213694 TABLE DATA _t vozilo_imp_raw postgres
+4202; 0 245825 TABLE DATA _t vozilo_imp_srt0 postgres
+4203; 0 245831 TABLE DATA _t vozilo_imp_srt1 postgres
+4204; 0 245837 TABLE DATA _t vozilo_imp_srt2 postgres
+4210; 0 246210 TABLE DATA adm adm_akcija postgres
+4211; 0 246218 TABLE DATA adm adm_aplikacija postgres
+4238; 0 246425 TABLE DATA adm adm_forma postgres
+4247; 0 246559 TABLE DATA adm adm_forma_akcija postgres
+4212; 0 246223 TABLE DATA adm adm_izvestaji postgres
+4248; 0 246574 TABLE DATA adm adm_forma_izvestaj postgres
+4213; 0 246228 TABLE DATA adm adm_rola postgres
+4246; 0 246542 TABLE DATA sys korisnik postgres
+4249; 0 246589 TABLE DATA adm adm_log postgres
+4250; 0 246605 TABLE DATA adm adm_log_akcija postgres
+4251; 0 246620 TABLE DATA adm arl_afo postgres
+4258; 0 246829 TABLE DATA adm arf_afac postgres
+4259; 0 246844 TABLE DATA adm arf_afiz postgres
+4214; 0 246233 TABLE DATA hmlg klijent postgres
+4215; 0 246240 TABLE DATA hmlg predmet_status postgres
+4218; 0 246273 TABLE DATA sif emisija postgres
+4219; 0 246280 TABLE DATA sif gorivo postgres
+4220; 0 246287 TABLE DATA sif marka postgres
+4240; 0 246453 TABLE DATA sif model postgres
+4221; 0 246294 TABLE DATA sif model_tip postgres
+4222; 0 246301 TABLE DATA sif model_varijanta postgres
+4223; 0 246308 TABLE DATA sif model_verzija postgres
+4224; 0 246315 TABLE DATA sif motor_oznaka postgres
+4225; 0 246322 TABLE DATA sif motor_tip postgres
+4241; 0 246464 TABLE DATA sif motor postgres
+4231; 0 246369 TABLE DATA sif vozilo_klasa postgres
+4232; 0 246376 TABLE DATA sif vozilo_vrsta postgres
+4242; 0 246482 TABLE DATA sif vozilo_podvrsta postgres
+4252; 0 246638 TABLE DATA hmlg vozilo_sert postgres
+4260; 0 246859 TABLE DATA hmlg vozilo postgres
+4264; 0 247009 TABLE DATA hmlg predmet postgres
+4236; 0 246405 TABLE DATA sys lokacija postgres
+4269; 0 247104 TABLE DATA hmlg potvrda postgres
+4229; 0 246355 TABLE DATA sif vozilo_dokument postgres
+4270; 0 247133 TABLE DATA hmlg pr_vzd postgres
+4227; 0 246340 TABLE DATA sif predmet_dokument postgres
+4271; 0 247148 TABLE DATA hmlg predmet_fajl postgres
+4237; 0 246416 TABLE DATA sys usluga postgres
+4272; 0 247164 TABLE DATA hmlg predmet_usluga postgres
+4265; 0 247046 TABLE DATA hmlg vozilo_gas postgres
+4226; 0 246333 TABLE DATA sif organizacija postgres
+4273; 0 247179 TABLE DATA hmlg vozilo_gas_ispitivanje postgres
+4217; 0 246262 TABLE DATA sif ag_uredjaj postgres
+4239; 0 246439 TABLE DATA sif ag_homologacija postgres
+4216; 0 246255 TABLE DATA sif ag_proizvodjac postgres
+4253; 0 246731 TABLE DATA sif agp_agh postgres
+4274; 0 247208 TABLE DATA hmlg vozilo_gu postgres
+4266; 0 247060 TABLE DATA hmlg vozilo_osovina postgres
+4261; 0 246965 TABLE DATA hmlg vozilo_s_osovina postgres
+4228; 0 246349 TABLE DATA sif vozilo_dod_oznaka postgres
+4267; 0 247074 TABLE DATA hmlg vz_vzdo postgres
+4230; 0 246364 TABLE DATA sif vozilo_karoserija postgres
+4268; 0 247089 TABLE DATA hmlg vz_vzk postgres
+4262; 0 246979 TABLE DATA hmlg vzs_vzdo postgres
+4263; 0 246994 TABLE DATA hmlg vzs_vzk postgres
+4208; 0 246143 TABLE DATA public sys_firma postgres
+4209; 0 246153 TABLE DATA public tuv_imp_sert postgres
+4243; 0 246495 TABLE DATA sif vzdo_vzv postgres
+4254; 0 246746 TABLE DATA sif vzk_vzpv postgres
+4255; 0 246761 TABLE DATA sif vzkl_vzpv postgres
+4244; 0 246511 TABLE DATA sys arl_us postgres
+4233; 0 246383 TABLE DATA sys cenovnik postgres
+4245; 0 246526 TABLE DATA sys cena postgres
+4256; 0 246778 TABLE DATA sys cena_uslov postgres
+4234; 0 246391 TABLE DATA sys ispitivanje_vrsta postgres
+4235; 0 246399 TABLE DATA sys kalendar postgres
+4257; 0 246807 TABLE DATA sys raspored postgres

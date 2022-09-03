@@ -1,0 +1,2 @@
+DROP VIEW IF EXISTS _t.v_vozilo_imp CASCADE;
+COMMIT;

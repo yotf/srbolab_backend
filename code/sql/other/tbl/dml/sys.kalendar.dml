@@ -1,0 +1,12 @@
+/* Table sys.kalendar */
+TRUNCATE TABLE sys.kalendar CASCADE;
+COMMIT;
+INSERT INTO sys.kalendar (kn_datum, kn_napomena)
+SELECT t.kn_datum::DATE,
+       t.kn_napomena::VARCHAR
+  FROM (
+        VALUES ('2020-10-15', null),
+               ('2020-10-16', null)
+       ) t (kn_datum, kn_napomena)
+  ORDER BY t.kn_datum;
+COMMIT;

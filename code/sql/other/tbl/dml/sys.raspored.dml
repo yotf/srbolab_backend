@@ -1,0 +1,16 @@
+/* Table sys.raspored */
+TRUNCATE TABLE sys.raspored CASCADE;
+COMMIT;
+INSERT INTO sys.raspored (kn_datum, kr_id, lk_id, rs_napomena)
+SELECT t.kn_datum::DATE,
+       t.kr_id::INTEGER,
+       t.lk_id::INTEGER,
+       t.rs_napomena::VARCHAR
+  FROM (
+        VALUES ('2020-10-15', 1, 12, NULL),
+               ('2020-10-16', 1, 11, NULL),
+               ('2020-10-15', 2, 10, NULL),
+               ('2020-10-16', 2, 11, NULL)
+       ) t (kn_datum, kr_id, lk_id, rs_napomena)
+  ORDER BY t.kn_datum, t.kr_id;
+COMMIT;

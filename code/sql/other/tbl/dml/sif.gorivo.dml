@@ -1,0 +1,20 @@
+/* Table sif.gorivo */
+TRUNCATE TABLE sif.gorivo CASCADE;
+COMMIT;
+INSERT INTO sif.gorivo (gr_id, gr_naziv)
+SELECT t.gr_id::INTEGER,
+       t.gr_naziv::VARCHAR
+  FROM (
+        VALUES (10, 'Бензин'),
+               (11, 'Бензин/КПГ'),
+               (12, 'Бензин/ТНГ'),
+               (13, 'Биодизел'),
+               (14, 'Биометан'),
+               (15, 'Водоник'),
+               (16, 'Дизел'),
+               (17, 'Етанол'),
+               (18, 'КПГ'),
+               (19, 'ТНГ')
+       ) t (gr_id, gr_naziv)
+  ORDER BY t.gr_id;
+COMMIT;

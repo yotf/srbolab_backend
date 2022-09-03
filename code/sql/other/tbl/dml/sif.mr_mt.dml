@@ -1,0 +1,14 @@
+/* Table sif.mr_mt */
+TRUNCATE TABLE sif.mr_mt CASCADE;
+COMMIT;
+INSERT INTO sif.mr_mt (mr_id, mt_id)
+SELECT mr.mr_id,
+       mt.mt_id
+  FROM sif.marka mr
+    JOIN _t.v_vozilo_imp v ON (_t.fix_mr_naziv(v.mr_naziv)=mr.mr_naziv)
+    JOIN sif.motor_oznaka mto ON (mto.mto_oznaka=_t.fix_mto_oznaka(coalesce(v.mt_oznaka, '-')))
+    JOIN sif.motor mt ON (mt.mto_id=mto.mto_id)
+  WHERE v.vz_sasija_rb=1
+    AND v.vzi_br IN (1, 2)
+  GROUP BY mr.mr_id, mt.mt_id;
+COMMIT;

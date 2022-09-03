@@ -1,0 +1,20 @@
+/* Table sif.predmet_dokument */
+TRUNCATE TABLE sif.predmet_dokument CASCADE;
+COMMIT;
+INSERT INTO sif.predmet_dokument (prd_id, prd_oznaka, prd_naziv)
+SELECT t.prd_id::INTEGER,
+       t.prd_oznaka::VARCHAR,
+       t.prd_naziv::VARCHAR
+  FROM (
+        VALUES (10, 'СД', 'Саобраћајна дозвола'),
+               (15, 'ОД', 'Одговарајући документ'),
+               (20, 'ЦОЦ', 'COC документ'),
+               (25, 'ПП', 'Потврда представника произвођача'),
+               (30, 'ЦД', 'Царински документ'),
+               (35, 'УП', 'Доказ о реализованим уплатама'),
+               (40, 'ДОВ', 'Доказ о власништву возила'),
+               (45, 'ОВ', 'Овлашћење за подношење захтева'),
+               (90, 'РЗ', 'Разно')
+       ) t (prd_id, prd_oznaka, prd_naziv)
+  ORDER BY t.prd_id;
+COMMIT;

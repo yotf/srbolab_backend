@@ -1,0 +1,3 @@
+\i ./_t/obj/view/_t.v_vozilo_imp.sql
+\i ./_t/obj/view/_t.v_vozilo_imp_srtx.sql
+COMMIT;

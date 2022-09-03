@@ -1,0 +1,34 @@
+DROP FUNCTION IF EXISTS sif.f_gorivo_g(character varying) CASCADE;
+CREATE OR REPLACE
+FUNCTION sif.f_gorivo_g(
+                        pc_rec character varying DEFAULT NULL::character varying
+                       )
+  RETURNS SETOF sif.gorivo AS
+$$
+DECLARE
+
+  r_rec record;
+  j_rec json := coalesce(pc_rec, '{}')::json;
+  vi_limit integer := coalesce(json_extract_path_text(j_rec, 'limit')::integer, 100);
+  vi_offset integer := coalesce(json_extract_path_text(j_rec, 'offset')::integer, 0);
+
+BEGIN
+
+  FOR r_rec IN SELECT t.*
+                 FROM sif.gorivo t
+                   CROSS JOIN (SELECT r.* from json_populate_record(null::sif.gorivo, j_rec) r) j
+                 WHERE t.gr_id=coalesce(j.gr_id, t.gr_id)
+                   AND t.gr_naziv ~* coalesce(j.gr_naziv, '.+')
+                 ORDER BY t.gr_id
+                 LIMIT vi_limit OFFSET vi_offset LOOP
+    RETURN NEXT r_rec;
+  END LOOP;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE;
+
+END;
+$$
+  LANGUAGE 'plpgsql';
+ALTER FUNCTION sif.f_gorivo_g(character varying) OWNER TO postgres;

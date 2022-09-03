@@ -1,0 +1,20 @@
+/* Table sys.usluga */
+TRUNCATE TABLE sys.usluga CASCADE;
+COMMIT;
+INSERT INTO sys.usluga (us_id, us_oznaka, us_naziv)
+SELECT t.us_id::INTEGER,
+       t.us_oznaka::VARCHAR,
+       t.us_naziv::VARCHAR
+  FROM (
+        VALUES (10, 'UPV', 'Uvoz polovnog vozila'),
+               (11, 'ISP', 'Ispitivanje'),
+               (12, 'ISP80', 'Ispitivanje 80%'),
+               (13, 'REA', 'Reatest'),
+               (14, 'UVU', 'Ugradnja vučnog uređaja'),
+               (15, 'TNG', 'Ugradnja TNG-a'),
+               (16, 'KPG', 'Ugradnja KPG-a'),
+               (17, 'FOL', 'Folije na staklima'),
+               (18, 'IPUP', 'Ispravka pogrešno upisanih podataka')
+       ) t (us_id, us_oznaka, us_naziv)
+  ORDER BY t.us_id;
+COMMIT;

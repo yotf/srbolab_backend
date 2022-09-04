@@ -5,20 +5,18 @@ CREATE TABLE hmlg.izmene
 (
   izm_id INTEGER NOT NULL,
   izm_tbl CHARACTER VARYING(20) NOT NULL,
-  izm_tbl_id INTEGER DEFAULT -1 NOT NULL,
   izm_oper CHARACTER VARYING(20) NOT NULL,
   izm_opis CHARACTER VARYING(100) NOT NULL,
-  izm_user INTEGER NOT NULL,
-  izm_vreme TIMESTAMP NOT NULL DEFAULT NOW()
+  izm_user CHARACTER VARYING(20) NOT NULL,
+  izm_vreme CHARACTER VARYING(20) NOT NULL DEFAULT TO_CHAR(CURRENT_TIMESTAMP,'YYYY-MM-DD hh:mm:ss')
 ) WITH (autovacuum_enabled=true);
 
 -- Comments on table hmlg.izmene
 COMMENT ON TABLE hmlg.izmene IS 'Izmene';
 COMMENT ON COLUMN hmlg.izmene.izm_id IS 'ID izmene';
 COMMENT ON COLUMN hmlg.izmene.izm_tbl IS 'Naziv izmenjene tabele';
-COMMENT ON COLUMN hmlg.izmene.izm_tbl_id IS 'ID u izmenjenoj tabeli';
 COMMENT ON COLUMN hmlg.izmene.izm_oper IS 'Operacija';
-COMMENT ON COLUMN hmlg.izmene.izm_user IS 'ID operatera';
+COMMENT ON COLUMN hmlg.izmene.izm_user IS 'Username';
 COMMENT ON COLUMN hmlg.izmene.izm_vreme IS 'Vreme';
 
 -- Primary key on table hmlg.izmene
@@ -47,10 +45,9 @@ BEGIN
     INTO vn_t_id
     FROM hmlg.izmene t;
 
-  INSERT INTO hmlg.izmene (izm_id, izm_tbl, izm_tbl_id, izm_oper, izm_opis, izm_user)
+  INSERT INTO hmlg.izmene (izm_id, izm_tbl, izm_oper, izm_opis, izm_user)
     SELECT vn_t_id AS izm_id,
            r.izm_tbl,
-           r.izm_tbl_id, 
            r.izm_oper, 
            r.izm_opis, 
            r.izm_user
@@ -78,36 +75,33 @@ ALTER FUNCTION hmlg.f_izmene_i(character varying) OWNER TO postgres;
 
 
 
--- FUNCTION hmlg.f_izmene_g(integer, character varying)
-DROP FUNCTION IF EXISTS hmlg.f_izmene_g(integer, character varying, character varying, character varying) CASCADE;
+-- FUNCTION hmlg.f_izmene_g(character varying)
+DROP FUNCTION IF EXISTS hmlg.f_izmene_g(character varying) CASCADE;
 CREATE OR REPLACE
-FUNCTION hmlg.f_izmene_g(
-                              pn_izm_id integer DEFAULT NULL::integer,
-                              pc_izm_tbl character varying DEFAULT NULL::character varying,
-                              pc_izm_oper character varying DEFAULT NULL::character varying,
-                              pc_izm_opis character varying DEFAULT NULL::character varying
-                             )
+FUNCTION hmlg.f_izmene_g(pc_rec character varying DEFAULT NULL::character varying)
   RETURNS SETOF hmlg.izmene AS
 $$
 DECLARE
 
-  r_rec RECORD;
+  r_rec record;
+  j_rec json := coalesce(pc_rec, '{}')::json;
+  vi_limit integer := coalesce(json_extract_path_text(j_rec, 'limit')::integer, 100);
+  vi_offset integer := coalesce(json_extract_path_text(j_rec, 'offset')::integer, 0);
+
 
 BEGIN
 
-  FOR r_rec IN SELECT t.izm_id,
-                      t.izm_tbl,
-                      t.izm_tbl_id, 
-                      t.izm_oper, 
-                      t.izm_opis, 
-                      t.izm_user,
-                      t.izm_vreme
+  FOR r_rec IN SELECT t.*
                    FROM hmlg.izmene t
-                   WHERE t.izm_id=COALESCE(pn_izm_id, t.izm_id)
-                     AND t.izm_tbl ~* COALESCE(pc_izm_tbl, '.+')
-                     AND t.izm_oper ~* COALESCE(pc_izm_oper, '.+')
-                     AND t.izm_opis ~* COALESCE(pc_izm_opis, '.+')
-                   ORDER BY t.izm_id LOOP
+                      CROSS JOIN (SELECT r.* from json_populate_record(null::hmlg.izmene, j_rec) r) j
+                   WHERE public.f_compc(t.izm_tbl, j.izm_tbl)
+                     AND public.f_compc(t.izm_oper, j.izm_oper)
+                     AND public.f_compc(t.izm_opis, j.izm_opis)
+                     AND public.f_compc(t.izm_user, j.izm_user)
+                     AND public.f_compc(t.izm_vreme, j.izm_vreme)
+                   ORDER BY t.izm_vreme::date DESC
+                   LIMIT vi_limit OFFSET vi_offset LOOP
+
     RETURN NEXT r_rec;
   END LOOP;
 
@@ -118,4 +112,8 @@ EXCEPTION
 END;
 $$
   LANGUAGE 'plpgsql';
-ALTER FUNCTION hmlg.f_izmene_g(integer, character varying, character varying, character varying) OWNER TO postgres; 
+ALTER FUNCTION hmlg.f_izmene_g(character varying) OWNER TO postgres; 
+
+
+-- INSERT ZA PREGLED
+insert into adm.adm_forma (afo_id, afo_naziv, afo_tabele, afo_izvestaji, aap_id) VALUES(440, "Pregled izmena", '{"title":"Izmene","source":"izmene","details":[],"actions":["v"]}', '{}', 30 );

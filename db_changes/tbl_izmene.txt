@@ -115,5 +115,10 @@ $$
 ALTER FUNCTION hmlg.f_izmene_g(character varying) OWNER TO postgres; 
 
 
--- INSERT ZA PREGLED
+-- INSERT ZA PREGLED IZMENA
 insert into adm.adm_forma (afo_id, afo_naziv, afo_tabele, afo_izvestaji, aap_id) VALUES(440, "Pregled izmena", '{"title":"Izmene","source":"izmene","details":[],"actions":["v"]}', '{}', 30 );
+
+-- UPDATE ZA REPORTE
+update adm.adm_forma SET afo_izvestaji = '[{"title":"Nalaz o neusaglašenosti","report":"neusaglasenost","parameters":{"pi_pr_id":"pr_id"}},{"title":"Zapisnik o ispitivanju vozila","report":"zapisnik","parameters":{"pi_pr_id":"pr_id","pc_vzpv_oznaka":"vzpv_oznaka"}}]' WHERE afo_id = 430;
+UPDATE 1
+update adm.adm_forma SET afo_izvestaji = '[{"title":"Potvrda o tehničkim karakteristikama vozila","report":"potvrda_b","parameters":{"pi_pr_id":"pr_id"}}]' WHERE afo_id = 415;      

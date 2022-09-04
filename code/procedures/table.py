@@ -39,7 +39,9 @@ class table:
   # _init
   #=======================================
   def _init(self):
-
+    print('TBL_INIT {}, {}'.format(self.name, self.db.tbls(self.name)))
+#    print(self.db.tbls)
+#    print(self.db.tbls(self.name))
     dxl_tbl = self.db.tbls(self.name)[0]
     self.schema = dxl_tbl['table_schema']
     self.comment = dxl_tbl['table_comment']
@@ -91,7 +93,7 @@ class table:
 
     """  Insert/Update data; Returns new table ID/number of records updated & message"""
 
-    print('>{} - {}<'.format(self.fnc.iu.fullname, utl.py2json(px_rec)))
+    print('INS/UPD {}, {}, {}'.format(self.fnc, px_rec, px_x))
 #    print('>{}<'.format(px_rec))
 #    print('>{}<'.format(px_x))
     conn = self.db.connget()
@@ -114,6 +116,7 @@ class table:
       crsr.close()
       self.db.connret(conn)
 
+    print('INS/UPD REZ: {}, {}'.format(vnl_res, vcl_res))
     return self.res2dct(vnl_res, vcl_res)
 
   #= METHOD ==============================
@@ -122,8 +125,11 @@ class table:
   def tbl_insert(self, px_rec, px_x=None):
 
     """  Insert data; Returns new tbl_id & message"""
+    rez = self.tbl_iu(px_rec, px_x)
+    if (rez["rcod"] and rez["rcod"] > 0) or rez["rcod"] == 0:
+      self.tbl_ins_change("insert", px_rec, rez["rcod"], px_x)
 
-    return self.tbl_iu(px_rec)
+    return rez
 
   #= METHOD ==============================
   # tbl_update
@@ -132,7 +138,7 @@ class table:
 
     """  Update data; Returns number of records updated & message"""
 
-    return self.tbl_iu(px_rec)
+    return self.tbl_iu(px_rec, px_x)
 
   #= METHOD ==============================
   # tbl_copy
@@ -141,7 +147,7 @@ class table:
 
     """  Insert data; Returns new tbl_id & message"""
 
-    return self.tbl_iu(px_rec)
+    return self.tbl_iu(px_rec, px_x)
 
   #= METHOD ==============================
   # tbl_delete
@@ -149,6 +155,7 @@ class table:
   def tbl_delete(self, px_rec, px_x=None):
 
     """  Delete data; Returns number of records deleted & message"""
+    print('DEL >')
 
     conn = self.db.connget()
     crsr = conn.cursor()
@@ -167,6 +174,47 @@ class table:
       self.db.connret(conn)
 
     return self.res2dct(vnl_res, vcl_res)
+
+
+#= METHOD ==============================
+  # insert trtack change line
+  #=======================================
+  def tbl_ins_change(self, oper, px_rec, rcode=-1, px_x=None):
+
+    """  Insert/Update data; Returns new table ID/number of records updated & message"""
+    userid = -1
+    if(px_x and ('kr_id' in px_x)):
+      userid = px_x['kr_id']
+
+    opis = ""
+    for key in px_rec.keys():
+      if 'naziv' in key:
+        opis += " "+px_rec[key]    
+    if len(opis)>100:
+      opis = opis[:99]
+
+    achange = { 'izm_tbl':self.name, 'izm_tbl_id':rcode, 'izm_oper':oper, 'izm_opis':opis.lstrip(), 'izm_user':userid}
+    print('TRACK INS {}, {}, {}, {}'.format(oper, px_rec, px_x, achange))
+#    print('>{}<'.format(px_rec))
+#    print('>{}<'.format(px_x))
+    conn = self.db.connget()
+    crsr = conn.cursor()
+    try:
+      crsr.callproc("hmlg.f_izmene_i", [utl.py2json(achange)])
+      #vnl_res = crsr.fetchone()[self.fnc.iu.name]
+      #if vnl_res is None:
+      #  vnl_res = 1
+      #if vnl_res:
+      #  vcl_res = self.db.connnotices(conn)
+      conn.commit()
+    #ignore exceptions
+    #except (psycopg2.errors.UniqueViolation, psycopg2.errors.CheckViolation, psycopg2.errors.NotNullViolation, psycopg2.errors.StringDataRightTruncation) as err:
+    #  vcl_res = err.pgerror.splitlines()[0].split(':', 1)[1].strip()
+    #except:
+    #  raise
+    finally:
+      crsr.close()
+      self.db.connret(conn)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # main code

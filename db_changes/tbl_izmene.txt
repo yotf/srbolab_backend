@@ -1,0 +1,121 @@
+/* Table hmlg.izmene */
+DROP TABLE IF EXISTS hmlg.izmene CASCADE;
+-- Table hmlg.izmene
+CREATE TABLE hmlg.izmene
+(
+  izm_id INTEGER NOT NULL,
+  izm_tbl CHARACTER VARYING(20) NOT NULL,
+  izm_tbl_id INTEGER DEFAULT -1 NOT NULL,
+  izm_oper CHARACTER VARYING(20) NOT NULL,
+  izm_opis CHARACTER VARYING(100) NOT NULL,
+  izm_user INTEGER NOT NULL,
+  izm_vreme TIMESTAMP NOT NULL DEFAULT NOW()
+) WITH (autovacuum_enabled=true);
+
+-- Comments on table hmlg.izmene
+COMMENT ON TABLE hmlg.izmene IS 'Izmene';
+COMMENT ON COLUMN hmlg.izmene.izm_id IS 'ID izmene';
+COMMENT ON COLUMN hmlg.izmene.izm_tbl IS 'Naziv izmenjene tabele';
+COMMENT ON COLUMN hmlg.izmene.izm_tbl_id IS 'ID u izmenjenoj tabeli';
+COMMENT ON COLUMN hmlg.izmene.izm_oper IS 'Operacija';
+COMMENT ON COLUMN hmlg.izmene.izm_user IS 'ID operatera';
+COMMENT ON COLUMN hmlg.izmene.izm_vreme IS 'Vreme';
+
+-- Primary key on table hmlg.izmene
+ALTER TABLE hmlg.izmene ADD CONSTRAINT izm_pk PRIMARY KEY (izm_id);
+
+COMMIT; 
+
+
+
+-- FUNCTION hmlg.f_izmene_i(character varying)
+DROP FUNCTION IF EXISTS hmlg.f_izmene_i(character varying) CASCADE;
+CREATE OR REPLACE
+FUNCTION hmlg.f_izmene_i(
+                        pc_rec character varying
+                       )
+  RETURNS integer AS
+$$
+DECLARE
+
+  vn_t_id INTEGER := 0;
+  vn_res_rc INTEGER := 0;
+
+BEGIN
+
+  SELECT COALESCE(MAX(t.izm_id), 0)+1 AS izm_id
+    INTO vn_t_id
+    FROM hmlg.izmene t;
+
+  INSERT INTO hmlg.izmene (izm_id, izm_tbl, izm_tbl_id, izm_oper, izm_opis, izm_user)
+    SELECT vn_t_id AS izm_id,
+           r.izm_tbl,
+           r.izm_tbl_id, 
+           r.izm_oper, 
+           r.izm_opis, 
+           r.izm_user
+      FROM JSON_POPULATE_RECORD(NULL::hmlg.izmene, pc_rec::JSON) r;
+  GET DIAGNOSTICS vn_res_rc=ROW_COUNT;
+  RAISE INFO '%', 'Red je uspešno dodat.';
+
+  RETURN vn_t_id;
+
+EXCEPTION
+
+  WHEN unique_violation THEN
+    IF regexp_match(sqlerrm, 'gr_pk', 'i') IS NOT NULL THEN
+      RAISE unique_violation USING MESSAGE = 'Takav ID emisije već postoji!';
+    ELSE
+      RAISE EXCEPTION 'Nemamo pojma šta se dešava % %!', sqlerrm, sqlstate;
+    END IF;
+  WHEN OTHERS THEN
+    RAISE;
+
+END;
+$$
+  LANGUAGE 'plpgsql';
+ALTER FUNCTION hmlg.f_izmene_i(character varying) OWNER TO postgres;
+
+
+
+-- FUNCTION hmlg.f_izmene_g(integer, character varying)
+DROP FUNCTION IF EXISTS hmlg.f_izmene_g(integer, character varying, character varying, character varying) CASCADE;
+CREATE OR REPLACE
+FUNCTION hmlg.f_izmene_g(
+                              pn_izm_id integer DEFAULT NULL::integer,
+                              pc_izm_tbl character varying DEFAULT NULL::character varying,
+                              pc_izm_oper character varying DEFAULT NULL::character varying,
+                              pc_izm_opis character varying DEFAULT NULL::character varying
+                             )
+  RETURNS SETOF hmlg.izmene AS
+$$
+DECLARE
+
+  r_rec RECORD;
+
+BEGIN
+
+  FOR r_rec IN SELECT t.izm_id,
+                      t.izm_tbl,
+                      t.izm_tbl_id, 
+                      t.izm_oper, 
+                      t.izm_opis, 
+                      t.izm_user,
+                      t.izm_vreme
+                   FROM hmlg.izmene t
+                   WHERE t.izm_id=COALESCE(pn_izm_id, t.izm_id)
+                     AND t.izm_tbl ~* COALESCE(pc_izm_tbl, '.+')
+                     AND t.izm_oper ~* COALESCE(pc_izm_oper, '.+')
+                     AND t.izm_opis ~* COALESCE(pc_izm_opis, '.+')
+                   ORDER BY t.izm_id LOOP
+    RETURN NEXT r_rec;
+  END LOOP;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    NULL;
+
+END;
+$$
+  LANGUAGE 'plpgsql';
+ALTER FUNCTION hmlg.f_izmene_g(integer, character varying, character varying, character varying) OWNER TO postgres; 

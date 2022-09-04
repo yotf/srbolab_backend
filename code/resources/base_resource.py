@@ -43,6 +43,7 @@ def generate_copy(table):
 
 class BaseResource(Resource):
   def __init__(self, table):
+    print('BR INIT')
     self.service = TableWrapper(table)
     self.item_name = table
     self.primary_keys = self.service.primarykey
@@ -67,6 +68,7 @@ class BaseResource(Resource):
         key: request.args.get(key)
         for key in request_args if request.args.get(key)
     }
+    print('RGET {}, {}'.format(query_params, jwt_identity))
     try:
       if len(query_params.items()):
         items = self.service.tbl_get(query_params, { "kr_id": jwt_identity })
@@ -142,6 +144,7 @@ class BaseResource(Resource):
         for col in self.service.cols
     ]
     item = parser.parse_args()
+    print('RPUT {}, {}'.format(item, jwt_identity))
     update_result = self.service.tbl_update(item, { "kr_id": jwt_identity })
     try:
       if (update_result["rcod"]
@@ -164,6 +167,7 @@ class BaseResource(Resource):
   def delete(self):
     jwt_identity = get_jwt_identity()
     item_id = { key: request.args.get(key) for key in self.primary_keys }
+    print('RDEL {}, {}'.format(item_id, jwt_identity))
     try:
       res = self.service.tbl_delete(item_id, { "kr_id": jwt_identity })
       if res["rcod"] >= 0:

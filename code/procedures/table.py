@@ -49,9 +49,13 @@ class table:
     self.cols, self.primarykey = self.db.tbl_cols(self.name)
     self.fnc = dd({})
     for vcl_act in ('d', 'g', 'iu', 'c'):  # d - DELETE; g - SELECT ... (get); iu - INSERT/UPDATE; c - COUNT(*)
+      prefix = 'f'
+      #TODO, HACK GT
+      if(self.name in ['motor', 'korisnik', 'vozilo_sert']):
+        prefix = 'f_v'
       self.fnc[vcl_act] = {
-                           'name': 'f_{}_{}'.format(self.name, vcl_act),
-                           'fullname': '{}.f_{}_{}'.format(self.schema, self.name, vcl_act),
+                           'name': '{}_{}_{}'.format(prefix, self.name, vcl_act),
+                           'fullname': '{}.{}_{}_{}'.format(self.schema, prefix, self.name, vcl_act),
                           }
 
   #= METHOD ==============================
@@ -75,6 +79,7 @@ class table:
     vxl_res = None
     try:
       print('!!! {} - {}'.format(self.fnc.g.fullname, utl.py2json(px_rec)))
+      #print('FUNC {}'.format(self.fnc))
       crsr.callproc(self.fnc.g.fullname, [utl.py2json(px_rec)])
       vxl_res = crsr.fetchall()
     except:
@@ -93,9 +98,15 @@ class table:
 
     """  Insert/Update data; Returns new table ID/number of records updated & message"""
 
-#    print('INS/UPD {}, {}, {}'.format(self.fnc, px_rec, px_x))
+    print('INS/UPD {}, {}, {}, {}'.format(self.fnc.iu.fullname, self.fnc, px_rec, px_x))
 #    print('>{}<'.format(px_rec))
 #    print('>{}<'.format(px_x))
+    #TODO, HACK GT, switch month and days, sick
+    if(self.fnc.iu.fullname == 'sys.f_v_kalendar_iu' or self.fnc.iu.fullname == 'sys.f_v_raspored_iu'):
+      if 'kn_datum' in px_rec:
+        oldDate = px_rec['kn_datum']
+        px_rec['kn_datum'] = oldDate[3:5]+"."+oldDate[0:2]+"."+oldDate[6:]
+    
     conn = self.db.connget()
     crsr = conn.cursor()
     vnl_res = -1
@@ -116,6 +127,7 @@ class table:
       crsr.close()
       self.db.connret(conn)
 
+    print('INS/UPD {}, {}'.format(vnl_res, vcl_res))
     return self.res2dct(vnl_res, vcl_res)
 
   #= METHOD ==============================

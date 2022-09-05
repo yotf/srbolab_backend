@@ -43,6 +43,7 @@ def generate_copy(table):
 
 class BaseResource(Resource):
   def __init__(self, table):
+    print('BR INIT {}'.format(table))
     self.service = TableWrapper(table)
     self.item_name = table
     self.primary_keys = self.service.primarykey
@@ -67,6 +68,7 @@ class BaseResource(Resource):
         key: request.args.get(key)
         for key in request_args if request.args.get(key)
     }
+    print('GET {}'.format(query_params))
     try:
       if len(query_params.items()):
         items = self.service.tbl_get(query_params, { "kr_id": jwt_identity })
@@ -101,7 +103,8 @@ class BaseResource(Resource):
     ]
 
     item = parser.parse_args()
-    #print(f'brajan 3 {item}')
+    # print(item)
+    print('POST {}'.format(item))
 
     try:
       new_item = self.service.tbl_insert(item, { "kr_id": jwt_identity })
@@ -111,10 +114,11 @@ class BaseResource(Resource):
             item.get(key, None) if item.get(key, None) else new_item["rcod"]
             for key in self.primary_keys
         }
-        new_item = self.service.tbl_get(get_args, { "kr_id": jwt_identity })[0]
-        if self.item_name == "v_korisnik" and new_item["kr_password"]:
-          new_item["kr_password"] = ""
-        #print(f'brajan 4 {new_item}')
+        new_items = self.service.tbl_get(get_args, { "kr_id": jwt_identity })
+        if new_items and len(new_items)>0:          
+          new_item = new_items[0]
+          if self.item_name == "v_korisnik" and new_item["kr_password"]:
+            new_item["kr_password"] = ""
 
         return item, 200
       else:
@@ -141,6 +145,7 @@ class BaseResource(Resource):
         for col in self.service.cols
     ]
     item = parser.parse_args()
+    print('PUT {}'.format(item))
     update_result = self.service.tbl_update(item, { "kr_id": jwt_identity })
     try:
       if (update_result["rcod"]
@@ -163,6 +168,7 @@ class BaseResource(Resource):
   def delete(self):
     jwt_identity = get_jwt_identity()
     item_id = { key: request.args.get(key) for key in self.primary_keys }
+    print('DEL {}'.format(item_id))
     try:
       res = self.service.tbl_delete(item_id, { "kr_id": jwt_identity })
       if res["rcod"] >= 0:
@@ -205,7 +211,7 @@ class Copy(Resource):
     parser = reqparse.RequestParser()
     [parser.add_argument(arg) for arg in request_args]
     item = parser.parse_args()
-
+    print('Copy {}'.format(item))
     try:
       db_response = self.service.tbl_copy(item, { "kr_id": jwt_identity })
       new_item = self.service.tbl_get(

@@ -119,7 +119,9 @@ class BaseResource(Resource):
           new_item = new_items[0]
           if self.item_name == "v_korisnik" and new_item["kr_password"]:
             new_item["kr_password"] = ""
-
+        #INS/UPD into sert after predmet insert
+        if(self.service.name == "v_predmet"):
+          self.insert_sert(item, { "kr_id": jwt_identity })
         return item, 200
       else:
         return new_item, 400
@@ -127,6 +129,45 @@ class BaseResource(Resource):
       traceback.print_exc()
       print(e.__class__, e)
       return { 'message': f"failed to create {self.item_name}"}, 500
+
+  def insert_sert(self, item, px_x):
+    sert_table = TableWrapper("v_vozilo_sert")
+    sert_item = dict(item)
+    sert_item = {
+      "vzs_id": item.get("vzs_id"),
+      "vzs_oznaka":item.get("vzs_oznaka"),
+      "vzs_godina": item.get("vz_godina"),
+      "vzs_mesta_sedenje": item.get("vz_mesta_sedenje"),
+      "vzs_mesta_stajanje": item.get("vz_mesta_stajanje"),
+      "vzs_masa": item.get("vz_masa"),
+      "vzs_nosivost": item.get("vz_nosivost"),
+      "vzs_masa_max": item.get("vz_masa_max"),
+      "vzs_duzina": item.get("vz_duzina"),
+      "vzs_sirina": item.get("vz_sirina"),
+      "vzs_visina": item.get("vz_visina"),
+      "vzs_kuka_sert": item.get("vz_kuka_sert"),
+      "vzs_max_brzina": item.get("vz_max_brzina"),
+      "vzs_kw_kg": item.get("vz_kw_kg"),
+      "vzs_co2": item.get("vz_co2"),
+      "vzs_sert_hmlg_tip": item.get("vz_sert_hmlg_tip"),
+      "vzs_sert_emisija": item.get("vz_sert_emisija"),
+      "vzs_sert_buka": item.get("vz_sert_buka"),
+      "mr_id": item.get("mr_id"),
+      "md_id": item.get("md_id"),
+      "vzpv_id": item.get("vzpv_id"),
+      "vzkl_id": item.get("vzkl_id"),
+      "em_id": item.get("em_id"),
+      "gr_id": item.get("gr_id"),
+      "mdt_id": item.get("mdt_id"),
+      "mdvr_id": item.get("mdvr_id"),
+      "mdvz_id": item.get("mdvz_id"),
+      "mt_id": item.get("mt_id"),
+      "kr_id": item.get("kr_id")
+    }
+    print('INS SERT FROM PREDMET {}'.format(sert_item))
+    rez = sert_table.tbl_insert(sert_item, px_x)
+    #TODO this rez iz ignored no ERROR HANDLING
+    print('INS SERT FROM PREDMET REZ = {}'.format(rez))
 
   @jwt_required
   def put(self):

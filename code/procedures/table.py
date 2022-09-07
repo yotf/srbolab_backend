@@ -226,6 +226,11 @@ class table:
       if 'naziv' in key:
         if px_rec[key]:
           opis += " "+px_rec[key]
+    if opis == "":
+      for key in px_rec.keys():
+        if 'oznaka' in key:
+          if px_rec[key]:
+            opis += " "+px_rec[key]
     if len(opis)>100:
       opis = opis[:99]
 

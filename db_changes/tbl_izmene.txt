@@ -1,0 +1,673 @@
+/* Table hmlg.izmene */
+DROP TABLE IF EXISTS hmlg.izmene CASCADE;
+-- Table hmlg.izmene
+CREATE TABLE hmlg.izmene
+(
+  izm_id INTEGER NOT NULL,
+  izm_tbl CHARACTER VARYING(20) NOT NULL,
+  izm_oper CHARACTER VARYING(20) NOT NULL,
+  izm_opis CHARACTER VARYING(100) NOT NULL,
+  izm_user CHARACTER VARYING(20) NOT NULL,
+  izm_vreme CHARACTER VARYING(20) NOT NULL DEFAULT TO_CHAR(CURRENT_TIMESTAMP,'YYYY-MM-DD hh:mm:ss')
+) WITH (autovacuum_enabled=true);
+
+-- Comments on table hmlg.izmene
+COMMENT ON TABLE hmlg.izmene IS 'Izmene';
+COMMENT ON COLUMN hmlg.izmene.izm_id IS 'ID izmene';
+COMMENT ON COLUMN hmlg.izmene.izm_tbl IS 'Naziv izmenjene tabele';
+COMMENT ON COLUMN hmlg.izmene.izm_oper IS 'Operacija';
+COMMENT ON COLUMN hmlg.izmene.izm_user IS 'Username';
+COMMENT ON COLUMN hmlg.izmene.izm_vreme IS 'Vreme';
+
+-- Primary key on table hmlg.izmene
+ALTER TABLE hmlg.izmene ADD CONSTRAINT izm_pk PRIMARY KEY (izm_id);
+
+COMMIT; 
+
+
+
+-- FUNCTION hmlg.f_izmene_i(character varying)
+DROP FUNCTION IF EXISTS hmlg.f_izmene_i(character varying) CASCADE;
+CREATE OR REPLACE
+FUNCTION hmlg.f_izmene_i(
+                        pc_rec character varying
+                       )
+  RETURNS integer AS
+$$
+DECLARE
+
+  vn_t_id INTEGER := 0;
+  vn_res_rc INTEGER := 0;
+
+BEGIN
+
+  SELECT COALESCE(MAX(t.izm_id), 0)+1 AS izm_id
+    INTO vn_t_id
+    FROM hmlg.izmene t;
+
+  INSERT INTO hmlg.izmene (izm_id, izm_tbl, izm_oper, izm_opis, izm_user)
+    SELECT vn_t_id AS izm_id,
+           r.izm_tbl,
+           r.izm_oper, 
+           r.izm_opis, 
+           r.izm_user
+      FROM JSON_POPULATE_RECORD(NULL::hmlg.izmene, pc_rec::JSON) r;
+  GET DIAGNOSTICS vn_res_rc=ROW_COUNT;
+  RAISE INFO '%', 'Red je uspešno dodat.';
+
+  RETURN vn_t_id;
+
+EXCEPTION
+
+  WHEN unique_violation THEN
+    IF regexp_match(sqlerrm, 'gr_pk', 'i') IS NOT NULL THEN
+      RAISE unique_violation USING MESSAGE = 'Takav ID emisije već postoji!';
+    ELSE
+      RAISE EXCEPTION 'Nemamo pojma šta se dešava % %!', sqlerrm, sqlstate;
+    END IF;
+  WHEN OTHERS THEN
+    RAISE;
+
+END;
+$$
+  LANGUAGE 'plpgsql';
+ALTER FUNCTION hmlg.f_izmene_i(character varying) OWNER TO postgres;
+
+
+
+-- FUNCTION hmlg.f_izmene_g(character varying)
+DROP FUNCTION IF EXISTS hmlg.f_izmene_g(character varying) CASCADE;
+CREATE OR REPLACE
+FUNCTION hmlg.f_izmene_g(pc_rec character varying DEFAULT NULL::character varying)
+  RETURNS SETOF hmlg.izmene AS
+$$
+DECLARE
+
+  r_rec record;
+  j_rec json := coalesce(pc_rec, '{}')::json;
+  vi_limit integer := coalesce(json_extract_path_text(j_rec, 'limit')::integer, 100);
+  vi_offset integer := coalesce(json_extract_path_text(j_rec, 'offset')::integer, 0);
+
+
+BEGIN
+
+  FOR r_rec IN SELECT t.*
+                   FROM hmlg.izmene t
+                      CROSS JOIN (SELECT r.* from json_populate_record(null::hmlg.izmene, j_rec) r) j
+                   WHERE public.f_compc(t.izm_tbl, j.izm_tbl)
+                     AND public.f_compc(t.izm_oper, j.izm_oper)
+                     AND public.f_compc(t.izm_opis, j.izm_opis)
+                     AND public.f_compc(t.izm_user, j.izm_user)
+                     AND public.f_compc(t.izm_vreme, j.izm_vreme)
+                   ORDER BY t.izm_vreme::date DESC
+                   LIMIT vi_limit OFFSET vi_offset LOOP
+
+    RETURN NEXT r_rec;
+  END LOOP;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    NULL;
+
+END;
+$$
+  LANGUAGE 'plpgsql';
+ALTER FUNCTION hmlg.f_izmene_g(character varying) OWNER TO postgres; 
+
+
+-- INSERT ZA PREGLED IZMENA
+insert into adm.adm_forma (afo_id, afo_naziv, afo_tabele, afo_izvestaji, aap_id) VALUES(440, "Pregled izmena", '{"title":"Izmene","source":"izmene","details":[],"actions":["v"]}', '{}', 30 );
+
+-- UPDATE ZA REPORTE
+update adm.adm_forma SET afo_izvestaji = '[{"title":"Nalaz o neusaglašenosti","report":"neusaglasenost","parameters":{"pi_pr_id":"pr_id"}},{"title":"Zapisnik o ispitivanju vozila","report":"zapisnik","parameters":{"pi_pr_id":"pr_id","pc_vzpv_oznaka":"vzpv_oznaka"}}]' WHERE afo_id = 430;
+UPDATE 1
+update adm.adm_forma SET afo_izvestaji = '[{"title":"Potvrda o tehničkim karakteristikama vozila","report":"potvrda_b","parameters":{"pi_pr_id":"pr_id"}}]' WHERE afo_id = 415;      
+
+
+-- THIS WILL never work because it not return 1(OK) on insert
+DROP FUNCTION IF EXISTS sys.f_v_raspored_iu(character varying) CASCADE;
+CREATE OR REPLACE FUNCTION sys.f_v_raspored_iu(pc_rec character varying)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+
+  j_rec json := pc_rec::json;
+  r_new sys.v_raspored;
+  r_old sys.v_raspored;
+
+  vi_row_count integer := 0;
+  vb_ins boolean;
+  vb_ok2updt boolean;
+
+BEGIN
+
+  SELECT j.*
+    INTO r_new
+    FROM json_populate_record(null::sys.v_raspored, j_rec) j;
+
+  SELECT COUNT(*)=0
+    INTO vb_ins
+    FROM sys.raspored t
+    WHERE t.kn_datum=r_new.kn_datum::date
+      AND t.kr_id=r_new.kr_id;
+
+  IF vb_ins THEN
+    INSERT INTO sys.raspored (kn_datum, kr_id, lk_id, rs_napomena)
+      VALUES (r_new.kn_datum::date, r_new.kr_id, r_new.lk_id, r_new.rs_napomena);
+    vi_row_count := 1;
+  ELSE
+    SELECT t.kn_datum,
+           t.lk_id,
+           t.lk_naziv,
+           t.kr_id,
+           t.kr_prezime,
+           t.kr_ime,
+           t.rs_napomena
+      INTO r_old
+      FROM sys.v_raspored t
+      WHERE t.kn_datum::date=r_new.kn_datum::date
+        AND t.kr_id=r_new.kr_id;
+
+    SELECT COUNT(*)=2 AS ok2updt
+      INTO vb_ok2updt
+      FROM (
+            SELECT r_old AS r
+              UNION
+            SELECT r_new AS r
+           ) t;
+
+    IF vb_ok2updt THEN
+      UPDATE sys.raspored t
+        SET lk_id=r_new.lk_id,
+            rs_napomena=r_new.rs_napomena
+        WHERE t.kn_datum=r_new.kn_datum::date
+          AND t.kr_id=r_new.kr_id;
+      GET DIAGNOSTICS vi_row_count=ROW_COUNT;
+    END IF;
+  END IF;
+
+  IF vi_row_count>0 THEN
+    RAISE INFO 'Red je uspešno %.', CASE WHEN vb_ins THEN 'dodat' ELSE 'izmenjen' END;
+  END IF;
+
+  RETURN vi_row_count;
+
+EXCEPTION
+
+  WHEN unique_violation THEN
+    IF regexp_match(sqlerrm, 'rs_pk', 'i') IS NOT NULL THEN
+      RAISE unique_violation USING MESSAGE = 'Taj korisnik je već raspoređen!';
+    ELSE
+      RAISE EXCEPTION 'Nemamo pojma šta se dešava % %!', sqlerrm, sqlstate;
+    END IF;
+  WHEN OTHERS THEN
+    RAISE;
+
+END;
+$function$
+;
+ALTER FUNCTION sys.f_v_raspored_iu(character varying) OWNER TO postgres; 
+
+
+-- THIS FUNCTION HAVE WRONG COLLUMNS ?!?
+DROP FUNCTION IF EXISTS hmlg.f_v_vzs_vzk_d(character varying) CASCADE;
+CREATE OR REPLACE FUNCTION hmlg.f_v_vzs_vzk_d(pc_rec character varying DEFAULT NULL::character varying)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+
+  vn_res_rc INTEGER := 0;
+  j_rec json := coalesce(pc_rec, '{}')::json;
+
+BEGIN
+
+  DELETE
+    FROM hmlg.vzs_vzk t
+    WHERE t.vzs_id=json_extract_path_text(j_rec, 'vzs_id')::integer
+      AND t.vzk_id=json_extract_path_text(j_rec, 'vzk_id')::integer;
+  GET DIAGNOSTICS vn_res_rc=ROW_COUNT;
+  IF vn_res_rc>0 THEN
+    RAISE INFO '%', 'Red je uspešno izbrisan.';
+  END IF;
+
+  RETURN vn_res_rc;
+
+EXCEPTION
+  WHEN foreign_key_violation THEN
+    RAISE foreign_key_violation USING MESSAGE = 'Ta dodatna oznaka i vrsta vozila se koriste, ne mogu se izbrisati!';
+  WHEN OTHERS THEN
+    RAISE;
+
+END;
+$function$
+;
+ALTER FUNCTION hmlg.f_v_vzs_vzk_d(character varying) OWNER TO postgres; 
+
+-- add fakturisi
+ ALTER TABLE predmet ADD COLUMN pr_fakturisi CHARACTER(1) DEFAULT 'N';
+
+---
+ALTER VIEW hmlg.v_predmet RENAME TO v_predmet_old;
+
+CREATE VIEW hmlg.v_predmet AS
+ WITH pus AS (
+         SELECT t.pr_id,
+            string_agg(COALESCE(us.us_oznaka, ''::character varying)::text, '/'::text) AS pus_oznaka
+           FROM predmet_usluga t
+             JOIN usluga us ON us.us_id = t.us_id
+          GROUP BY t.pr_id
+        ), pvd AS (
+         SELECT t.pr_id,
+            string_agg(COALESCE(vzd.vzd_oznaka, ''::character varying)::text, '/'::text) AS pvd_oznaka
+           FROM pr_vzd t
+             JOIN vozilo_dokument vzd ON vzd.vzd_id = t.vzd_id
+          GROUP BY t.pr_id
+        )
+ SELECT pr.pr_id,
+    pr.pr_broj,
+    pr.kl_id,
+    kl.kl_naziv,
+    kl.kl_adresa,
+    kl.kl_telefon,
+    kl.kl_firma,
+    to_char(pr.pr_datum::timestamp with time zone, 'dd.mm.yyyy'::text) AS pr_datum,
+    to_char(pr.pr_datum_zak::timestamp with time zone, 'dd.mm.yyyy'::text) AS pr_datum_zak,
+    pus.pus_oznaka,
+    pvd.pvd_oznaka,
+    pr.prs_id,
+    prs.prs_oznaka,
+    prs.prs_naziv,
+    pr.pr_napomena,
+    pr.pr_primedbe,
+    pr.pr_zakljucak,
+    pr.kr_id AS kr_id_p,
+    kr.kr_username AS kr_username_p,
+    pr.vz_id,
+    vz.vz_reg,
+    vz.vz_sasija,
+    vz.vz_sasija_10,
+    vz.mr_id,
+    vz.mr_naziv,
+    vz.md_id,
+    vz.md_naziv_k,
+    vz.vzpv_id,
+    vz.vzpv_oznaka,
+    vz.vzpv_naziv,
+    vz.vzk_oznaka,
+    vz.vzdo_oznaka,
+    vz.vzkl_id,
+    vz.vzkl_oznaka,
+    vz.vzkl_naziv,
+    vz.mdt_id,
+    vz.mdt_oznaka,
+    vz.mdvr_id,
+    vz.mdvr_oznaka,
+    vz.mdvz_id,
+    vz.mdvz_oznaka,
+    vz.mt_id,
+    vz.vz_motor,
+    vz.mto_id,
+    vz.mto_oznaka,
+    vz.mt_cm3,
+    vz.mt_kw,
+    vz.mtt_id,
+    vz.gr_id,
+    vz.gr_naziv,
+    vz.em_id,
+    vz.em_naziv,
+    vz.vz_co2,
+    vz.vz_os_broj,
+    vz.vz_os_tockova,
+    vz.vz_os_tockovi,
+    vz.vz_os_pneumatici,
+    vz.vz_os_nosivost,
+    vz.vz_elektro,
+    vz.vz_godina,
+    vz.vz_mesta_sedenje,
+    vz.vz_mesta_stajanje,
+    vz.vz_masa,
+    vz.vz_nosivost,
+    vz.vz_masa_max,
+    vz.vz_duzina,
+    vz.vz_sirina,
+    vz.vz_visina,
+    vz.vz_kuka,
+    vz.vz_kuka_sert,
+    vz.vz_km,
+    vz.vz_max_brzina,
+    vz.vz_kw_kg,
+    vz.vz_sert_hmlg_tip,
+    vz.vz_sert_emisija,
+    vz.vz_sert_buka,
+    vz.kr_id,
+    vz.kr_username,
+    vz.vzs_id,
+    vz.vzs_oznaka,
+    vz.vz_osovine,
+    pr.pr_fakturisi
+
+   FROM predmet pr
+     JOIN predmet_status prs ON prs.prs_id = pr.prs_id
+     JOIN v_vozilo vz ON vz.vz_id = pr.vz_id
+     JOIN klijent kl ON kl.kl_id = pr.kl_id
+     JOIN korisnik kr ON kr.kr_id = pr.kr_id
+     LEFT JOIN pus ON pus.pr_id = pr.pr_id
+     LEFT JOIN pvd ON pvd.pr_id = pr.pr_id;
+
+--
+
+CREATE OR REPLACE FUNCTION hmlg.f_v_predmet_iu(pc_rec character varying)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+
+  j_rec json := pc_rec::json;
+  r_t hmlg.v_predmet;
+--   r_new hmlg.predmet;
+--   r_old hmlg.predmet;
+
+  vi_id integer := 1;
+  vc_rec varchar;
+
+  r_c record;
+  vb_ins boolean;
+  vi_row_count integer := 0;
+  vi_row_count1 integer := 0;
+  vb_ok2updt boolean;
+
+BEGIN
+
+  SELECT j.*
+    INTO r_t
+    FROM json_populate_record(null::hmlg.v_predmet, j_rec) j;
+
+-- hmlg.klijent
+  IF r_t.kl_naziv IS NOT NULL THEN
+    SELECT row_to_json(t)::varchar
+      INTO vc_rec
+      FROM (
+            SELECT j.*
+              FROM json_populate_record(null::hmlg.klijent, j_rec) j
+           ) t;
+    IF r_t.kl_id IS NULL THEN
+      r_t.kl_id := hmlg.f_klijent_iu(vc_rec);
+      j_rec := jsonb_set(j_rec::jsonb, '{kl_id}', (r_t.kl_id::varchar)::jsonb)::json;
+    ELSE
+      vi_row_count := hmlg.f_klijent_iu(vc_rec);
+    END IF;
+  END IF;
+
+-- hmlg.vozilo
+  SELECT row_to_json(t)::varchar
+    INTO vc_rec
+    FROM (
+          SELECT j.*
+            FROM json_populate_record(null::hmlg.v_vozilo, j_rec) j
+         ) t;
+  IF r_t.vz_id IS NULL THEN
+    r_t.vz_id := hmlg.f_v_vozilo_iu(vc_rec);
+    j_rec := jsonb_set(j_rec::jsonb, '{vz_id}', (r_t.vz_id::varchar)::jsonb)::json;
+  ELSE
+    vi_row_count := hmlg.f_v_vozilo_iu(vc_rec);
+  END IF;
+
+  vb_ins := r_t.pr_id IS NULL;
+
+  IF vb_ins THEN
+    SELECT COALESCE(MAX(t.pr_id), 0)+1
+      INTO r_t.pr_id
+      FROM hmlg.predmet t;
+
+--    r_t.pr_id := vi_id;
+    r_t.pr_broj := to_char(r_t.pr_id, 'fm000000');
+    j_rec := jsonb_set(j_rec::jsonb, '{pr_id}', (r_t.pr_id::varchar)::jsonb)::json;
+    j_rec := jsonb_set(j_rec::jsonb, '{pr_broj}', ('"'||r_t.pr_broj::varchar||'"')::jsonb)::json;
+    INSERT INTO hmlg.predmet (pr_id, pr_broj, pr_datum, pr_datum_zak, pr_napomena, pr_fakturisi, pr_primedbe, pr_zakljucak, prs_id, kl_id, vz_id, kr_id)
+      VALUES (r_t.pr_id, to_char(r_t.pr_id, 'fm000000'), coalesce(r_t.pr_datum::date, current_date), r_t.pr_datum_zak::date, r_t.pr_napomena, r_t.pr_fakturisi, r_t.pr_primedbe, r_t.pr_zakljucak, coalesce(r_t.prs_id, 10), r_t.kl_id, r_t.vz_id, r_t.kr_id);
+  ELSE
+
+--     SELECT j.*
+--       INTO r_new
+--       FROM json_populate_record(null::hmlg.predmet, j_rec) j;
+
+--     SELECT t.*
+--       INTO r_old
+--       FROM hmlg.predmet t
+--       WHERE t.pr_id=r_new.pr_id;
+
+    SELECT COUNT(*)=2 AS ok2updt
+      INTO vb_ok2updt
+      FROM (
+            SELECT t.*
+              FROM hmlg.predmet t
+              WHERE t.pr_id=r_t.pr_id
+            UNION
+            SELECT j.*
+              FROM json_populate_record(null::hmlg.predmet, j_rec) j
+           ) t;
+
+    IF vb_ok2updt THEN
+      UPDATE hmlg.predmet t
+        SET pr_broj=r_t.pr_broj,
+             pr_datum=r_t.pr_datum::date,
+             pr_datum_zak=r_t.pr_datum_zak::date,
+             pr_napomena=r_t.pr_napomena,
+             pr_fakturisi=r_t.pr_fakturisi,
+             pr_primedbe=r_t.pr_primedbe,
+             pr_zakljucak=r_t.pr_zakljucak,
+             prs_id=r_t.prs_id,
+             kl_id=r_t.kl_id,
+             vz_id=r_t.vz_id,
+             kr_id=r_t.kr_id
+        WHERE t.pr_id=r_t.pr_id;
+      GET DIAGNOSTICS vi_id=ROW_COUNT;
+    END IF;
+  END IF;
+
+  -- hmlg.predmet_usluga
+  FOR r_c IN WITH
+               s1 AS
+                (
+                 SELECT r_t.pr_id,
+                        us.us_id
+                   FROM regexp_split_to_table(r_t.pus_oznaka, '/', 'i') AS s
+                     JOIN sys.usluga us ON (us.us_oznaka=s.s)
+                ),
+               s2 AS
+                (
+                 SELECT s.pr_id,
+                        s.us_id
+                   FROM hmlg.predmet_usluga s
+                   WHERE s.pr_id=r_t.pr_id
+                )
+             SELECT s1.pr_id,
+                    s1.us_id,
+                    s2.pr_id AS pr_id1,
+                    s2.us_id AS us_id1
+              FROM s1
+                FULL JOIN s2 ON (s2.pr_id=s1.pr_id AND s2.us_id=s1.us_id) LOOP
+    IF r_c.pr_id1 IS NULL THEN
+      SELECT row_to_json(t)::varchar
+        INTO vc_rec
+        FROM (
+              SELECT r_c.pr_id,
+                     r_c.us_id
+             ) t;
+      vi_row_count1 := hmlg.f_v_predmet_usluga_iu(vc_rec);
+    ELSE
+      IF r_c.pr_id IS NULL THEN
+        SELECT row_to_json(t)::varchar
+          INTO vc_rec
+          FROM (
+                SELECT r_c.pr_id1 AS pr_id,
+                       r_c.us_id1 AS us_id
+               ) t;
+        vi_row_count1 := hmlg.f_v_predmet_usluga_d(vc_rec);
+      END IF;
+    END IF;
+  END LOOP;
+
+  -- hmlg.pr_vzd
+  FOR r_c IN WITH
+               s1 AS
+                (
+                 SELECT r_t.pr_id,
+                        vzd.vzd_id
+                   FROM regexp_split_to_table(r_t.pvd_oznaka, '/', 'i') AS s
+                     JOIN sif.vozilo_dokument vzd ON (vzd.vzd_oznaka=s.s)
+                ),
+               s2 AS
+                (
+                 SELECT s.pr_id,
+                        s.vzd_id
+                   FROM hmlg.pr_vzd s
+                   WHERE s.pr_id=r_t.pr_id
+                )
+             SELECT s1.pr_id,
+                    s1.vzd_id,
+                    s2.pr_id AS pr_id1,
+                    s2.vzd_id AS vzd_id1
+              FROM s1
+                FULL JOIN s2 ON (s2.pr_id=s1.pr_id AND s2.vzd_id=s1.vzd_id) LOOP
+    IF r_c.pr_id1 IS NULL THEN
+      SELECT row_to_json(t)::varchar
+        INTO vc_rec
+        FROM (
+              SELECT r_c.pr_id,
+                     r_c.vzd_id
+             ) t;
+      vi_row_count1 := hmlg.f_v_pr_vzd_iu(vc_rec);
+    ELSE
+      IF r_c.pr_id IS NULL THEN
+        SELECT row_to_json(t)::varchar
+          INTO vc_rec
+          FROM (
+                SELECT r_c.pr_id1 AS pr_id,
+                       r_c.vzd_id1 AS vzd_id
+               ) t;
+        vi_row_count1 := hmlg.f_v_pr_vzd_d(vc_rec);
+      END IF;
+    END IF;
+  END LOOP;
+
+  IF vi_id>0 THEN
+    RAISE INFO 'Red je uspešno %.', CASE WHEN vb_ins THEN 'dodat' ELSE 'izmenjen' END;
+  END IF;
+  RETURN vi_id;
+
+EXCEPTION
+
+  WHEN unique_violation THEN
+    IF regexp_match(sqlerrm, 'pr_pk', 'i') IS NOT NULL THEN
+      RAISE unique_violation USING MESSAGE = 'Takav ID predmeta već postoji!';
+    ELSEIF regexp_match(sqlerrm, 'pr_broj', 'i') IS NOT NULL THEN
+      RAISE unique_violation USING MESSAGE = 'Takav broj predmeta već postoji!';
+    ELSE
+      RAISE EXCEPTION 'Nemamo pojma šta se dešava % %!', sqlerrm, sqlstate;
+    END IF;
+  WHEN not_null_violation THEN
+    IF regexp_match(sqlerrm, 'pr_id', 'i') IS NOT NULL THEN
+      RAISE not_null_violation USING MESSAGE = 'ID predmeta ne može bit prazan!';
+    ELSEIF regexp_match(sqlerrm, 'pr_broj', 'i') IS NOT NULL THEN
+      RAISE not_null_violation USING MESSAGE = 'Broj predmeta ne može bit prazan!';
+    ELSEIF regexp_match(sqlerrm, 'prs_id', 'i') IS NOT NULL THEN
+      RAISE not_null_violation USING MESSAGE = 'Status predmeta ne može bit prazan!';
+    ELSEIF regexp_match(sqlerrm, 'kl_id', 'i') IS NOT NULL THEN
+      RAISE not_null_violation USING MESSAGE = 'ID klijenta ne može bit prazan!';
+    ELSEIF regexp_match(sqlerrm, 'vz_id', 'i') IS NOT NULL THEN
+      RAISE not_null_violation USING MESSAGE = 'ID vozila ne može bit prazan!';
+    ELSE
+      RAISE EXCEPTION 'Nemamo pojma šta se dešava % %!', sqlerrm, sqlstate;
+    END IF;
+  WHEN OTHERS THEN
+    RAISE;
+
+END;
+$function$
+;
+
+---
+ DROP FUNCTION f_v_predmet_g(character varying);
+
+CREATE OR REPLACE FUNCTION hmlg.f_v_predmet_g(pc_rec character varying DEFAULT NULL::character varying)
+ RETURNS SETOF v_predmet
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+
+  r_rec record;
+  j_rec json := coalesce(pc_rec, '{}')::json;
+  vi_limit integer := coalesce(json_extract_path_text(j_rec, 'limit')::integer, 100);
+  vi_offset integer := coalesce(json_extract_path_text(j_rec, 'offset')::integer, 0);
+
+BEGIN
+
+  FOR r_rec IN SELECT v.*
+                 FROM hmlg.v_predmet v
+                   CROSS JOIN (SELECT r.* from json_populate_record(null::hmlg.v_predmet, j_rec) r) j
+                   CROSS JOIN (SELECT r1.* FROM json_to_record(j_rec) AS r1 (pr_datum_to varchar, pr_datum_zak_to varchar)) j1
+                 WHERE v.pr_id=coalesce(j.pr_id::integer, v.pr_id)
+                   AND public.f_compc(v.vzs_oznaka, j.vzs_oznaka)
+                   AND public.f_compc(v.pr_broj, j.pr_broj)
+                   AND public.f_compd(v.pr_datum, j.pr_datum)
+                   AND public.f_compd(v.pr_datum_zak, j.pr_datum_zak)
+                   AND public.f_compc(v.pus_oznaka, j.pus_oznaka)
+                   AND public.f_compc(v.pvd_oznaka, j.pvd_oznaka)
+                   AND public.f_compc(v.prs_oznaka, j.prs_oznaka)
+                   AND public.f_compc(v.prs_naziv, j.prs_naziv)
+                   AND public.f_compc(v.kl_naziv, j.kl_naziv)
+                   AND public.f_compc(v.kl_adresa, j.kl_adresa)
+                   AND coalesce(v.kl_firma, '*') ILIKE coalesce(j.kl_firma, v.kl_firma)
+                   AND public.f_compc(v.pr_napomena, j.pr_napomena)
+                   AND public.f_compc(v.pr_primedbe, j.pr_primedbe)
+                   AND public.f_compc(v.pr_zakljucak, j.pr_zakljucak)
+                   AND public.f_compc(v.vz_reg, j.vz_reg)
+                   AND public.f_compc(v.vz_sasija, j.vz_sasija)
+                   AND public.f_compc(v.vz_sasija_10, j.vz_sasija_10)
+                   AND public.f_compc(v.vz_motor, j.vz_motor)
+                   AND public.f_compc(v.mr_naziv, j.mr_naziv)
+                   AND public.f_compc(v.md_naziv_k, j.md_naziv_k)
+                   AND public.f_compc(v.vzpv_oznaka, j.vzpv_oznaka)
+                   AND public.f_compc(v.vzpv_naziv, j.vzpv_naziv)
+                   AND public.f_compc(v.vzk_oznaka, j.vzk_oznaka)
+                   AND public.f_compc(v.vzdo_oznaka, j.vzdo_oznaka)
+                   AND public.f_compc(v.vzkl_oznaka, j.vzkl_oznaka)
+                   AND public.f_compc(v.vzkl_naziv, j.vzkl_naziv)
+                   AND public.f_compc(v.mdt_oznaka, j.mdt_oznaka)
+                   AND public.f_compc(v.mdvr_oznaka, j.mdvr_oznaka)
+                   AND public.f_compc(v.mdvz_oznaka, j.mdvz_oznaka)
+                   AND public.f_compc(v.mto_oznaka, j.mto_oznaka)
+                   AND public.f_compn(v.mt_cm3::numeric, j.mt_cm3::numeric)
+                   AND public.f_compn(v.mt_kw::numeric, j.mt_kw::numeric)
+                   AND public.f_compc(v.gr_naziv, j.gr_naziv)
+                   AND public.f_compc(v.em_naziv, j.em_naziv)
+                   AND public.f_compn(v.vz_os_broj::numeric, j.vz_os_broj::numeric)
+                   AND public.f_compn(v.vz_os_tockova::numeric, j.vz_os_tockova::numeric)
+                   AND public.f_compc(v.vz_os_nosivost, j.vz_os_nosivost)
+                   AND public.f_compc(v.vz_os_pneumatici, j.vz_os_pneumatici)
+                   AND public.f_compn(v.vz_mesta_sedenje::numeric, j.vz_mesta_sedenje::numeric)
+                   AND public.f_compn(v.vz_mesta_stajanje::numeric, j.vz_mesta_stajanje::numeric)
+                   AND public.f_compn(v.vz_masa::numeric, j.vz_masa::numeric)
+                   AND public.f_compn(v.vz_nosivost::numeric, j.vz_nosivost::numeric)
+                   AND public.f_compn(v.vz_masa_max::numeric, j.vz_masa_max::numeric)
+                   AND public.f_compn(v.vz_duzina::numeric, j.vz_duzina::numeric)
+                   AND public.f_compn(v.vz_sirina::numeric, j.vz_sirina::numeric)
+                   AND public.f_compn(v.vz_visina::numeric, j.vz_visina::numeric)
+                   AND public.f_compn(v.vz_co2::numeric, j.vz_co2::numeric)
+                   AND coalesce(v.vz_elektro, '*') ILIKE coalesce(j.vz_elektro, v.vz_elektro)
+                   AND coalesce(v.vz_kuka, '*') ILIKE coalesce(j.vz_kuka, v.vz_kuka)
+                 ORDER BY v.pr_datum::date DESC, v.pr_broj DESC
+                 LIMIT vi_limit OFFSET vi_offset LOOP
+    RETURN NEXT r_rec;
+  END LOOP;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE;
+
+END;
+$function$
+

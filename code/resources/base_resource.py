@@ -68,7 +68,11 @@ class BaseResource(Resource):
         key: request.args.get(key)
         for key in request_args if request.args.get(key)
     }
+<<<<<<< HEAD
     print('RGET {}, {}'.format(query_params, jwt_identity))
+=======
+    print('GET {}'.format(query_params))
+>>>>>>> 7d4bf2c33127756008462d84e58786d5754989ee
     try:
       if len(query_params.items()):
         items = self.service.tbl_get(query_params, { "kr_id": jwt_identity })
@@ -104,7 +108,7 @@ class BaseResource(Resource):
 
     item = parser.parse_args()
     # print(item)
-    print(f'brajan 3 {item}')
+    print('POST {}'.format(item))
 
     try:
       new_item = self.service.tbl_insert(item, { "kr_id": jwt_identity })
@@ -114,11 +118,14 @@ class BaseResource(Resource):
             item.get(key, None) if item.get(key, None) else new_item["rcod"]
             for key in self.primary_keys
         }
-        new_item = self.service.tbl_get(get_args, { "kr_id": jwt_identity })[0]
-        if self.item_name == "v_korisnik" and new_item["kr_password"]:
-          new_item["kr_password"] = ""
-        print(f'brajan 4 {new_item}')
-
+        new_items = self.service.tbl_get(get_args, { "kr_id": jwt_identity })
+        if new_items and len(new_items)>0:          
+          new_item = new_items[0]
+          if self.item_name == "v_korisnik" and new_item["kr_password"]:
+            new_item["kr_password"] = ""
+        #INS/UPD into sert after predmet insert
+        if(self.service.name == "v_predmet"):
+          self.iu_sert(item, { "kr_id": jwt_identity }, False)
         return item, 200
       else:
         return new_item, 400
@@ -144,7 +151,11 @@ class BaseResource(Resource):
         for col in self.service.cols
     ]
     item = parser.parse_args()
+<<<<<<< HEAD
     print('RPUT {}, {}'.format(item, jwt_identity))
+=======
+    print('PUT {}'.format(item))
+>>>>>>> 7d4bf2c33127756008462d84e58786d5754989ee
     update_result = self.service.tbl_update(item, { "kr_id": jwt_identity })
     try:
       if (update_result["rcod"]
@@ -153,7 +164,8 @@ class BaseResource(Resource):
         new_item = self.service.tbl_get(get_args, { "kr_id": jwt_identity })[0]
         if self.item_name == "v_korisnik" and new_item["kr_password"]:
           new_item["kr_password"] = ""
-
+        if(self.service.name == "v_predmet"):          
+          self.iu_sert(item, { "kr_id": jwt_identity }, True)
         return new_item, 200
       else:
         return update_result, 400
@@ -163,11 +175,59 @@ class BaseResource(Resource):
       print(e.__class__, e)
       return { 'message': f"failed to update {self.item_name}"}, 500
 
+  def iu_sert(self, item, px_x, do_update):
+    if item.get("prs_oznaka") == "ZAK":
+      sert_table = TableWrapper("v_vozilo_sert")
+      sert_item = dict(item)
+      sert_item = {
+        "vzs_id": item.get("vzs_id"),
+        "vzs_oznaka":item.get("vzs_oznaka"),
+        "vzs_godina": item.get("vz_godina"),
+        "vzs_mesta_sedenje": item.get("vz_mesta_sedenje"),
+        "vzs_mesta_stajanje": item.get("vz_mesta_stajanje"),
+        "vzs_masa": item.get("vz_masa"),
+        "vzs_nosivost": item.get("vz_nosivost"),
+        "vzs_masa_max": item.get("vz_masa_max"),
+        "vzs_duzina": item.get("vz_duzina"),
+        "vzs_sirina": item.get("vz_sirina"),
+        "vzs_visina": item.get("vz_visina"),
+        "vzs_kuka_sert": item.get("vz_kuka_sert"),
+        "vzs_max_brzina": item.get("vz_max_brzina"),
+        "vzs_kw_kg": item.get("vz_kw_kg"),
+        "vzs_co2": item.get("vz_co2"),
+        "vzs_sert_hmlg_tip": item.get("vz_sert_hmlg_tip"),
+        "vzs_sert_emisija": item.get("vz_sert_emisija"),
+        "vzs_sert_buka": item.get("vz_sert_buka"),
+        "mr_id": item.get("mr_id"),
+        "md_id": item.get("md_id"),
+        "vzpv_id": item.get("vzpv_id"),
+        "vzkl_id": item.get("vzkl_id"),
+        "em_id": item.get("em_id"),
+        "gr_id": item.get("gr_id"),
+        "mdt_id": item.get("mdt_id"),
+        "mdvr_id": item.get("mdvr_id"),
+        "mdvz_id": item.get("mdvz_id"),
+        "mt_id": item.get("mt_id"),
+        "kr_id": item.get("kr_id")
+      }
+      print('INS SERT FROM PREDMET {}'.format(sert_item))
+      if do_update:
+        rez = sert_table.tbl_update(sert_item, px_x)
+      else:
+        rez = sert_table.tbl_insert(sert_item, px_x)
+      
+      #TODO this rez iz ignored no ERROR HANDLING
+      print('INS SERT FROM PREDMET REZ = {}'.format(rez))
+
   @jwt_required
   def delete(self):
     jwt_identity = get_jwt_identity()
     item_id = { key: request.args.get(key) for key in self.primary_keys }
+<<<<<<< HEAD
     print('RDEL {}, {}'.format(item_id, jwt_identity))
+=======
+    print('DEL {}'.format(item_id))
+>>>>>>> 7d4bf2c33127756008462d84e58786d5754989ee
     try:
       res = self.service.tbl_delete(item_id, { "kr_id": jwt_identity })
       if res["rcod"] >= 0:
@@ -210,7 +270,7 @@ class Copy(Resource):
     parser = reqparse.RequestParser()
     [parser.add_argument(arg) for arg in request_args]
     item = parser.parse_args()
-
+    print('Copy {}'.format(item))
     try:
       db_response = self.service.tbl_copy(item, { "kr_id": jwt_identity })
       new_item = self.service.tbl_get(

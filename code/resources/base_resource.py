@@ -68,11 +68,7 @@ class BaseResource(Resource):
         key: request.args.get(key)
         for key in request_args if request.args.get(key)
     }
-<<<<<<< HEAD
-    print('RGET {}, {}'.format(query_params, jwt_identity))
-=======
     print('GET {}'.format(query_params))
->>>>>>> 7d4bf2c33127756008462d84e58786d5754989ee
     try:
       if len(query_params.items()):
         items = self.service.tbl_get(query_params, { "kr_id": jwt_identity })
@@ -151,11 +147,7 @@ class BaseResource(Resource):
         for col in self.service.cols
     ]
     item = parser.parse_args()
-<<<<<<< HEAD
-    print('RPUT {}, {}'.format(item, jwt_identity))
-=======
     print('PUT {}'.format(item))
->>>>>>> 7d4bf2c33127756008462d84e58786d5754989ee
     update_result = self.service.tbl_update(item, { "kr_id": jwt_identity })
     try:
       if (update_result["rcod"]
@@ -223,11 +215,7 @@ class BaseResource(Resource):
   def delete(self):
     jwt_identity = get_jwt_identity()
     item_id = { key: request.args.get(key) for key in self.primary_keys }
-<<<<<<< HEAD
-    print('RDEL {}, {}'.format(item_id, jwt_identity))
-=======
     print('DEL {}'.format(item_id))
->>>>>>> 7d4bf2c33127756008462d84e58786d5754989ee
     try:
       res = self.service.tbl_delete(item_id, { "kr_id": jwt_identity })
       if res["rcod"] >= 0:

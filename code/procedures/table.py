@@ -99,11 +99,7 @@ class table:
 
     """  Insert/Update data; Returns new table ID/number of records updated & message"""
 
-<<<<<<< HEAD
     print('INS/UPD {}, {}, {}'.format(self.fnc.iu.fullname, px_rec, px_x))
-=======
-    print('INS/UPD {}, {}, {}, {}'.format(self.fnc.iu.fullname, self.fnc, px_rec, px_x))
->>>>>>> 7d4bf2c33127756008462d84e58786d5754989ee
 #    print('>{}<'.format(px_rec))
 #    print('>{}<'.format(px_x))
     #TODO, HACK GT, switch month and days, sick
@@ -145,11 +141,7 @@ class table:
     if (rez["rcod"] and rez["rcod"] > 0) or rez["rcod"] == 0:
       self.tbl_ins_change("insert", px_rec, rez["rcod"], px_x)
 
-<<<<<<< HEAD
-    return self.tbl_iu(px_rec, px_x)
-=======
     return rez
->>>>>>> 7d4bf2c33127756008462d84e58786d5754989ee
 
   #= METHOD ==============================
   # tbl_update
@@ -161,11 +153,7 @@ class table:
     if (rez["rcod"] and rez["rcod"] > 0) or rez["rcod"] == 0:
       self.tbl_ins_change("update", px_rec, rez["rcod"], px_x)
 
-<<<<<<< HEAD
-    return self.tbl_iu(px_rec, px_x)
-=======
     return rez
->>>>>>> 7d4bf2c33127756008462d84e58786d5754989ee
 
   #= METHOD ==============================
   # tbl_copy
@@ -174,16 +162,12 @@ class table:
 
     """  Insert data; Returns new tbl_id & message"""
 
-<<<<<<< HEAD
-    return self.tbl_iu(px_rec, px_x)
-=======
     rez = self.tbl_iu(px_rec, px_x)
     if (rez["rcod"] and rez["rcod"] > 0) or rez["rcod"] == 0:
       self.tbl_ins_change("copy", px_rec, rez["rcod"], px_x)
 
     return rez
 
->>>>>>> 7d4bf2c33127756008462d84e58786d5754989ee
 
   #= METHOD ==============================
   # tbl_delete

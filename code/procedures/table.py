@@ -39,7 +39,9 @@ class table:
   # _init
   #=======================================
   def _init(self):
-
+    print('TBL_INIT {}, {}'.format(self.name, self.db.tbls(self.name)))
+#    print(self.db.tbls)
+#    print(self.db.tbls(self.name))
     dxl_tbl = self.db.tbls(self.name)[0]
     self.schema = dxl_tbl['table_schema']
     self.comment = dxl_tbl['table_comment']
@@ -91,7 +93,7 @@ class table:
 
     """  Insert/Update data; Returns new table ID/number of records updated & message"""
 
-    print('>{} - {}<'.format(self.fnc.iu.fullname, utl.py2json(px_rec)))
+    print('INS/UPD {}, {}, {}'.format(self.fnc.iu.fullname, px_rec, px_x))
 #    print('>{}<'.format(px_rec))
 #    print('>{}<'.format(px_x))
     conn = self.db.connget()
@@ -123,7 +125,7 @@ class table:
 
     """  Insert data; Returns new tbl_id & message"""
 
-    return self.tbl_iu(px_rec)
+    return self.tbl_iu(px_rec, px_x)
 
   #= METHOD ==============================
   # tbl_update
@@ -132,7 +134,7 @@ class table:
 
     """  Update data; Returns number of records updated & message"""
 
-    return self.tbl_iu(px_rec)
+    return self.tbl_iu(px_rec, px_x)
 
   #= METHOD ==============================
   # tbl_copy
@@ -141,7 +143,7 @@ class table:
 
     """  Insert data; Returns new tbl_id & message"""
 
-    return self.tbl_iu(px_rec)
+    return self.tbl_iu(px_rec, px_x)
 
   #= METHOD ==============================
   # tbl_delete
@@ -149,6 +151,7 @@ class table:
   def tbl_delete(self, px_rec, px_x=None):
 
     """  Delete data; Returns number of records deleted & message"""
+    print('DEL >')
 
     conn = self.db.connget()
     crsr = conn.cursor()

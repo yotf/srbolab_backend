@@ -156,3 +156,6 @@ system.db
 # code/.env_develop
 *tokens.db
 tokens.db
+
+#mac cache
+**/.DS_Store

@@ -1,0 +1,7 @@
+\i ./_t/tbl/ddl/_t.vozilo_imp.ddl
+\i ./_t/tbl/ddl/_t.vozilo_imp_gas.ddl
+\i ./_t/tbl/ddl/_t.vozilo_imp_gu.ddl
+\i ./_t/tbl/ddl/_t.vozilo_imp_srt0.ddl
+\i ./_t/tbl/ddl/_t.vozilo_imp_srt1.ddl
+\i ./_t/tbl/ddl/_t.vozilo_imp_srt2.ddl
+COMMIT;

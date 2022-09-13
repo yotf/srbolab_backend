@@ -1,0 +1,23 @@
+# generalno:
+  - error handling
+  - selektovanje teksta u tabeli ?
+  - filteri na formama (postavljanje i poništavanje)
+
+# forma "Predmeti"
+  - izbaci dugme filtriraj sa edit forme za predmet
+  - izgubi podešavanja kolona
+
+--------------------------------------------------------------------------------
+
+1. novi predmet i novo vozilo
+  ~ null - sve kolone null
+2. novi predmet od postojeceg predmeta i vozila
+  ~ null - pr_id i pr_broj
+3. novi predmet i novo vozilo od postojeceg predmeta i vozila
+  ~ null - pr_id, pr_broj, kl_id, kl_naziv, kl_adresa, kl_telefon, kl_firma, vz_id, vz_sasija i vz_motor
+
+--------------------------------------------------------------------------------
+
+# srbolab - srbobran
+  ~ 192.168.0.12 - interna
+  ~ 79.101.43.218 - statička spolja

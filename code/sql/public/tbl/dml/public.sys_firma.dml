@@ -1,0 +1,28 @@
+/* Table public.sys_firma */
+TRUNCATE TABLE public.sys_firma CASCADE;
+COMMIT;
+INSERT INTO public.sys_firma (fir_id, fir_naziv, fir_naziv_s, fir_opis, fir_opis_s, fir_mesto_sediste, fir_adresa_sediste, fir_mesto, fir_adresa, fir_tel1, fir_tel2, fir_mail, fir_web, fir_logo, fir_pib, fir_mbr, fir_banka, fir_ziro_rac, sr_cir)
+SELECT t.fir_id::INTEGER,
+       t.fir_naziv::VARCHAR,
+       t.fir_naziv_s::VARCHAR,
+       t.fir_opis::VARCHAR,
+       t.fir_opis_s::VARCHAR,
+       t.fir_mesto_sediste::VARCHAR,
+       t.fir_adresa_sediste::VARCHAR,
+       t.fir_mesto::VARCHAR,
+       t.fir_adresa::VARCHAR,
+       t.fir_tel1::VARCHAR,
+       t.fir_tel2::VARCHAR,
+       t.fir_mail::VARCHAR,
+       t.fir_web::VARCHAR,
+       t.fir_logo::VARCHAR,
+       t.fir_pib::INTEGER,
+       t.fir_mbr::INTEGER,
+       t.fir_banka::VARCHAR,
+       t.fir_ziro_rac::VARCHAR,
+       t.sr_cir::VARCHAR
+  FROM (
+        VALUES (10, 'SRBOLAB doo Feketić', 'SRBOLAB doo', 'Ogranak, Kontrolno telo za kontrolisanje kvaliteta i kvantiteta roba', 'Ogranak, Kontrolno telo', 'Srbobran', 'Turijski put 17, 21480 Srbobran', 'Feketić', 'Trinaestog jula 43, 24323 Feketić', '+ 381 (21) 310-1533', NULL, 'vozila@srbolab.com', 'www.srbolab-vozila.rs', NULL, 105888507, 20478063, 'Banca Intesa', '160-312897-54', 'N')
+       ) t (fir_id, fir_naziv, fir_naziv_s, fir_opis, fir_opis_s, fir_mesto_sediste, fir_adresa_sediste, fir_mesto, fir_adresa, fir_tel1, fir_tel2, fir_mail, fir_web, fir_logo, fir_pib, fir_mbr, fir_banka, fir_ziro_rac, sr_cir)
+  ORDER BY t.fir_id;
+COMMIT;

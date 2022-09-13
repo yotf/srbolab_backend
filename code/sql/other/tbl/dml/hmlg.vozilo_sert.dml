@@ -1,0 +1,51 @@
+/* Table hmlg.vozilo_sert */
+TRUNCATE TABLE hmlg.vozilo_sert CASCADE;
+COMMIT;
+INSERT INTO hmlg.vozilo_sert (vzs_id, vzs_oznaka, vzs_godina, vzs_mesta_sedenje, vzs_mesta_stajanje, vzs_masa, vzs_nosivost, vzs_masa_max, vzs_duzina, vzs_sirina, vzs_visina, vzs_kuka_sert, vzs_max_brzina, vzs_kw_kg, vzs_co2, vzs_sert_hmlg_tip, vzs_sert_emisija, vzs_sert_buka, mr_id, md_id, vzpv_id, vzkl_id, em_id, gr_id, mdt_id, mdvr_id, mdvz_id, mt_id, kr_id)
+SELECT i.vzs_id,
+       i.vzs_oznaka,
+       i.vz_godina[1] AS vzs_godina,
+       i.vz_mesta_sedenje AS vzs_mesta_sedenje,
+       i.vz_mesta_stajanje AS vzs_mesta_stajanje,
+       i.vz_masa AS vzs_masa,
+       i.vz_nosivost AS vzs_nosivost,
+       i.vz_masa_max AS vzs_masa_max,
+       i.vz_duzina AS vzs_duzina,
+       i.vz_sirina AS vzs_sirina,
+       i.vz_visina AS vzs_visina,
+       null AS vzs_kuka_sert,
+       i.vz_kmh AS vzs_max_brzina,
+       i.vz_kw_kg AS vzs_kw_kg,
+       i.vz_co2 AS vzs_co2,
+       null AS vzs_sert_hmlg_tip,
+       null AS vzs_sert_emisija,
+       null AS vzs_sert_buka,
+       mr.mr_id,
+       md.md_id,
+       vzpv.vzpv_id,
+       _t.vzkl_id(i.vzk_naziv) AS vzkl_id,
+       em.em_id,
+       gr.gr_id,
+       mdt.mdt_id,
+       mdvr.mdvr_id,
+       mdvz.mdvz_id,
+       mt.mt_id,
+       0 AS kr_id
+  FROM _t.vozilo_imp_srt2 i
+    LEFT JOIN sif.marka mr ON (mr.mr_naziv=coalesce(i.mr_naziv, '~'))
+    LEFT JOIN sif.model md ON (md.mr_id=mr.mr_id AND md.md_naziv_k=coalesce(i.md_naziv_k, '~'))
+    LEFT JOIN sif.model_tip mdt ON (mdt.mdt_oznaka=coalesce(i.mdt_oznaka, '~'))
+    LEFT JOIN sif.model_varijanta mdvr ON (mdvr.mdvr_oznaka=coalesce(i.mdvr_oznaka, '~'))
+    LEFT JOIN sif.model_verzija mdvz ON (mdvz.mdvz_oznaka=coalesce(i.mdvz_oznaka, '~'))
+    LEFT JOIN sif.motor_oznaka mto ON (mto.mto_oznaka=coalesce(i.mt_oznaka, '-'))
+    LEFT JOIN sif.motor mt ON (mt.mto_id=mto.mto_id AND mt.mt_cm3=i.mt_cm3 AND mt.mt_kw=i.mt_kw)
+    LEFT JOIN sif.vozilo_podvrsta vzpv ON (vzpv.vzpv_oznaka=trim(substring(i.vzpv_naziv, 1, 3)))
+    LEFT JOIN sif.emisija em ON (em.em_naziv=i.em_naziv)
+    LEFT JOIN sif.gorivo gr ON (gr.gr_naziv=i.gr_naziv)
+  WHERE NOT EXISTS
+         (
+          SELECT 1
+            FROM hmlg.vozilo_sert vzs
+            WHERE vzs.vzs_id=i.vzs_id
+         );
+COMMIT;

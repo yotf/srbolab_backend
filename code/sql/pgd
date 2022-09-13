@@ -1,0 +1,231 @@
+#!/bin/bash
+
+COLUMNS=15
+
+PGDRDIR="./dmp"
+PGHOST="localhost"
+PGHOSTADDR="127.0.0.1"
+PGPORT="5432"
+PGDATABASE="srbolab"
+PGUSER="postgres"
+
+PGDUMPFORMAT="custom"
+PGDUMPFILEEXT="dmp"
+
+#=======================================
+# main
+#=======================================
+function main()
+{
+
+  local sel_opts_main=("Dump" "Restore")
+  local option
+  ok2go_main="1"
+  while [[ $ok2go_main -eq 1 ]] ; do
+    PS3='Choose option [x=Quit;q=Quit]: '
+    echo ""
+    select option in "${sel_opts_main[@]}" ; do
+      if [[ -n "$option" ]] ; then
+        run_pg_dr "$option"
+      else
+        if [[ ${REPLY,,} =~ ^[xq]$ ]] ; then
+          ok2go_main="0"
+        else
+          invalid_option
+        fi
+      fi
+      break
+    done
+  done
+
+}
+
+#=======================================
+# run_pg_dr
+#=======================================
+function run_pg_dr()
+{
+
+  PS3='Choose option [x=Exit;q=Quit]: '
+  local action="${1,,}"
+  local option
+  local what
+  local idx
+  local sel_lbls=("Schema" "Data")
+  local sel_opts
+  declare -a sel_opts
+  for idx in "${sel_lbls[@]}"; do
+    sel_opts+=("$idx")
+  done
+  sel_opts+=("All" "View TOC files" "View log files")
+  local ok2go="1"
+  while [[ $ok2go_main -eq 1 ]] && [[ $ok2go -eq 1 ]] ; do
+    echo ""
+    echo -e "  .:: ${action^^} ::."
+    select option in "${sel_opts[@]}" ; do
+      if [[ -n "$option" ]] ; then
+        if [[ "$option" == "All" ]] ; then
+          echo ""
+          for idx in "${!sel_lbls[@]}"; do
+            what=${sel_lbls[idx]}
+            execute_pg_dr $action $what
+          done
+        elif [[ "$option" == "View TOC files" ]] ; then
+          echo ""
+          view_xxx_files "toc" $action
+        elif [[ "$option" == "View log files" ]] ; then
+          echo ""
+          view_xxx_files "log" $action
+        else
+          idx=$(expr $REPLY - 1)
+          what=${sel_lbls[idx]}
+          echo ""
+          execute_pg_dr $action $what
+        fi
+      else
+        if [[ ${REPLY,,} =~ ^[xq]$ ]] ; then
+          ok2go="0"
+          if [[ ${REPLY,,} =~ ^q$ ]] ; then
+            ok2go_main="0"
+          fi
+        else
+          invalid_option
+        fi
+      fi
+      break
+    done
+  done
+
+}
+
+#=======================================
+# execute_pg_dr
+#=======================================
+function execute_pg_dr()
+{
+
+  local action="${1,,}"
+  local what="${2,,}"
+  local dmp
+  local log
+  local toc
+  dmp="${PGDRDIR}/$PGDATABASE-$what.$PGDUMPFILEEXT"
+  log="${PGDRDIR}/$PGDATABASE-$what-$action.log"
+  toc="${PGDRDIR}/$PGDATABASE-$what.toc"
+
+  echo -n "# ${action^^}-ing $what on database \"$PGDATABASE\" ..."
+  if [[ "$action" == "dump" ]]; then
+    pg_$action --$what-only --host=$PGHOST --port=$PGPORT --username=$PGUSER --format=$PGDUMPFORMAT --no-privileges --no-tablespaces --verbose --no-password --no-owner --no-unlogged-table-data --encoding=UTF8 --file="$dmp" "$PGDATABASE" 1>/dev/null 2>"$log"
+    pg_restore --list "$dmp">"$toc"
+  elif [[ "$action" == "restore" ]]; then
+    if [[ "$what" == "schema" ]]; then
+#      pg_$action --$what-only --host=$PGHOST --port=$PGPORT --username=$PGUSER --format=$PGDUMPFORMAT --use-list="$toc" --no-privileges --no-tablespaces --verbose --clean --dbname="$PGDATABASE" "$dmp" 1>/dev/null 2>"$log"
+      pg_$action --$what-only --host=$PGHOST --port=$PGPORT --username=$PGUSER --format=$PGDUMPFORMAT --use-list="$toc" --no-privileges --no-tablespaces --verbose --create --clean --dbname="postgres" "$dmp" 1>/dev/null 2>"$log"
+    else
+      pg_$action --$what-only --host=$PGHOST --port=$PGPORT --username=$PGUSER --format=$PGDUMPFORMAT --use-list="$toc" --no-privileges --no-tablespaces --verbose --disable-triggers --dbname="$PGDATABASE" "$dmp" 1>/dev/null 2>"$log"
+    fi
+  fi
+  echo " Done."
+
+}
+
+#=======================================
+# view_xxx_files
+#=======================================
+function view_xxx_files()
+{
+
+  PS3='Choose option [x=Exit;q=Quit]: '
+  local type="${1,,}"
+  local action="${2,,}"
+  local option
+  local rexp
+  local ok2go="1"
+  local xxx_fls
+  declare -a xxx_fls
+  if [[ "$type" == "log" || "$type" == "toc" ]]; then
+    if [[ "$type" == "log" ]] ; then
+      rexp="$PGDATABASE-.+-$action\.$type$"
+    else
+      rexp="$PGDATABASE-.+\.$type$"
+      action=""
+    fi
+    xxx_fls=($(find $PGDRDIR -type f | sort -f -r | grep -P -e "$rexp"))
+    if [[ ${#xxx_fls[@]} -gt 0 ]] ; then
+      while [[ $ok2go_main -eq 1 ]] && [[ $ok2go -eq 1 ]] ; do
+        echo ""
+        echo "  .:: .$type files ${action^^} ::."
+        select option in "${xxx_fls[@]}" ; do
+          if [[ -n "$option" ]] ; then
+            less "$option"
+          else
+            if [[ ${REPLY,,} =~ ^[xq]$ ]] ; then
+              ok2go="0"
+              if [[ ${REPLY,,} =~ ^q$ ]] ; then
+                ok2go_main="0"
+              fi
+            else
+              invalid_option
+            fi
+          fi
+          break
+        done
+      done
+    else
+      echo ""
+      echo "There are no .$type files."
+    fi
+  else
+    echo ""
+    echo "Invalid file type \".$type\"."
+  fi
+
+}
+
+#=======================================
+# dir_chk
+#=======================================
+function dir_chk()
+{
+
+  mkdir -p "$PGDRDIR"
+
+}
+
+#=======================================
+# invalid_option
+#=======================================
+function invalid_option()
+{
+
+  echo ""
+  echo "Invalid option: $REPLY"
+
+}
+
+#=======================================
+# log_file_check
+#=======================================
+function log_file_check()
+{
+
+  local log="$1"
+  if [[ ! -s "$log" ]] || [[ "$(grep -c "ERROR" $log)" -eq 0 ]] ; then
+    rm "$log"
+    echo " Done. (Ok.)"
+  else
+    echo " Done. (With ERROR-s. View log file '$log'.)"
+  fi
+
+}
+
+dir_chk
+main
+echo ""
+
+# %H:%M:%S
+# date +"%Y-%m-%d#%T#%N"
+# date +"%Y-%m-%d#%H:%M:%S#%N"
+
+#printf "%.3f\n" $(echo "scale=2;"$(date +"%S.%N") | bc | tr '.' ',')
+#echo $(date +"%Y-%m-%d#%H:%M:printf "%.3f\n" $(echo "scale=2;"$(date +"%S.%N") | bc | tr '.' ','))

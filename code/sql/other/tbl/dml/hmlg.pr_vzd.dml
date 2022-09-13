@@ -1,0 +1,63 @@
+/* Table hmlg.pr_vzd */
+TRUNCATE TABLE hmlg.pr_vzd CASCADE;
+COMMIT;
+INSERT INTO hmlg.pr_vzd (pr_id, vzd_id)
+WITH
+  vi AS
+   (
+    SELECT row_number() OVER (ORDER BY i.pr_datum, i.pr_broj) AS pr_id,
+           i.vz_saobracajna,
+           i.vz_odg_dok,
+           i.vz_coc,
+           i.vz_potvrda_pr
+      FROM _t.v_vozilo_imp i
+        JOIN hmlg.vozilo vz ON (vz.vz_sasija=i.vz_sasija)
+        JOIN hmlg.klijent kl ON (kl.kl_naziv=i.kl_naziv)
+      WHERE i.vz_sasija_rb=1
+        AND i.vzi_br IN (1, 2, 3)
+   ),
+  d1 AS -- 10, SD, Saobraćajna dozvola
+   (
+    SELECT vi.pr_id,
+           10 AS vzd_id
+      FROM vi
+      WHERE vi.vz_saobracajna='d'
+   ),
+  d2 AS -- 20, OD, Odgovarajući dokument
+   (
+    SELECT vi.pr_id,
+           20 AS vzd_id
+      FROM vi
+      WHERE vi.vz_odg_dok='d'
+   ),
+  d3 AS -- 30, COC, COC dokument
+   (
+    SELECT vi.pr_id,
+           30 AS vzd_id
+      FROM vi
+      WHERE vi.vz_coc='d'
+   ),
+  d4 AS -- 40, PP, Potvrda proizvođača
+   (
+    SELECT vi.pr_id,
+           30 AS vzd_id
+      FROM vi
+      WHERE vi.vz_potvrda_pr='d'
+   )
+SELECT d1.pr_id,
+       d1.vzd_id
+  FROM d1
+UNION ALL
+SELECT d2.pr_id,
+       d2.vzd_id
+  FROM d2
+UNION ALL
+SELECT d3.pr_id,
+       d3.vzd_id
+  FROM d3
+UNION ALL
+SELECT d4.pr_id,
+       d4.vzd_id
+  FROM d4
+  ORDER BY 1, 2;
+COMMIT;

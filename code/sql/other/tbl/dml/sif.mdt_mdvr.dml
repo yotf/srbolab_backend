@@ -1,0 +1,13 @@
+/* Table sif.mdt_mdvr */
+TRUNCATE TABLE sif.mdt_mdvr CASCADE;
+COMMIT;
+INSERT INTO sif.mdt_mdvr (mdt_id, mdvr_id)
+SELECT mdt.mdt_id,
+       mdvr.mdvr_id
+  FROM sif.model_tip mdt
+    JOIN _t.v_vozilo_imp v ON (_t.fix_mdt_oznaka(v.mdt_oznaka)=mdt.mdt_oznaka)
+    JOIN sif.model_varijanta mdvr ON (mdvr.mdvr_oznaka=_t.fix_mdvr_oznaka(v.mdvr_oznaka))
+  WHERE v.vz_sasija_rb=1
+    AND v.vzi_br IN (1, 2)
+  GROUP BY mdt.mdt_id, mdvr.mdvr_id;
+COMMIT;

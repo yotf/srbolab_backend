@@ -1,0 +1,30 @@
+/* Table sif.model_tip */
+TRUNCATE TABLE sif.model_tip CASCADE;
+COMMIT;
+INSERT INTO sif.model_tip (mdt_id, mdt_oznaka)
+WITH
+  s AS
+   (
+    SELECT t.mdt_oznaka
+      FROM _t.v_vozilo_imp t
+      WHERE t.vz_sasija_rb=1
+        AND t.vzi_br IN (1, 2, 3)
+        AND t.mdt_oznaka IS NOT NULL
+        AND NOT EXISTS
+             (
+              SELECT 1
+                FROM sif.model_tip mdt
+                WHERE mdt.mdt_oznaka=t.mdt_oznaka
+             )
+      GROUP BY t.mdt_oznaka
+   ),
+  r AS
+   (
+    SELECT coalesce(max(mdt.mdt_id), 100) AS mdt_id
+      FROM sif.model_tip mdt
+   )
+SELECT r.mdt_id+row_number() OVER (ORDER BY s.mdt_oznaka) AS mdt_id,
+       s.mdt_oznaka
+  FROM s
+    CROSS JOIN r;
+COMMIT;

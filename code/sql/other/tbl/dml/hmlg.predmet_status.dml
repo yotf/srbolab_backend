@@ -1,0 +1,21 @@
+/* Table hmlg.predmet_status */
+TRUNCATE TABLE hmlg.predmet_status CASCADE;
+COMMIT;
+INSERT INTO hmlg.predmet_status (prs_id, prs_oznaka, prs_naziv, prs_priprema, prs_cekanje, prs_zakljucen, prs_neusag)
+SELECT t.prs_id::INTEGER,
+       t.prs_oznaka::VARCHAR,
+       t.prs_naziv::VARCHAR,
+       t.prs_priprema::VARCHAR,
+       t.prs_cekanje::VARCHAR,
+       t.prs_zakljucen::VARCHAR,
+       t.prs_neusag::VARCHAR
+  FROM (
+        VALUES (10, 'PRI', 'Priprema', 'D', 'N', 'N', 'N'),
+               (11, 'NEU', 'Neusaglašenost', 'N', 'D', 'N', 'D'),
+               (12, 'AS1', 'Poslati podaci u AS', 'N', 'D', 'N', 'N'),
+               (13, 'CE1', 'Čeka se dokumentacija', 'N', 'D', 'N', 'N'),
+               (14, 'CE2', 'Čekaju se uplate', 'N', 'D', 'N', 'N'),
+               (88, 'ZAK', 'Zaključen', 'N', 'N', 'D', 'N')
+       ) t (prs_id, prs_oznaka, prs_naziv, prs_priprema, prs_cekanje, prs_zakljucen, prs_neusag)
+  ORDER BY t.prs_id;
+COMMIT;

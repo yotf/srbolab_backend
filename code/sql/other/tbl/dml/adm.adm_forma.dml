@@ -1,0 +1,38 @@
+/* Table adm.adm_forma */
+TRUNCATE TABLE adm.adm_forma CASCADE;
+COMMIT;
+INSERT INTO adm.adm_forma (afo_id, afo_naziv, afo_tabele, afo_izvestaji, aap_id)
+SELECT t.afo_id::INTEGER,
+       t.afo_naziv::VARCHAR,
+       t.afo_tabele::VARCHAR,
+       t.afo_izvestaji::VARCHAR,
+       t.aap_id::INTEGER
+  FROM (
+        VALUES (100, 'Role', '{"title":"Role","source":"adm_rola","details":[{"title":"Forme","source":"v_arl_afo","details":[],"actions":["v","i","u","d"]}],"actions":["v","i","u","d","c"]}', '{}', 0),
+               (210, 'Lokacije', '{"title":"Lokacije","source":"lokacija","details":[],"actions":["v","i","u","d"]}', '{}', 10),
+               (220, 'Korisnici', '{"title":"Korisnivci","source":"v_korisnik","details":[],"actions":["v","i","u","d"]}', '{}', 10),
+               (230, 'Raspored', '{"title":"Kalendar","source":"v_kalendar","details":[{"title":"Rapored","source":"v_raspored","details":[],"actions":["v","i","u","d"]}],"actions":["v","i","u","d","c"]}', '[{"title":"Raspored za dan","report":"raspored","parameters":{"pc_kn_datum":"kn_datum"}}]', 10),
+               (231, 'Dnevnik rada', '{"title":"Dnevnik rada","source":"v_adm_log","details":[],"actions":["v"]}', '{}', 10),
+               (235, 'Usluge', '{"title":"Usluge","source":"usluga","details":[],"actions":["v","i","u","d"]}', '{}', 10),
+               (250, 'Vrste ispitivanja', '{}', '{}', 10),
+               (310, 'Goriva', '{"title":"Goriva","source":"gorivo","details":[],"actions":["v","i","u","d"]}', '{}', 20),
+               (320, 'Klasa emisije', '{"title":"Klase emisije","source":"emisija","details":[],"actions":["v","i","u","d"]}', '{}', 20),
+               (331, 'Kategorije vozila', '{"title":"Kategorije vozila","source":"vozilo_podvrsta","details":[],"actions":["v","i","u","d"]}', '{}', 20),
+               (340, 'Organizacije', '{"title":"Organizacije","source":"organizacija","details":[],"actions":["v","i","u","d"]}', '{}', 20),
+               (350, 'Tipovi karoserija', '{}', '{}', 20),
+               (360, 'Klase vozila', '{}', '{}', 20),
+               (370, 'Dodatne oznake vozila', '{}', '{}', 20),
+               (380, 'Proizvođači gasnih uređaja', '{}', '{}', 20),
+               (390, 'Proizvođači/Marke vozila', '{"title":"Marke","source":"marka","details":[{"title":"Modeli","source":"model","details":[],"actions":["v","i","u","d"]}],"actions":["v","i","u","d"]}', '{}', 20),
+               (392, 'Dokumenti vozila', '{"title":"Dokumenti vozila","source":"vozilo_dokument","details":[],"actions":["v","i","u","d"]}', '{}', 20),
+               (410, 'Klijenti', '{"title":"Klijenti","source":"klijent","details":[],"actions":["v","i","u","d"]}', '{}', 30),
+               (415, 'Sertifikati/Potvrde', '{"title":"Sertifikati/Potvrde za vozila","source":"v_vozilo_sert","details":[],"actions":["v","i","u","d"]}', '{}', 30),
+               (420, 'Vozila', '{"title":"Vozila","source":"v_vozilo","details":[],"actions":["v","i","u","d"]}', '{}', 30),
+               (430, 'Predmeti', '{"title":"Predmeti","source":"v_predmet","details":[],"actions":["v","i","u","d"]}', '[{"title":"Potvrda o tehničkim karakteristikama vozila","report":"potvrda_b","parameters":{"pi_pr_id":"pr_id"}},{"title":"Nalaz o neusaglašenosti","report":"neusaglasenost","parameters":{"pi_pr_id":"pr_id"}},{"title":"Zapisnik o ispitivanju vozila","report":"zapisnik","parameters":{"pi_pr_id":"pr_id","pc_vzpv_oznaka":"vzpv_oznaka"}}]', 30),
+               (332, 'Karoserije vozila', '{"title":"Karoserije vozila","source":"vozilo_karoserija","details":[{"title":"Kategorije vozila","source":"v_vzk_vzpv","details":[],"actions":["v","i","u","d"]}],"actions":["v","i","u","d"]}', '{}', 20),
+               (333, 'Dodatne oznake vozila', '{"title":"Dodatne oznake vozila","source":"vozilo_dod_oznaka","details":[{"title":"Vrste vozila","source":"v_vzdo_vzv","details":[],"actions":["v","i","u","d"]}],"actions":["v","i","u","d"]}', '{}', 20),
+               (334, 'Klase vozila', '{"title":"Klase vozila","source":"vozilo_klasa","details":[{"title":"Kategorije vozila","source":"v_vzkl_vzpv","details":[],"actions":["v","i","u","d"]}],"actions":["v","i","u","d"]}', '{}', 20),
+               (330, 'Vrste vozila', '{"title":"Vrste vozila","source":"vozilo_vrsta","details":[{"title":"Kategorije vozila","source":"vozilo_podvrsta","details":[],"actions":["v","i","u","d"]}],"actions":["v","i","u","d"]}', '{}', 20)
+       ) t (afo_id, afo_naziv, afo_tabele, afo_izvestaji, aap_id)
+  ORDER BY t.afo_id;
+COMMIT;

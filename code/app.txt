@@ -1,0 +1,319 @@
+# Administracija
+  n. Role
+    + adm.adm_rola
+    ~ Forme za rolu
+      + adm.v_arl_afo
+        + za unos forme adm.f_c_adm_forma(<arl_id>[, <tekst>[, [<fromstart>[, <casesesens>]]])
+
+# Sistem
+  n. Korisnici
+    + sys.v_korisnik
+      + za unos role adm.f_c_adm_rola([<tekst>[, [<fromstart>[, <casesesens>]]])
+
+  n. Lokacije
+    + sys.lokacija
+
+  n. Raspored
+    + sys.kalendar
+    ~ Raspored korisnika po lokacijama za dan
+      + sys.v_raspored (v_raspored.kn_datum=kalendar.kn_datum)
+        + za unos korisnika sys.f_c_korisnik(<kn_datum>[, <tekst>, [<fromstart>[, <casesesens>]]])
+
+  n. Usluge
+    + sys.usluga
+
+  n. Vrste ispitivanja
+    + sys.v_ispitivanje_vrsta
+      + za unos usluge adm.f_c_usluga([<tekst>[, [<fromstart>[, <casesesens>]]])
+
+  n. Cenovnici
+    + sys.cenovnik
+    ~ Cene za cenovnik
+      - sys.v_cena (v_cena.ck_id=cenovnik.ck_id)
+      ~ Uslovi za koje cene važe
+        - sys.cena_uslov (v_cena_uslov.ck_id=v_cena.ck_id AND v_cena_uslov.cn_id=v_cena.cn_id)
+
+# Šifarnici
+  n. Vrste goriva
+    + sif.gorivo
+
+  n. EURO emisija CO2
+    + sif.emisija
+
+  n. Dokumenti
+    + sif.dokument
+
+  n. Organizacije/Institucije
+    + sif.organizacija
+
+  n. Proizvođači auto-gas uređaja
+    + sif.ag_proizvodjac
+    ~ Homologacije za proizvođača
+      + sif.v_agp_agh (v_agp_agh.agp_id=ag_proizvodjac.agp_id)
+        + za unos homologacije sif.f_c_ag_homologacija(<agp_id>[, <tekst>[, [<fromstart>[, <casesesens>]]])
+
+  n. Homologacije auto-gas uređaja
+    + sif.ag_homologacija
+    ~ Proizvođači za homologaciju
+      + sif.v_agp_agh (v_agp_agh.agh_id=ag_homologacija.agh_id)
+        + za unos proizvođača sif.f_c_ag_proizvodjac(<agh_id>[, <tekst>[, [<fromstart>[, <casesesens>]]])
+
+  n. Vrste vozila
+    + sif.vozilo_vrsta
+    ~ Podvrste vozila
+      + sif.vozilo_podvrsta (vozilo_podvrsta.vzv_id=vozilo_vrsta.vzv_id)
+      ~ Karoserije za podvrstu vozila
+        + sif.v_vzk_vzpv (v_vzk_vzpv.vzpv_id=v_vzv_vzpv.vzpv_id)
+      ~ Klase za podvrstu vozila
+        + sif.v_vzkl_vzpv (v_vzkl_vzpv.vzpv_id=v_vzv_vzpv.vzpv_id)
+    ~ Dodatne oznake za vrstu vozila
+      + sif.v_vzdo_vzv (v_vzdo_vzv.vzv_id=vozilo_vrsta.vzv_id)
+
+  n. Marke vozila
+    ~ Oznake za marku vozila
+    ~ Motori za marku vozila
+    ~ Modeli za marku vozila
+      ~ Tipovi modela
+        ~ Varijante tipova modela
+          ~ Verzije varijanti tipova modela
+
+# Ispitivanja
+  n. Klijenti
+
+  n. Predmeti
+    ~ Vozila
+      ~ Osovine vozila
+      ~ Gasni uređaji vozila
+        ~ Uređaji gasnog uređaja
+      ~ Slike vozila
+
+  n. Vozila
+    ~ Osovine vozila
+    ~ Gasni uređaji vozila
+        ~ Uređaji gasnog uređaja
+    ~ Slike vozila
+
+todo:
+  1. opis formi za adm_forma
+  2. sve funkcije da primaju json
+
+
+
+
+
+
+{"source": "ag_proizvodjac", "details": [{"source": "v_agp_agh", "details": [], "actions": ["v", "i", "u", "d"]}], "actions": ["v", "i", "u", "d"]}
+
+        'adm_forma': """
+(100, 'Role', '{"source": "adm_rola", "details": [{"source": "v_arl_afo", "details": [], "actions": ["v", "i", "u", "d"]}], "actions": ["v", "i", "u", "d", "c"]}', '{}', 0),
+
+(210, 'Lokacije', '{"source": "lokacija", "details": [], "actions": ["v", "i", "u", "d"]}', '{}', 10),
+(220, 'Korisnici', '{"source": "v_korisnik", "details": [], "actions": ["v", "i", "u", "d"]}', '{}', 10),
+(230, 'Raspored', '{"source": "v_kalendar", "details": [{"source": "v_raspored", "details": [], "actions": ["v", "i", "u", "d"]}], "actions": ["v", "i", "u", "d", "c"]}', '{}', 10),
+(240, 'Cenovnik', '{"source": "cenovnik", "details": [{"source": "v_cena", "details": [{"source": "v_cena_uslov", "details": [], "actions": ["v", "i", "u", "d"]}], "actions": ["v", "i", "u", "d"]}], "actions": ["v", "i", "u", "d", "c"]}', '{}', 10),
+(250, 'Vrste ispitivanja', '{"source": "v_ispitivanje_vrsta", "details": [], "actions": ["v", "i", "u", "d"]}', '{}', 10),
+
+(310, 'Goriva', '{"source": "gorivo", "details": [], "actions": ["v", "i", "u", "d"]}', '{}', 20),
+(320, 'Klasa emisije', '{"source": "emisija", "details": [], "actions": ["v", "i", "u", "d"]}', '{}', 20),
+(340, 'Organizacije', '{"source": "organizacija", "details": [], "actions": ["v", "i", "u", "d"]}', '{}', 20),
+(380, 'Dokumenta', '{"source": "dokument", "details": [], "actions": ["v", "i", "u", "d"]}', '{}', 20),
+
+(380, 'Proizvođači gasnih uređaja', '{"source": "ag_proizvodjac", "details": [{"source": "v_agp_agh", "details": [], "actions": ["v", "i", "u", "d"]}], "actions": ["v", "i", "u", "d"]}', '{}', 20),
+(380, 'Homologacije gasnih uređaja', '{"source": "v_ag_homologacija", "details": [{"source": "v_agh_agp", "details": [], "actions": ["v", "i", "u", "d"]}], "actions": ["v", "i", "u", "d"]}', '{}', 20),
+(380, 'Delovi gasnog uređaja', '{"source": "ag_uredjaj", "details": [], "actions": ["v", "i", "u", "d"]}', '{}', 20),
+
+
+(330, 'Vrste vozila', '{}', '{}', 20),
+(350, 'Tipovi karoserija', '{}', '{}', 20),
+(360, 'Klase vozila', '{}', '{}', 20),
+(370, 'Dodatne oznake vozila', '{}', '{}', 20),
+
+
+(390, 'Proizvođači/Marke vozila', '{}', '{}', 20),
+
+(410, 'Klijenti', '{"source": "klijent", "details": [], "actions": ["v", "i", "u", "d"]}', '{}', 30),
+(420, 'Vozila', '{}', '{}', 30),
+(430, 'Predmeti', '{}', '{}', 30)
+""",
+
+
+- poslato na proveru u ABS
+- provereno u ABS
+- plaćen
+- neplaćen
+- obustavljen
+- zaključen
+
+ 1. forma za role - nićko
+ 2. forma za lokacija - nićko
+ 3. forma za korisnike - nićko
+ 4. forma za raspored - nićko
+ 5. forma za tipove dokumenata predmeta - nićko
+ 6. forma za predmete/vozila - nićko/željko
+   6.1. forma za unos osovina - nićko/željko
+   6.2. forma za unos gasnih urđaja - nićko/željko
+   6.3. unos i pregled fotografija za vozilo - nićko/željko
+   6.4. unos i pregled dokumenata za predmet - nićko/željko
+   6.5. generisanje podataka za slanje agenciji za saobraćaj - nićko/željko
+   6.6. import saobraćajne dozvole ??? - nićko/željko
+   6.7. generisanje raznih izveštaja ... - željko
+ 7. kreiranje i konfigurisanje produkcione baze - željko
+ 8. deploy i testiranje aplikacije na apache-u - nićko
+ 9. import podataka - željko
+
+10. forma za klijente
+11. forma za usluge
+12. forma za cenovnik
+13. forma za vrste ispitivanja
+14. forma za organizacije
+15. forma za vrste vozila
+16. forma za kategorije vozila
+17. forma za karoserije vozila
+18. forma za dodatne oznake vozila
+19. forma za klase vozila
+
+20. forma za vozila
+21. forma za motore
+22. forma za tip/varijantu/verziju vozila
+23. forma za proizvođače gasnih uređaja
+24. forma za homologacije gasnih uređaja
+
+------ TODO !!!
+
+-- CHECK CONSTRAINTS  za view-s
+   deafault ....
+
+
+SELECT 
+
+-- predmet
+       v.pr_broj,
+       v.us_naziv,
+       v.pr_datum,
+
+-- klijent
+       v.kl_naziv,
+       v.kl_adresa,
+       v.kl_telefon,
+       v.kl_firma,
+
+-- vozilo opšte
+       v.vz_sasija,
+       v.vz_reg,
+       v.vz_godina,
+       v.vz_km,
+
+-- tip/kategorija/karoserija/dodatna oznaka/klasa
+       v.vzv_oznaka,
+       v.vzv_naziv,
+
+       v.vzpv_oznaka,
+       v.vzpv_naziv,
+
+       v.vzk_oznaka,
+       v.vzk_naziv,
+
+       v.vzdo_oznaka,
+       v.vzdo_naziv,
+
+       v.vzkl_oznaka,
+       v.vzkl_naziv,
+
+-- marka/model
+       v.mr_naziv,
+       v.md_naziv_k,
+
+-- tip/varijanta/verzija
+       v.mdt_oznaka,
+       v.mdvr_oznaka,
+       v.mdvz_oznaka,
+
+-- šasija 1 ?
+       v.vz_mesta_sedenje,
+       v.vz_mesta_stajanje,
+       v.vz_masa,
+       v.vz_nosivost,
+       v.vz_masa_max,
+       v.vz_duzina,
+       v.vz_sirina,
+       v.vz_visina,
+       v.vz_kuka,
+       v.vz_kuka_sert,
+
+-- šasija 2 ?
+       v.vz_os_broj,
+       v.vz_os_tockova,
+       v.vz_os_pneumatici,
+       v.vz_os_nosivost,
+
+-- motor
+       v.vz_motor,
+       v.mt_oznaka,
+       v.mt_cm3,
+       v.mt_kw,
+       v.gr_naziv,
+       v.em_naziv,
+       v.vz_co2,
+       v.vz_elektro,
+       v.vz_max_brzina,
+       v.vz_kw_kg,
+
+-- napomena/primedba/zaključak
+       v.pr_napomena,
+       v.pr_primedbe,
+       v.pr_zakljucak,
+
+-- razne homologacije
+       v.vz_sert_hmlg_tip,
+       v.vz_sert_emisija,
+       v.vz_sert_buka
+
+
+  FROM hmlg.v_predmet v;
+
+--       v.pr_id,
+--       v.kl_id,
+--       v.us_id,
+--       v.kr_id_p,
+--       v.kr_username_p,
+--       v.vz_id,
+--       v.mr_id,
+--       v.md_id,
+--       v.vzv_id,
+--       v.vzpv_id,
+--       v.vzk_id,
+--       v.vzdo_id,
+--       v.vzkl_id,
+--       v.mdt_id,
+--       v.mdvr_id,
+--       v.mdvz_id,
+--       v.mt_id,
+--       v.gr_id,
+--       v.em_id,
+--       v.kr_id,
+--       v.kr_username
+
+    length(vz.vz_sasija)=17
+    vz.vz_sasija ~ '^[A-HJ-NPR-Z0-9]+$'
+    regexp_match(vz.vz_sasija, '^[A-HJ-NPR-Z0-9]+$') IS NOT NULL
+    regexp_match(substring(vz.vz_sasija, 10, 1),  '[^UZ0]') IS NOT NULL
+
+-- predmet
+  - filter, datum od do
+  - engleski se izbacuje sa tuv sertifikata
+
+- od datuma - do datuma filter
+- title u detalj
+- tip podatka kolone !!!!!!! (t ??????)
+
+- istorijat vozila vezati za predmet
+- JSON ?????
+
+- JSON za predmet i vozilo !!!!
+
+------------------------------------------------
+- funkcije za logovanje username, password da vraća kr_id ili -nešto (loši kredencijali ili korisnik neaktivan)
+- akcije
+
+pg_dump --schema-only --host=localhost --port=5432 --username=postgres --format=custom --no-privileges --no-tablespaces --verbose --no-password --no-owner --no-unlogged-table-data --encoding=UTF8 --file=./dmp/srbolab-schema.dmp srbolab
+pg_dump --data-only   --host=localhost --port=5432 --username=postgres --format=custom --no-privileges --no-tablespaces --verbose --no-password --no-owner --no-unlogged-table-data --encoding=UTF8 --file=./dmp/srbolab-data.dmp srbolab

@@ -1,0 +1,30 @@
+/* Table hmlg.vz_vzdo */
+TRUNCATE TABLE hmlg.vz_vzdo CASCADE;
+COMMIT;
+INSERT INTO hmlg.vz_vzdo (vz_id, vzdo_id)
+WITH
+  s AS
+   (
+    SELECT i.vz_sasija,
+           i.vzk_naziv,
+           unnest(string_to_array(i.vzk_naziv::text, '/', '')::varchar[]) AS kdo
+      FROM _t.v_vozilo_imp i
+      WHERE i.vz_sasija_rb=1
+        AND i.vzi_br IN (1, 2, 3)
+   )
+SELECT DISTINCT
+       vz.vz_id,
+       vzdo.vzdo_id
+  FROM s
+    JOIN sif.vozilo_dod_oznaka vzdo ON (vzdo.vzdo_oznaka=s.kdo)
+    JOIN hmlg.vozilo vz ON (vz.vz_sasija=s.vz_sasija)
+  WHERE s.kdo IS NOT NULL
+    AND s.kdo ~ '[0-9]{2}'
+    AND NOT EXISTS
+         (
+          SELECT 1
+            FROM hmlg.vz_vzdo t
+            WHERE t.vz_id=vz.vz_id
+              AND t.vzdo_id=vzdo.vzdo_id
+         );
+COMMIT;

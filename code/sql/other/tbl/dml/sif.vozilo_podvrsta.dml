@@ -1,0 +1,58 @@
+/* Table sif.vozilo_podvrsta */
+TRUNCATE TABLE sif.vozilo_podvrsta CASCADE;
+COMMIT;
+INSERT INTO sif.vozilo_podvrsta (vzpv_id, vzpv_oznaka, vzpv_naziv, vzv_id)
+SELECT 99+row_number() OVER (ORDER BY vzv.vzv_id, t.vzpv_oznaka) AS vzpv_id,
+       t.vzpv_oznaka::VARCHAR,
+       t.vzpv_naziv::VARCHAR,
+       vzv.vzv_id
+  FROM (
+        VALUES ('L1', 'Мопед'),
+               ('L2', 'Лаки трицикл'),
+               ('L3', 'Мотоцикл'),
+               ('L4', 'Мотоцикл'),
+               ('L5', 'Тешки трицикл'),
+               ('L6', 'Лаки четвороцикл'),
+               ('L7', 'Тешки четвороцикл'),
+               ('M1', 'Путничко возило'),
+               ('M1G', 'Путничко возило'),
+               ('M2', 'Аутобус'),
+               ('M3', 'Аутобус'),
+               ('N1', 'Теретно возило'),
+               ('N1G', 'Теретно возило'),
+               ('N2', 'Теретно возило'),
+               ('N3', 'Теретно возило'),
+               ('O1', 'Прикључно возило'),
+               ('O2', 'Прикључно возило'),
+               ('O3', 'Прикључно возило'),
+               ('O4', 'Прикључно возило'),
+               ('T1', '-'),
+               ('T2', '-'),
+               ('T3', '-'),
+               ('T4', '-'),
+               ('T5', '-'),
+               ('Tm', '-'),
+               ('Tr', '-'),
+               ('T4.1', '-'),
+               ('T4.2', '-'),
+               ('T4.3', '-'),
+               ('C1', '-'),
+               ('C2', '-'),
+               ('C3', '-'),
+               ('C4', '-'),
+               ('C5', '-'),
+               ('R1', '-'),
+               ('R2', '-'),
+               ('R3', '-'),
+               ('R4', '-'),
+               ('S1', '-'),
+               ('S2', '-'),
+               ('K1', '-'),
+               ('K2', '-'),
+               ('K3', '-'),
+               ('K5a', '-'),
+               ('K5b', '-')
+       ) t (vzpv_oznaka, vzpv_naziv)
+    JOIN sif.vozilo_vrsta vzv ON (vzv.vzv_oznaka=substring(t.vzpv_oznaka, 1, 1))
+  ORDER BY 1;
+COMMIT;

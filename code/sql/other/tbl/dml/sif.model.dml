@@ -1,0 +1,37 @@
+/* Table sif.model */
+TRUNCATE TABLE sif.model CASCADE;
+COMMIT;
+INSERT INTO sif.model (mr_id, md_id, md_naziv_k)
+WITH
+  s AS
+   (
+    SELECT mr.mr_id,
+           t.md_naziv_k
+      FROM _t.v_vozilo_imp t
+        JOIN sif.marka mr ON (mr.mr_naziv=t.mr_naziv)
+      WHERE t.vz_sasija_rb=1
+        AND t.vzi_br IN (1, 2, 3)
+        AND t.md_naziv_k IS NOT NULL
+        AND NOT EXISTS
+             (
+              SELECT 1
+                FROM sif.model md
+                WHERE md.md_naziv_k=t.md_naziv_k
+                  AND md.mr_id=mr.mr_id
+             )
+      GROUP BY mr.mr_id, t.md_naziv_k
+   ),
+  r AS
+   (
+    SELECT mr.mr_id,
+           coalesce(max(md.md_id), 10) AS md_id
+      FROM sif.marka mr
+        LEFT JOIN sif.model md ON (md.mr_id=mr.mr_id)
+      GROUP BY mr.mr_id
+   )
+SELECT s.mr_id,
+       r.md_id+row_number() OVER (PARTITION BY s.mr_id ORDER BY s.md_naziv_k) AS md_id,
+       s.md_naziv_k
+  FROM s
+    JOIN r ON (r.mr_id=s.mr_id);
+COMMIT;

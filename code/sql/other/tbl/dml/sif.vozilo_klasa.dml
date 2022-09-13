@@ -1,0 +1,16 @@
+/* Table sif.vozilo_klasa */
+TRUNCATE TABLE sif.vozilo_klasa CASCADE;
+COMMIT;
+INSERT INTO sif.vozilo_klasa (vzkl_id, vzkl_oznaka, vzkl_naziv)
+SELECT t.vzkl_id::INTEGER,
+       t.vzkl_oznaka::VARCHAR,
+       t.vzkl_naziv::VARCHAR
+  FROM (
+        VALUES (10, 'I', 'Класа I'),
+               (11, 'II', 'Класа II'),
+               (12, 'III', 'Класа III'),
+               (13, 'A', 'Класа A'),
+               (14, 'B', 'Класа B')
+       ) t (vzkl_id, vzkl_oznaka, vzkl_naziv)
+  ORDER BY t.vzkl_id;
+COMMIT;

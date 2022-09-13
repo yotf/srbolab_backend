@@ -1,0 +1,14 @@
+/* Table adm.adm_aplikacija */
+TRUNCATE TABLE adm.adm_aplikacija CASCADE;
+COMMIT;
+INSERT INTO adm.adm_aplikacija (aap_id, aap_naziv)
+SELECT t.aap_id::INTEGER,
+       t.aap_naziv::VARCHAR
+  FROM (
+        VALUES (0, 'Administracija'),
+               (10, 'Sistem'),
+               (20, 'Šifarnici'),
+               (30, 'Ispitivanja')
+       ) t (aap_id, aap_naziv)
+  ORDER BY t.aap_id;
+COMMIT;

@@ -1,0 +1,15 @@
+/* Table sif.vozilo_dokument */
+TRUNCATE TABLE sif.vozilo_dokument CASCADE;
+COMMIT;
+INSERT INTO sif.vozilo_dokument (vzd_id, vzd_oznaka, vzd_naziv)
+SELECT t.vzd_id::INTEGER,
+       t.vzd_oznaka::VARCHAR,
+       t.vzd_naziv::VARCHAR
+  FROM (
+        VALUES (10, 'SD', 'Saobraćajna dozvola'),
+               (20, 'OD', 'Odgovarajući dokument'),
+               (30, 'COC', 'COC dokument'),
+               (40, 'PP', 'Potvrda pr. proizvođača')
+       ) t (vzd_id, vzd_oznaka, vzd_naziv)
+  ORDER BY t.vzd_id;
+COMMIT;

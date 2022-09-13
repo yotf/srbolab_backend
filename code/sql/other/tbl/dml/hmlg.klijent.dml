@@ -1,0 +1,50 @@
+/* Table hmlg.klijent */
+TRUNCATE TABLE hmlg.klijent CASCADE;
+COMMIT;
+INSERT INTO hmlg.klijent (kl_id, kl_naziv, kl_adresa, kl_telefon, kl_firma)
+WITH
+  s AS
+   (
+    SELECT i.kl_naziv,
+           i.kl_adresa,
+           max(i.kl_telefon) AS kl_telefon,
+           CASE array_length(string_to_array(trim(regexp_replace(i.kl_naziv, ' {2,}', ' ', 'g')), ' ', null), 1)
+             WHEN 2 THEN CASE WHEN i.kl_naziv ~* '(SZR|D[\.]*O[\.]*O)' THEN 'D' ELSE 'N' END
+             ELSE 'D'
+           END AS kl_firma,
+           count(*) AS c
+      FROM _t.v_vozilo_imp i
+      WHERE i.vz_sasija_rb=1
+        AND i.vzi_br IN (1, 2, 3)
+        AND NOT EXISTS
+             (
+              SELECT 1
+                FROM hmlg.klijent kl
+                WHERE kl.kl_naziv=i.kl_naziv
+             )
+      GROUP BY i.kl_naziv, i.kl_adresa
+      ORDER BY i.kl_naziv, i.kl_adresa
+   ),
+  i AS
+   (
+    SELECT row_number() OVER (PARTITION BY s.kl_naziv ORDER BY s.c DESC) AS kl_rb,
+           s.kl_naziv,
+           s.kl_adresa,
+           s.kl_telefon,
+           s.kl_firma
+      FROM s
+   ),
+  r AS
+   (
+    SELECT coalesce(max(kl.kl_id), 1000) AS kl_id
+      FROM hmlg.klijent kl
+   )
+SELECT r.kl_id+row_number() OVER (ORDER BY i.kl_naziv) AS kl_id,
+       i.kl_naziv,
+       i.kl_adresa,
+       i.kl_telefon,
+       i.kl_firma
+  FROM i
+    CROSS JOIN r
+  WHERE i.kl_rb=1;
+COMMIT;

@@ -1,0 +1,14 @@
+/* Table sif.motor_tip */
+TRUNCATE TABLE sif.motor_tip CASCADE;
+COMMIT;
+INSERT INTO sif.motor_tip (mtt_id, mtt_oznaka, mtt_naziv)
+SELECT t.mtt_id::INTEGER,
+       t.mtt_oznaka::VARCHAR,
+       t.mtt_naziv::VARCHAR
+  FROM (
+        VALUES (1, 'B', 'Oto'),
+               (2, 'D', 'Dizel'),
+               (3, 'E', 'Elektro')
+       ) t (mtt_id, mtt_oznaka, mtt_naziv)
+  ORDER BY t.mtt_id;
+COMMIT;

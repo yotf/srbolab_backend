@@ -1,0 +1,17 @@
+/* Table sif.emisija */
+TRUNCATE TABLE sif.emisija CASCADE;
+COMMIT;
+INSERT INTO sif.emisija (em_id, em_naziv)
+SELECT t.em_id::INTEGER,
+       t.em_naziv::VARCHAR
+  FROM (
+        VALUES (10, '0 (Нула)'),
+               (11, '1 (Један)'),
+               (12, '2 (Два)'),
+               (13, '3 (Три)'),
+               (14, '4 (Четири)'),
+               (15, '5 (Пет)'),
+               (16, '6 (Шест)')
+       ) t (em_id, em_naziv)
+  ORDER BY t.em_id;
+COMMIT;

@@ -1,0 +1,55 @@
+/* Table sif.mdtvv_mt */
+TRUNCATE TABLE sif.mdtvv_mt CASCADE;
+COMMIT;
+INSERT INTO sif.mdtvv_mt (mr_id, md_id, mdtvv_id, mt_id)
+WITH
+  i AS
+   (
+    SELECT _t.fix_mr_naziv(coalesce(vi.mr_naziv, '~')) AS mr_naziv,
+           _t.fix_md_naziv_k(coalesce(vi.md_naziv_k, '~')) AS md_naziv_k,
+           _t.fix_mdt_oznaka(coalesce(vi.mdt_oznaka, '~')) AS mdt_oznaka,
+           _t.fix_mdvr_oznaka(coalesce(vi.mdvr_oznaka, '~')) AS mdvr_oznaka,
+           _t.fix_mdvz_oznaka(coalesce(vi.mdvz_oznaka, '~')) AS mdvz_oznaka,
+           _t.fix_mto_oznaka(coalesce(vi.mt_oznaka, '-')) AS mto_oznaka,
+           coalesce(vi.mt_cm3, -1) AS mt_cm3,
+           coalesce(vi.mt_kw, -1) AS mt_kw
+      FROM _t.v_vozilo_imp vi
+      WHERE vi.vz_sasija_rb=1
+        AND vi.vzi_br IN (1, 2)
+        AND vi.vz_sasija IS NOT NULL
+      GROUP BY _t.fix_mr_naziv(coalesce(vi.mr_naziv, '~')), 
+               _t.fix_md_naziv_k(coalesce(vi.md_naziv_k, '~')), 
+               _t.fix_mdt_oznaka(coalesce(vi.mdt_oznaka, '~')), 
+               _t.fix_mdvr_oznaka(coalesce(vi.mdvr_oznaka, '~')), 
+               _t.fix_mdvz_oznaka(coalesce(vi.mdvz_oznaka, '~')), 
+               _t.fix_mto_oznaka(coalesce(vi.mt_oznaka, '-')),
+               coalesce(vi.mt_cm3, -1),
+               coalesce(vi.mt_kw, -1)
+   )
+SELECT DISTINCT
+       mdtvv.mr_id,
+       mdtvv.md_id,
+       mdtvv.mdtvv_id,
+       mrmt.mt_id
+  FROM sif.mr_mt mrmt
+    JOIN sif.md_tvv mdtvv ON (mdtvv.mr_id=mrmt.mr_id)
+    JOIN sif.marka mr ON (mr.mr_id=mdtvv.mr_id)
+    JOIN sif.model md ON (md.mr_id=mr.mr_id AND md.md_id=mdtvv.md_id)
+    JOIN sif.model_tip mdt ON (mdt.mdt_id=mdtvv.mdt_id)
+    JOIN sif.model_varijanta mdvr ON (mdvr.mdvr_id=mdtvv.mdvr_id)
+    JOIN sif.model_verzija mdvz ON (mdvz.mdvz_id=mdtvv.mdvz_id)
+    JOIN sif.mdt_mdvr mdtvr ON (mdtvr.mdt_id=mdt.mdt_id AND mdtvr.mdvr_id=mdvr.mdvr_id)
+    JOIN sif.mdvr_mdvz mdvrz ON (mdvrz.mdvr_id=mdvr.mdvr_id AND mdvrz.mdvz_id=mdvz.mdvz_id)
+    JOIN sif.motor mt ON (mt.mt_id=mrmt.mt_id)
+    JOIN sif.motor_oznaka mto ON (mto.mto_id=mt.mto_id)
+    JOIN i ON (i.mr_naziv=mr.mr_naziv AND i.md_naziv_k=md.md_naziv_k AND i.mdt_oznaka=mdt.mdt_oznaka AND i.mdvr_oznaka=mdvr.mdvr_oznaka AND i.mdvz_oznaka=mdvz.mdvz_oznaka AND i.mto_oznaka=mto.mto_oznaka AND i.mt_cm3=mt.mt_cm3 AND i.mt_kw=mt.mt_kw)
+  WHERE NOT EXISTS
+         (
+          SELECT 1
+            FROM mdtvv_mt t
+            WHERE t.mr_id=mdtvv.mr_id
+              AND t.md_id=mdtvv.md_id
+              AND t.mdtvv_id=mdtvv.mdtvv_id
+              AND t.mt_id=mrmt.mt_id 
+         );
+COMMIT;

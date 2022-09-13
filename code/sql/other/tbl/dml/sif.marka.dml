@@ -1,0 +1,30 @@
+/* Table sif.marka */
+TRUNCATE TABLE sif.marka CASCADE;
+COMMIT;
+INSERT INTO sif.marka (mr_id, mr_naziv)
+WITH
+  s AS
+   (
+    SELECT t.mr_naziv
+      FROM _t.v_vozilo_imp t
+      WHERE t.vz_sasija_rb=1
+        AND t.vzi_br IN (1, 2, 3)
+        AND t.mr_naziv IS NOT NULL
+        AND NOT EXISTS
+             (
+              SELECT 1
+                FROM sif.marka mr
+                WHERE mr.mr_naziv=t.mr_naziv
+             )
+      GROUP BY t.mr_naziv
+   ),
+  r AS
+   (
+    SELECT coalesce(max(mr.mr_id), 100) AS mr_id
+      FROM sif.marka mr
+   )
+SELECT r.mr_id+row_number() OVER (ORDER BY s.mr_naziv) AS mr_id,
+       s.mr_naziv
+  FROM s
+    CROSS JOIN r;
+COMMIT;

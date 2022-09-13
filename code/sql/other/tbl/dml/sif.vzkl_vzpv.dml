@@ -1,0 +1,11 @@
+/* Table sif.vzkl_vzpv */
+TRUNCATE TABLE sif.vzkl_vzpv CASCADE;
+COMMIT;
+INSERT INTO sif.vzkl_vzpv (vzkl_id, vzpv_id)
+SELECT vzkl.vzkl_id,
+       vzpv.vzpv_id
+  FROM sif.vozilo_klasa vzkl
+    CROSS JOIN sif.vozilo_podvrsta vzpv
+  WHERE vzpv.vzpv_oznaka IN ('M2', 'M3')
+  ORDER BY vzkl.vzkl_id, vzpv.vzpv_id;
+COMMIT;

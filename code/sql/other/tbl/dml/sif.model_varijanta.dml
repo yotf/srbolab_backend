@@ -1,0 +1,30 @@
+/* Table sif.model_varijanta */
+TRUNCATE TABLE sif.model_varijanta CASCADE;
+COMMIT;
+INSERT INTO sif.model_varijanta (mdvr_id, mdvr_oznaka)
+WITH
+  s AS
+   (
+    SELECT t.mdvr_oznaka
+      FROM _t.v_vozilo_imp t
+      WHERE t.vz_sasija_rb=1
+        AND t.vzi_br IN (1, 2, 3)
+        AND t.mdvr_oznaka IS NOT NULL
+        AND NOT EXISTS
+             (
+              SELECT 1
+                FROM sif.model_varijanta mdvr
+                WHERE mdvr.mdvr_oznaka=t.mdvr_oznaka
+             )
+      GROUP BY t.mdvr_oznaka
+   ),
+  r AS
+   (
+    SELECT coalesce(max(mdvr.mdvr_id), 100) AS mdvr_id
+      FROM sif.model_varijanta mdvr
+   )
+SELECT r.mdvr_id+row_number() OVER (ORDER BY s.mdvr_oznaka) AS mdvr_id,
+       s.mdvr_oznaka
+  FROM s
+    CROSS JOIN r;
+COMMIT;

@@ -1,0 +1,22 @@
+\i ./_t/obj/fnc/_t.f_fix_kl_adresa.sql
+\i ./_t/obj/fnc/_t.f_fix_kl_naziv.sql
+\i ./_t/obj/fnc/_t.f_fix_kl_telefon.sql
+\i ./_t/obj/fnc/_t.f_fix_md_naziv.sql
+\i ./_t/obj/fnc/_t.f_fix_md_naziv_k.sql
+\i ./_t/obj/fnc/_t.f_fix_mdt_oznaka.sql
+\i ./_t/obj/fnc/_t.f_fix_mdvr_oznaka.sql
+\i ./_t/obj/fnc/_t.f_fix_mdvz_oznaka.sql
+\i ./_t/obj/fnc/_t.f_fix_mr_naziv.sql
+\i ./_t/obj/fnc/_t.f_fix_mt_oznaka.sql
+\i ./_t/obj/fnc/_t.f_fix_mto_oznaka.sql
+\i ./_t/obj/fnc/_t.f_fix_str.sql
+\i ./_t/obj/fnc/_t.f_fix_str4re.sql
+\i ./_t/obj/fnc/_t.f_fix_vzo_pneumatik.sql
+\i ./_t/obj/fnc/_t.f_iscir.sql
+\i ./_t/obj/fnc/_t.f_islat.sql
+\i ./_t/obj/fnc/_t.f_lat2cir.sql
+\i ./_t/obj/fnc/_t.f_lat2cir_nr.sql
+\i ./_t/obj/fnc/_t.f_vzkl_id.sql
+\i ./_t/obj/fnc/_t.f_word.sql
+\i ./_t/obj/fnc/_t.f_word_cnt.sql
+COMMIT;

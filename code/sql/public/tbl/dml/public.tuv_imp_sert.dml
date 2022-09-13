@@ -1,0 +1,50 @@
+/* Table public.tuv_imp_sert */
+TRUNCATE TABLE public.tuv_imp_sert CASCADE;
+COMMIT;
+INSERT INTO public.tuv_imp_sert (tis_part, tis_order, tis_lbl_coc, tis_lbl_drvlc, tis_desc_sr, tis_desc_en, tis_unit, tis_column)
+SELECT t.tis_part::VARCHAR,
+       t.tis_order::INTEGER,
+       t.tis_lbl_coc::VARCHAR,
+       t.tis_lbl_drvlc::VARCHAR,
+       t.tis_desc_sr::VARCHAR,
+       t.tis_desc_en::VARCHAR,
+       t.tis_unit::VARCHAR,
+       t.tis_column::VARCHAR
+  FROM (
+        VALUES ('h', 1, null, null, 'Broj potvrde', 'Certificate Number', null, 'pr_broj'),
+               ('h', 2, null, null, 'Datum izdavanja', 'Date of issuing', null, 'pr_datum'),
+               ('h', 3, null, null, 'Identifikaciona oznaka vozila', 'VIN', null, 'vz_sasija'),
+               ('b', 1, 'COC', 'Vozačka dozvola', 'Tehničke karakteristike vozila', 'General construction characteristics', null, null),
+               ('b', 2, '0.1', '(D.1)', 'Marka', 'Marke', null, 'mr_naziv'),
+               ('b', 3, '0.2', '(D.2)', 'Tip/varijanta/verzija', 'Type/variant/version', null, 'mdt_oznaka||mdvr_oznaka||mdvz_oznaka'),
+               ('b', 4, '0.2.1', '(D.3)', 'Komercijalna oznaka', 'Commercial name', null, 'md_naziv_k'),
+               ('b', 5, '-', '(B1)', 'Procenjena godina proizvodnje', 'Estimated year of production', null, 'vz_godina'),
+               ('b', 6, '16.1', '(F.1)', 'Najveća dozvoljena masa vozila', 'Technically permissible maximum laden mass', 'kg', 'vz_masa_max'),
+               ('b', 7, '13', '(G)', 'Masa vozila spremnog za vožnju', 'Mass in running order', 'kg', 'vz_masa'),
+               ('b', 8, '0.4', '(L)', 'Kategorija vozila', 'Vehicle category', null, 'vzpv_oznaka'),
+               ('b', 9, '38', '(J.1)', 'Oznaka oblika za karoseriju', 'Code for bodywork', null, 'vzk_oznaka'),
+               ('b', 10, '1', '(L)', 'Broj osovina i točkova', 'Number of axles and tyres', null, 'vz_os_broj'),
+               ('b', 11, '5', '(5)', 'Dužina vozila', 'Length', 'mm', 'vz_duzina'),
+               ('b', 12, '6', '(6)', 'Širina vozila', 'Width', 'mm', 'vz_sirina'),
+               ('b', 13, '7', '(7)', 'Visina vozila', 'Height', 'mm', 'vz_visina'),
+               ('b', 14, '35', '(35)', 'Pneumatik/naplatak kombinacija', 'Tyre/wheel combination', null, 'vz_os_pneumatici'),
+               ('b', 15, '21', '(P)', 'Oznaka motora', 'Engine code', null, 'mto_oznaka'),
+               ('b', 16, '25', '(P.1)', 'Radna zapremina motora', 'Engine capacity', 'cm3', 'mt_cm3'),
+               ('b', 17, '27', '(P.2)', 'Najveća neto snaga motora', 'Maximum net power', 'kW', 'mt_kw'),
+               ('b', 18, '26', '(P.3)', 'Pogonsko gorivo', 'Type of fuel or power source', null, 'gr_naziv'),
+               ('b', 19, '26.1', '(Q)', 'Najveća neto snaga/masa vozila (samo za motocikle)', 'Power/weight ratio (only for motorcycles)', 'kW/kg', 'vz_kw_kg'),
+               ('b', 20, '42', '(S.1)', 'Broj mesta za sedenje', 'Number of seating positions (including the driver)', null, 'vz_mesta_sedenje'),
+               ('b', 21, '43', '(S.2)', 'Broj mesta za stajanje (za vozila vrste M2 i M3)', 'Number of standing places', null, 'vz_mesta_stajanje'),
+               ('b', 22, '43.1', '(43.1)', 'Uređaj za spajanje vučnog i priključnog vozila', 'EC type-approval mark of coupling device', null, 'vz_kuka_sert'),
+               ('b', 23, '44', '(T)', 'Najveća brzina (za vozila vrste L)', 'Maximum speed', 'km/h', 'vz_max_brzina'),
+               ('b', 24, '49', '(V.7)', 'Nivo izduvne emisije', 'CO2', 'g/km', 'vz_co2'),
+               ('b', 25, '16.2', '(N)', 'Najveće dozvoljeno osovinsko opterećenje', 'Distribution of the technically permissible maximum laden mass among the axles', 'kg', 'vz_os_nosivost'),
+               ('f', 1, null, null, 'Broj sertifikata homologacije tipa vozila', 'Number of WVTA', null, 'vz_sert_hmlg_tip'),
+               ('f', 2, null, null, 'Broj sertifikata za izduvnu emisiju (datum)', 'Number of the Certificate of air pollutionly emissions from motor vehicles', null, 'vz_sert_emisija'),
+               ('f', 3, null, null, 'Broj sertifikata za buku (datum)', 'Number of the Certificate of noise of vehicle', null, 'vz_sert_buka'),
+               ('s', 1, null, null, 'POTVRĐUJEMO DA JE OVO VOZILO PROIZVEDENO U SKLADU SA EEC/ECE REGULATIVIMA', 'WE DECLARE THAT THE VEHICLE WAS PRODUCED IN ACCORDANCE TO THE EEC/ECE REGULATIONS', null, null),
+               ('s', 2, null, null, 'Ovaj dokument se izdaje (bez pregleda vozila) na osnovu saobraćajne dozvole i važi bez pečata i potpisa', 'This certificate was made (without the inspection of the vehicle) by the vehicle document', null, null),
+               ('s', 3, null, null, 'Potpis ovlašćenog lica', 'Signature of the autorized person', null, null)
+       ) t (tis_part, tis_order, tis_lbl_coc, tis_lbl_drvlc, tis_desc_sr, tis_desc_en, tis_unit, tis_column)
+  ORDER BY t.tis_order, t.tis_part;
+COMMIT;

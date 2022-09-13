@@ -1,0 +1,29 @@
+/* Table sif.motor_oznaka */
+TRUNCATE TABLE sif.motor_oznaka CASCADE;
+COMMIT;
+INSERT INTO sif.motor_oznaka (mto_id, mto_oznaka)
+WITH
+  s AS
+   (
+    SELECT coalesce(t.mt_oznaka, '-') AS mto_oznaka
+      FROM _t.v_vozilo_imp t
+      WHERE t.vz_sasija_rb=1
+        AND t.vzi_br IN (1, 2, 3)
+        AND NOT EXISTS
+             (
+              SELECT 1
+                FROM sif.motor_oznaka mto
+                WHERE mto.mto_oznaka=coalesce(t.mt_oznaka, '-')
+             )
+      GROUP BY coalesce(t.mt_oznaka, '-')
+   ),
+  r AS
+   (
+    SELECT coalesce(max(mto.mto_id), 100) AS mto_id
+      FROM sif.motor_oznaka mto
+   )
+SELECT r.mto_id+row_number() OVER (ORDER BY s.mto_oznaka) AS mto_id,
+       s.mto_oznaka
+  FROM s
+    CROSS JOIN r;
+COMMIT;

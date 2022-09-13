@@ -1,0 +1,12 @@
+/* Table sys.cenovnik */
+TRUNCATE TABLE sys.cenovnik CASCADE;
+COMMIT;
+INSERT INTO sys.cenovnik (ck_id, ck_datum, ck_napomena)
+SELECT t.ck_id::INTEGER,
+       t.ck_datum::DATE,
+       t.ck_napomena::VARCHAR
+  FROM (
+        VALUES (10, '2020-01-01'::date, 'Prvi cenovnik')
+       ) t (ck_id, ck_datum, ck_napomena)
+  ORDER BY t.ck_id;
+COMMIT;

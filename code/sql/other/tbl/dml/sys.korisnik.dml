@@ -1,0 +1,32 @@
+/* Table sys.korisnik */
+TRUNCATE TABLE sys.korisnik CASCADE;
+COMMIT;
+INSERT INTO sys.korisnik (kr_id, kr_prezime, kr_ime, kr_username, kr_password, kr_aktivan, arl_id)
+SELECT t.kr_id::INTEGER,
+       t.kr_prezime::VARCHAR,
+       t.kr_ime::VARCHAR,
+       t.kr_username::VARCHAR,
+       t.kr_password::VARCHAR,
+       t.kr_aktivan::VARCHAR,
+       t.arl_id::INTEGER
+  FROM (
+        VALUES (0, 'Import', 'podataka', 'ip', '4212f285500f66a6c8fe518ffa73517154b904286d076f687a46db751925a7ed', 'N', 0),
+               (1, 'Дојић', 'Жељко', 'dojicz', 'ba1f31bc18d62146a13e8568d2aa055532fc18ff8b93266bea50a6b6ade947d4', 'N', -1),
+               (2, 'Дојић', 'Никола', 'dojicn', 'f9387655ed7340a5298b4aec08e2f17bf77b270c3df8bf78b4bb91cdaadef069', 'N', -1),
+               (37, 'Миловић', 'Владимир', 'admin', '7788b65ee31f2c764e5eb57215bf6e2d40263fe94697a0382536404160a3bc30', 'D', 0),
+               (27, 'Комленић', 'Небојша', 'nebojsa.komlenic', '88fb3cc95b88c950911b7a064b0a26d7732e003bf32834205a5c96fd7f3e57cf', 'D', 20),
+               (29, 'Миленковић', 'Владимир', 'vladimir.milenkovic', 'ee7ec6cc6c0a1ad8ac74ea2f069d38c1b78740101a85ea202007af1cca31d099', 'D', 20),
+               (32, 'Николић', 'Слободан', 'slobodan.nikolic', '459ef367c980a63921ef66e1ab5298f972ebd43ac0e8af5d870b2ec38db6711c', 'D', 20),
+               (36, 'Петровић', 'Љубомир', 'ljubomir.petrovic', '0739f2750020c468168a6ffb92d09094a0dbc8cc56b38149ad2ea20ab75467eb', 'D', 20),
+               (20, 'Спајић', 'Бранко', 'branko.spajic', 'e4bf196ad74172c39df5df50ebec952711df785e4f2c6d8bdb3f108ea0d9a1e0', 'D', 20),
+               (33, 'Стојановић', 'Стеван', 'stevan.stojanovic', '28767600f90c79f4f1cdf7fb00a80397318eb966395493a66a8d915ecc9d72b9', 'D', 20),
+               (34, 'Чоловић', 'Вук', 'vuk.colovic', '6734bffbacc9635727881c51338532698180b1ee7e1d9b68847e0f7b787c8569', 'N', 20),
+               (38, 'Vignjevic', 'Ljubomir', 'ljubomir.vignjevic', 'ffafb934da031be90aea4c2f1d4fc589df19d6ab2eb181ded1e33077bfbbdc33', 'D', 20),
+               (39, 'Mandic', 'Nenad', 'nenad.mandic', '4eab410a7a825fef817d0a747a8a6885bb0df39b87cb7f627be8a6cf0d05ad07', 'D', 20),
+               (40, 'Mandic', 'Milorad', 'milorad.mandic', 'd21704cce4ca14ab519c6768e156a886f8c522c04a61a9acb80a8dab1b5a41f8', 'D', 20),
+               (41, 'Trbojevic', 'Petar', 'petar.trbojevic', 'ec300ba1ff77429f5a253754b61e1a1db75a268b04a0711632bdb7baadf5b02a', 'D', 20),
+               (42, 'Stojanovic', 'Aleksandar', 'aca.stojanovic', 'dfc1940929e88528476caeb09ee0a4549522ea4261c3b25fdf174bbd741451f4', 'D', 20),
+               (43, 'Siriski', 'Milica', 'milica.siriski', '5e47493d947efe62887d18fef6cb0e8e70b06fce12a119831b27e61e7e08a6c7', 'D', 20)
+       ) t (kr_id, kr_prezime, kr_ime, kr_username, kr_password, kr_aktivan, arl_id)
+  ORDER BY t.kr_id;
+COMMIT;

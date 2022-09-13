@@ -1,0 +1,114 @@
+/* Table hmlg.vozilo */
+TRUNCATE TABLE hmlg.vozilo CASCADE;
+COMMIT;
+INSERT INTO hmlg.vozilo (vz_id, vz_sasija, vz_godina, vz_reg, vz_mesta_sedenje, vz_mesta_stajanje, vz_masa, vz_nosivost, vz_masa_max, vz_duzina, vz_sirina, vz_visina, vz_kuka, vz_kuka_sert, vz_km, vz_max_brzina, vz_kw_kg, vz_motor, vz_co2, vz_elektro, vz_sert_hmlg_tip, vz_sert_emisija, vz_sert_buka, vz_vreme, mr_id, md_id, vzpv_id, vzkl_id, em_id, gr_id, mdt_id, mdvr_id, mdvz_id, mt_id, kr_id, vzs_id)
+WITH
+  s AS
+   (
+    SELECT unnest(vs.vz_sasije) AS vz_sasija,
+           vs.vzs_id
+      FROM _t.vozilo_imp_srt2 vs
+   ),
+  v AS
+   (
+    SELECT row_number() OVER (ORDER BY i.vz_sasija) AS vz_id,
+           i.vz_sasija,
+           i.vz_godina,
+           null AS vz_reg,
+           i.vz_mesta_sedenje,
+           i.vz_mesta_stajanje,
+           i.vz_masa,
+           i.vz_nosivost,
+           i.vz_masa_max,
+           i.vz_duzina,
+           i.vz_sirina,
+           i.vz_visina,
+           upper(i.vz_kuka) AS vz_kuka,
+           null AS vz_kuka_sert,
+           i.vz_km,
+           null::integer AS vz_max_brzina,
+           i.vz_kw_kg,
+           i.vz_motor,
+           i.vz_co2,
+           upper(i.vz_elektro) AS vz_elektro,
+           null AS vz_sert_hmlg_tip,
+           null AS vz_sert_emisija,
+           null AS vz_sert_buka,
+           now() AS vz_vreme,
+           mr.mr_id,
+           md.md_id,
+           vzpv.vzpv_id,
+           _t.vzkl_id(i.vzk_naziv) AS vzkl_id,
+           em.em_id,
+           gr.gr_id,
+           mdt.mdt_id,
+           mdvr.mdvr_id,
+           mdvz.mdvz_id,
+           mt.mt_id,
+           0 AS kr_id,
+           s.vzs_id
+      FROM _t.v_vozilo_imp i
+        JOIN s ON (s.vz_sasija=i.vz_sasija)
+        LEFT JOIN sif.marka mr ON (mr.mr_naziv=coalesce(i.mr_naziv, '~'))
+        LEFT JOIN sif.model md ON (md.mr_id=mr.mr_id AND md.md_naziv_k=coalesce(i.md_naziv_k, '~'))
+        LEFT JOIN sif.model_tip mdt ON (mdt.mdt_oznaka=coalesce(i.mdt_oznaka, '~'))
+        LEFT JOIN sif.model_varijanta mdvr ON (mdvr.mdvr_oznaka=coalesce(i.mdvr_oznaka, '~'))
+        LEFT JOIN sif.model_verzija mdvz ON (mdvz.mdvz_oznaka=coalesce(i.mdvz_oznaka, '~'))
+        LEFT JOIN sif.motor_oznaka mto ON (mto.mto_oznaka=coalesce(i.mt_oznaka, '-'))
+        LEFT JOIN sif.motor mt ON (mt.mto_id=mto.mto_id AND mt.mt_cm3=i.mt_cm3 AND mt.mt_kw=i.mt_kw)
+        LEFT JOIN sif.vozilo_podvrsta vzpv ON (vzpv.vzpv_oznaka=trim(substring(i.vzpv_naziv, 1, 3)))
+        LEFT JOIN sif.emisija em ON (em.em_naziv=i.em_naziv)
+        LEFT JOIN sif.gorivo gr ON (gr.gr_naziv=i.gr_naziv)
+      WHERE i.vz_sasija_rb=1
+        AND i.vzi_br IN (1, 2, 3)
+        AND NOT EXISTS
+             (
+              SELECT 1
+                FROM hmlg.vozilo vz
+                WHERE vz.vz_sasija=i.vz_sasija
+             )
+   ),
+  r AS
+   (
+    SELECT coalesce(max(vz.vz_id), 100000) AS vz_id
+      FROM hmlg.vozilo vz
+   )
+SELECT r.vz_id+v.vz_id AS vz_id,
+       v.vz_sasija,
+       v.vz_godina,
+       v.vz_reg,
+       v.vz_mesta_sedenje,
+       v.vz_mesta_stajanje,
+       v.vz_masa,
+       v.vz_nosivost,
+       v.vz_masa_max,
+       v.vz_duzina,
+       v.vz_sirina,
+       v.vz_visina,
+       v.vz_kuka,
+       v.vz_kuka_sert,
+       v.vz_km,
+       v.vz_max_brzina,
+       v.vz_kw_kg,
+       v.vz_motor,
+       v.vz_co2,
+       v.vz_elektro,
+       v.vz_sert_hmlg_tip,
+       v.vz_sert_emisija,
+       v.vz_sert_buka,
+       v.vz_vreme+((v.vz_id/1000.0)::varchar||' milliseconds')::interval AS vz_vreme,
+       v.mr_id,
+       v.md_id,
+       v.vzpv_id,
+       v.vzkl_id,
+       v.em_id,
+       v.gr_id,
+       v.mdt_id,
+       v.mdvr_id,
+       v.mdvz_id,
+       v.mt_id,
+       v.kr_id,
+       v.vzs_id
+  FROM v
+    CROSS JOIN r;
+COMMIT;
